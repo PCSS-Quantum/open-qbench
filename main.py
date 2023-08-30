@@ -14,12 +14,12 @@ from qc_app_benchmarks.apps import qaoa, vqe, qsvm, qft
 from qc_app_benchmarks.utils import create_fake_backend_sampler
 
 
-ideal_sampler = AerSampler(backend_options={"method": "statevector"})
+ideal_sampler = AerSampler(run_options={"shots": None})
 
 backend = AQTProvider("token").get_backend("offline_simulator_noise")
 aqt_sampler = AQTSampler(backend, options={"shots": 500})
 
-backend_sampler = create_fake_backend_sampler(FakeHanoi(), shots=1000, seed=123)
+# backend_sampler = create_fake_backend_sampler(FakeHanoi(), shots=1000, seed=123)
 
 # service = QiskitRuntimeService(channel="ibm_quantum")
 # backend = service.backend("ibm_sherbrooke")
