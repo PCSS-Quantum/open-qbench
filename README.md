@@ -13,6 +13,7 @@ The following main metrics based on best practices discussed in [1] have been id
 - Fidelity: a measure of how well the simulator or hardware runs a particular benchmark;
 
 The following benchmarks are currently implemented:
+
 | Benchmark   | Number of Qubits |
 |-------------|------------------|
 | VQE (UCCSD) | 3                |
