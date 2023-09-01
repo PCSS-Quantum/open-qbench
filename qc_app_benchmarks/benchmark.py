@@ -19,12 +19,11 @@ class BenchmarkError(Exception):
 class BenchmarkResult:
     """Dataclass for storing the results of running a benchmark"""
 
-    name: str = None
-    dist_backend: dict = None
-    dist_ideal: dict = None
-    average_fidelity: float = None
-    creation_time: float = None
-    execution_time: float = None
+    name: str
+    dist_backend: dict
+    dist_ideal: dict
+    average_fidelity: float
+    execution_time: float
 
     def save_to_file(self, path: str = "./results"):
         if not os.path.exists(path):
@@ -50,8 +49,11 @@ class QuantumBenchmark(ABC):
         self.backend_sampler = backend_sampler
         self.ideal_sampler = ideal_sampler
         self.params = params
-        self.name = name
-        self.result = BenchmarkResult(name=name)
+        if name is not None:
+            self.name = name
+        else:
+            self.name = self.circuit.name
+        # self.result = BenchmarkResult(name=name)
 
     def __str__(self) -> str:
         return f"Benchmark {self.name}"
@@ -88,7 +90,7 @@ class QuantumBenchmark(ABC):
         pass
 
     @abstractmethod
-    def calculate_fidelity(self):
+    def calculate_fidelity(self, dist_ideal: dict, dist_backend: dict):
         pass
 
     @abstractmethod
@@ -104,18 +106,21 @@ class QuantumAppBenchmark(QuantumBenchmark):
 
     basis_gates = {"rx", "ry", "rz", "cx"}
 
-    def run(self):
+    def run(self) -> BenchmarkResult:
         job = self.ideal_sampler.run(self.circuit, self.params)
         result = job.result()
-        dist = result.quasi_dists[0]
-        self.result.dist_ideal = dist.binary_probabilities()
+        dist_ideal = result.quasi_dists[0].binary_probabilities()
 
         start = time.time()
         job = self.backend_sampler.run(self.circuit, self.params)
         result = job.result()
-        self.result.execution_time = time.time() - start
-        dist = result.quasi_dists[0]
-        self.result.dist_backend = dist.binary_probabilities()
+        execution_time = time.time() - start
+        dist_backend = result.quasi_dists[0].binary_probabilities()
+
+        fidelity = self.calculate_fidelity(dist_ideal, dist_backend)
+        return BenchmarkResult(
+            self.name, dist_backend, dist_ideal, fidelity, execution_time
+        )
 
     @staticmethod
     def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
@@ -138,18 +143,14 @@ class QuantumAppBenchmark(QuantumBenchmark):
         fidelity = fidelity**2
         return fidelity
 
-    def calculate_fidelity(self) -> float:
-        backend_fidelity = self.classical_fidelity(
-            self.result.dist_ideal, self.result.dist_backend
-        )
-        uniform_fidelity = self.classical_fidelity(
-            self.result.dist_ideal, self._uniform_dist()
-        )
+    def calculate_fidelity(self, dist_ideal: dict, dist_backend: dict) -> float:
+        backend_fidelity = self.classical_fidelity(dist_ideal, dist_backend)
+        uniform_fidelity = self.classical_fidelity(dist_ideal, self._uniform_dist())
 
         raw_fidelity = (backend_fidelity - uniform_fidelity) / (1 - uniform_fidelity)
 
-        self.result.average_fidelity = max([raw_fidelity, 0])
-        return max([raw_fidelity, 0])
+        normalized_fidelity = max([raw_fidelity, 0])
+        return normalized_fidelity
 
     @staticmethod
     def counts_to_dist(counts: dict) -> dict:
@@ -241,12 +242,8 @@ class BenchmarkSuite(list):
 
     def run_all(self):
         for ben in self:
-            ben.run()
-            self.results.extend([ben.result])
-
-    def calculate_fidelities(self):
-        for ben in self:
-            ben.calculate_fidelity()
+            result = ben.run()
+            self.results.extend([result])
 
     def save_results(self, directory: str = "./results"):
         if not os.path.exists(directory):
@@ -263,9 +260,18 @@ class BenchmarkSuite(list):
         for ben in self:
             qc = transpile(
                 ben.circuit,
-                basis_gates=QuantumAppBenchmark.basis_gates,
+                basis_gates=list(QuantumAppBenchmark.basis_gates),
                 optimization_level=1,
             )
             if ben.params is not None:
-                qc = qc.bind_parameters(ben.params)
-            qc.qasm(filename=os.path.join(directory, ben.name + ".qasm"))
+                if isinstance(qc, QuantumCircuit):
+                    bounded_qc = qc.bind_parameters(ben.params)
+                    bounded_qc.qasm(
+                        filename=os.path.join(directory, ben.name + ".qasm")
+                    )
+                elif isinstance(qc, list):
+                    for circ in qc:
+                        bounded_circ = circ.bind_parameters(ben.params)
+                        bounded_circ.qasm(
+                            filename=os.path.join(directory, ben.name + ".qasm")
+                        )

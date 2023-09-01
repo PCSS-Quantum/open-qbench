@@ -2,17 +2,12 @@ from qiskit import QuantumCircuit
 
 
 def grover_3q() -> QuantumCircuit:
+    """Resturns a 3-qubit Grover circuit with one marked state (111)"""
     circuit = QuantumCircuit(3, 3)
     circuit.h(range(3))
-    # circuit.h(2)
-    # circuit.ccx(0, 1, 2)
-    # circuit.h(2)
     circuit.ccz(0, 1, 2)
     circuit.h(range(3))
     circuit.x(range(3))
-    # circuit.h(2)
-    # circuit.ccx(0, 1, 2)
-    # circuit.h(2)
     circuit.ccz(0, 1, 2)
     circuit.x(range(3))
     circuit.h(range(3))
