@@ -9,14 +9,14 @@ def prepare_QFT(encoded_number: int):
 
     circuit = QuantumCircuit(q)
     circuit.h(q)
-    for i, qubit in enumerate(reversed(q)):
+    for i, qubit in enumerate(q):
         angle = encoded_number * math.pi / 2**i
         circuit.rz(angle, qubit)
 
     circuit &= QFT(
         num_qubits=n_qubits,
         approximation_degree=0,
-        do_swaps=True,
+        do_swaps=False,
         inverse=True,
         insert_barriers=True,
         name="qft",

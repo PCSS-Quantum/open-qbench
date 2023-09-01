@@ -29,7 +29,9 @@ class BenchmarkResult:
     def save_to_file(self, path: str = "./results"):
         if not os.path.exists(path):
             os.makedirs(path)
-        with open(path + "/" + self.name + ".json", "w", encoding="utf-8") as file:
+        with open(
+            os.path.join(path, self.name + ".json"), "w", encoding="utf-8"
+        ) as file:
             file.write(json.dumps(asdict(self), indent=4))
 
 
@@ -266,4 +268,4 @@ class BenchmarkSuite(list):
             )
             if ben.params is not None:
                 qc = qc.bind_parameters(ben.params)
-            qc.qasm(filename="./" + directory + "/" + ben.name + ".qasm")
+            qc.qasm(filename=os.path.join(directory, ben.name + ".qasm"))

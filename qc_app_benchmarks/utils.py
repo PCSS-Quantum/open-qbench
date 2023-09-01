@@ -6,9 +6,8 @@ from qiskit.providers.fake_provider import FakeBackendV2, FakePulseBackend
 def create_fake_backend_sampler(
     fake_backend: FakeBackendV2 | FakePulseBackend, shots: int, seed: int = None
 ) -> AerSampler:
-    backend = fake_backend
-    coupling_map = backend.configuration().coupling_map
-    noise_model = NoiseModel.from_backend(backend)
+    coupling_map = fake_backend.configuration().coupling_map
+    noise_model = NoiseModel.from_backend(fake_backend)
 
     backend_sampler = AerSampler(
         backend_options={
