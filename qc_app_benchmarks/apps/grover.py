@@ -1,26 +1,41 @@
+import math
 from qiskit import QuantumCircuit
 
 
-def grover_3q() -> QuantumCircuit:
-    """Resturns a 3-qubit Grover circuit with one marked state (111)"""
-    circuit = QuantumCircuit(3, 3)
-    circuit.h(range(3))
-    circuit.ccz(0, 1, 2)
-    circuit.h(range(3))
-    circuit.x(range(3))
-    circuit.ccz(0, 1, 2)
-    circuit.x(range(3))
-    circuit.h(range(3))
-    circuit.measure(range(3), range(3))
+def grover_nq(num_qubits: int, marked_state: int | str) -> QuantumCircuit:
+    """Resturns an n-qubit Grover circuit with one marked state"""
+    if isinstance(marked_state, int):
+        marked_state = bin(marked_state)[2:]
+    if len(marked_state) > num_qubits:
+        raise ValueError(
+            "Number of bits in the marked state cannot be larger than number of qubits"
+        )
+    marking_circ = QuantumCircuit(num_qubits, num_qubits)
+    for i, q in enumerate(reversed(marked_state)):
+        if int(q) == 0:
+            marking_circ.x(i)
 
-    circuit.name = "grover_3q"
+    circuit = QuantumCircuit(num_qubits, num_qubits)
+    circuit.h(range(num_qubits))
+    circuit &= marking_circ
+    circuit.mcp(math.pi, list(range(num_qubits - 1)), num_qubits - 1)
+    circuit &= marking_circ
+    circuit.h(range(num_qubits))
+    circuit.x(range(num_qubits))
+    circuit.mcp(math.pi, list(range(num_qubits - 1)), num_qubits - 1)
+    circuit.x(range(num_qubits))
+    circuit.h(range(num_qubits))
+    circuit.measure(range(num_qubits), range(num_qubits))
+
+    circuit.name = f"grover_{num_qubits}q"
     return circuit
 
 
 if __name__ == "__main__":
-    qc = grover_3q()
-    # qc.draw("latex", filename=qc.name + ".png")
+    qc = grover_nq(4, 10)
+    print(qc.draw())
     from qiskit.primitives import Sampler
 
-    res = Sampler().run(qc).result().quasi_dists
-    print(res)
+    res = Sampler().run(qc).result().quasi_dists[0]
+    sorted_probs = dict(sorted(res.items(), key=lambda item: item[1]))
+    print(sorted_probs)

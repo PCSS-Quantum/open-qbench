@@ -20,6 +20,8 @@ class BenchmarkResult:
     """Dataclass for storing the results of running a benchmark"""
 
     name: str
+    num_qubits: int
+    normalized_depth: int
     dist_backend: dict
     dist_ideal: dict
     average_fidelity: float
@@ -119,7 +121,13 @@ class QuantumAppBenchmark(QuantumBenchmark):
 
         fidelity = self.calculate_fidelity(dist_ideal, dist_backend)
         return BenchmarkResult(
-            self.name, dist_backend, dist_ideal, fidelity, execution_time
+            self.name,
+            self.circuit.num_qubits,
+            self.normalized_depth(),
+            dist_backend,
+            dist_ideal,
+            fidelity,
+            execution_time,
         )
 
     @staticmethod
@@ -181,8 +189,7 @@ class QuantumAppBenchmark(QuantumBenchmark):
         pass
 
 
-# class BenchmarkSuite(Sequence[QuantumBenchmark]):
-class BenchmarkSuite(list):
+class BenchmarkSuite(List[QuantumAppBenchmark]):
     """Class for aggregating different benchmarks and analysing the results"""
 
     def __init__(
