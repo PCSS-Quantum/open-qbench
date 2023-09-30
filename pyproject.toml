@@ -1,0 +1,33 @@
+[project]
+name = "qc_app_benchmarks"
+version = "0.0.3"
+authors = [
+    { name = "Konrad Wojciechowski", email = "kwojciechowski@man.poznan.pl" },
+]
+description = "Package for running benchmarks on quantum backends leveraging Qiskit"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "qiskit-terra>=0.23.3,!=0.24.0,<0.25.0",
+    "qiskit-aer>=0.12",
+    "qiskit-aqt-provider~=0.17",
+]
+
+[project.optional-dependencies]
+VQE = ["qiskit-nature~=0.6.0", "pyscf~=2.2"]
+QSVM = ["scikit-image~=0.21"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["qc_app_benchmarks*"]
+
+[tool.setuptools.package-data]
+qc_app_benchmarks = ["*.csv"]

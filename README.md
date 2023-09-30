@@ -20,6 +20,18 @@ The following benchmarks are currently implemented:
 | QAOA (JSSP) | 7                |
 | QSVM        | 8                |
 | QFT         | arbitrary        |
-| Grover      | 3                |
+| Grover      | arbitrary        |
+| Toffoli     | 5                |
 
+## Installation
+To install this package with minimal requirements use `pip`:
+```
+pip install .
+```
+The VQE and QSVM benchmarks require some additional dependencies, so in order to run these, install with:
+```
+pip install .[VQE,QSVM]
+```
+
+## References
 [1]: [Application-Oriented Performance Benchmarks for Quantum Computing](https://arxiv.org/abs/2110.03137)

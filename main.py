@@ -10,13 +10,13 @@ from qc_app_benchmarks.apps import grover, qaoa, vqe, qsvm, qft, toffoli
 ideal_sampler = AerSampler(run_options={"shots": None})
 
 backend = AQTProvider("token").get_backend("offline_simulator_noise")
-aqt_sampler = AQTSampler(backend, options={"shots": 500})
+aqt_sampler = AQTSampler(backend, options={"shots": 200})
 
 qaoa_circuit, qaoa_params = qaoa.jssp_7q_24d()
 vqe_circuit, vqe_params = vqe.uccsd_3q_56d()
 qsvm_circuit, qsvm_params = qsvm.trained_qsvm_8q()
 qft_circuit = qft.prepare_QFT(encoded_number=13)
-grover_circuit = grover.grover_nq(4, marked_state="1010")
+grover_circuit = grover.grover_nq(4, marked_state="1111")
 toffoli_circuit = toffoli.toffoli_circuit(5, input_state="11111")
 
 suite = BenchmarkSuite(
@@ -37,7 +37,7 @@ suite.run_all()
 print("Results:")
 for res in suite.results:
     print(
-        f"{res.name} - depth = {res.normalized_depth}, fidelity = {res.average_fidelity}"
+        f"{res.name:>15}: depth = {res.normalized_depth:3}, fidelity = {res.average_fidelity}"
     )
 
 suite.save_results("test_res")

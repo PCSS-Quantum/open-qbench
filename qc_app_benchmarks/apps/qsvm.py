@@ -1,4 +1,21 @@
+# This code is part of qiskit-runtime.
+#
+# (C) Copyright IBM 2021.
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
+"""The FeatureMap class adapted from qiskit-runtime supplemented with code for preparing MNIST data for QSVM"""
+
 from typing import Optional, List
+import csv
+import os
+from importlib.resources import files
 
 import numpy as np
 
@@ -8,7 +25,6 @@ from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.parametervector import ParameterVector
 
 from skimage.transform import resize
-import pandas as pd
 
 
 class FeatureMap:
@@ -131,20 +147,19 @@ def sort_2_arrays(list1, list2):
     return list1[p], list2[p]
 
 
-def load_prepared_mnist(train_size: int = 20, seed: Optional[int] = None):
-    img_dim = 4
+def load_csv_data(path: str):
+    data = []
+    with open(path, "r", encoding="UTF-8") as csvfile:
+        reader_variable = csv.reader(csvfile, delimiter=",")
+        for row in reader_variable:
+            data.append(row)
+    return np.array(data, dtype=np.int16)
 
-    import os
 
-    dirname = os.path.dirname(__file__)
-
-    x_train = np.array(
-        pd.read_csv(os.path.join(dirname, "../data/mnist_train100_dim4.csv"))
-    )
-    y_train = np.array(
-        pd.read_csv(os.path.join(dirname, "../data/mnist_ytrain100_dim4.csv"))
-    )[:, 0]
-
+def load_prepared_mnist(file: str, train_size: int = 20, img_dim=3, seed: int = None):
+    data = load_csv_data(file)
+    x_train = data[:, 1:]
+    y_train = data[:, 0]
     np.random.seed(seed)
     train_shuffler = np.random.permutation(len(y_train))
     x_train = x_train[train_shuffler][:train_size]
@@ -163,8 +178,9 @@ def load_prepared_mnist(train_size: int = 20, seed: Optional[int] = None):
     return x_train, y_train
 
 
-def trained_qsvm_8q():
-    train_data_x, _ = load_prepared_mnist(2, seed=123)
+def trained_qsvm_8q() -> QuantumCircuit:
+    datafile = files("qc_app_benchmarks.data").joinpath("mnist_train100.csv")
+    train_data_x, _ = load_prepared_mnist(datafile, 20, 4, seed=123)
     circuit = prepare_qsvm_circuit(train_data_x)
     circuit.name = "QSVM_MNIST_8q"
     parameters = [
@@ -180,15 +196,8 @@ def trained_qsvm_8q():
     return circuit, parameters
 
 
-def trained_qsvm_16q():
-    d = 36
-    # np.random.seed(345)
-    parameters = [np.random.uniform(0, np.pi) for _ in range(d // 2)]
-    circuit = prepare_qsvm_circuit(d)
-    return circuit, parameters
-
-
 if __name__ == "__main__":
+    dirname = os.path.dirname(__file__)
     qc, params = trained_qsvm_8q()
 
     from qiskit.primitives import Sampler
