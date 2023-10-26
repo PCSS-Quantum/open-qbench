@@ -40,7 +40,7 @@ def uccsd_3q_56d() -> Tuple[QuantumCircuit, tuple]:
         reps=1,
     )
     ansatz.measure_all()
-    ansatz.name = "UCCSD_LiH_3q"
+    ansatz.name = "VQE_UCCSD_LiH_3q"
     params = [0.08670186, 0.41080424, 0.96417694, 0.17362798]
 
     return ansatz, params

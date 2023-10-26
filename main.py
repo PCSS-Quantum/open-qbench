@@ -16,7 +16,7 @@ qaoa_circuit, qaoa_params = qaoa.jssp_7q_24d()
 vqe_circuit, vqe_params = vqe.uccsd_3q_56d()
 qsvm_circuit, qsvm_params = qsvm.trained_qsvm_8q()
 qft_circuit = qft.prepare_QFT(encoded_number=13)
-grover_circuit = grover.grover_nq(4, marked_state="1111")
+grover_circuit = grover.grover_nq(3, marked_state="111")
 toffoli_circuit = toffoli.toffoli_circuit(5, input_state="11111")
 
 suite = BenchmarkSuite(
@@ -41,4 +41,4 @@ for res in suite.results:
     )
 
 suite.save_results("test_res")
-suite.export_qasm("qasm_circuits")
+suite.export_qasm("qasm_circuits", ver=3)

@@ -8,6 +8,7 @@ import os
 import json
 
 from qiskit import QuantumCircuit, transpile
+from qiskit import qasm3
 from qiskit.primitives import BaseSampler
 
 
@@ -41,7 +42,7 @@ class QuantumBenchmark(ABC):
 
     def __init__(
         self,
-        circuit: QuantumCircuit,
+        circuit: QuantumCircuit,  # TODO: | List[QuantumCircuit]
         backend_sampler: BaseSampler,
         ideal_sampler: BaseSampler,
         params: Optional[Sequence] = None,
@@ -261,7 +262,9 @@ class BenchmarkSuite(List[QuantumAppBenchmark]):
     def plot_results(self):
         pass
 
-    def export_qasm(self, directory: str):
+    def export_qasm(self, directory: str, *, ver: int = 2):
+        if ver not in (2, 3):
+            raise ValueError("Only OpenQASM 2.0 and 3.0 are supported")
         if not os.path.exists(directory):
             os.makedirs(directory)
         for ben in self:
@@ -273,9 +276,18 @@ class BenchmarkSuite(List[QuantumAppBenchmark]):
             if ben.params is not None:
                 if isinstance(qc, QuantumCircuit):
                     bounded_qc = qc.bind_parameters(ben.params)
-                    bounded_qc.qasm(
-                        filename=os.path.join(directory, ben.name + ".qasm")
-                    )
+
+                    if ver == 2:
+                        bounded_qc.qasm(
+                            filename=os.path.join(directory, ben.name + ".qasm")
+                        )
+                    elif ver == 3:
+                        with open(
+                            os.path.join(directory, ben.name + ".qasm3"),
+                            "w",
+                            encoding="UTF-8",
+                        ) as f:
+                            qasm3.dump(bounded_qc, f)
                 elif isinstance(qc, list):
                     for circ in qc:
                         bounded_circ = circ.bind_parameters(ben.params)

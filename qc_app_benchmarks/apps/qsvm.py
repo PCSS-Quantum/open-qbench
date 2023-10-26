@@ -9,6 +9,9 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
+#
+# Code taken from qiskit-runtime, with slight modifications was used by PSNC
+# for the purpose of creating a QSVM benchmark.
 
 """The FeatureMap class adapted from qiskit-runtime supplemented with code for preparing MNIST data for QSVM"""
 
