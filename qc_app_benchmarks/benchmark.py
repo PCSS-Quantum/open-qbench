@@ -275,7 +275,7 @@ class BenchmarkSuite(List[QuantumAppBenchmark]):
             )
             if ben.params is not None:
                 if isinstance(qc, QuantumCircuit):
-                    bounded_qc = qc.bind_parameters(ben.params)
+                    bounded_qc = qc.assign_parameters(ben.params)
 
                     if ver == 2:
                         bounded_qc.qasm(

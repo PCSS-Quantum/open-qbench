@@ -6,7 +6,7 @@ from qiskit_ibm_runtime import Options
 
 from qiskit_aer.noise import NoiseModel
 from qiskit_aer.primitives import Sampler as AerSampler
-from qiskit.providers.fake_provider import FakeBackendV2, FakeBackend
+from qiskit_ibm_runtime.fake_provider.fake_backend import FakeBackend, FakeBackendV2
 
 
 def get_fake_backend_sampler(
