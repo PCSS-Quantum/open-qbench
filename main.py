@@ -1,16 +1,19 @@
 from qiskit_aer.primitives import Sampler as AerSampler
 
-from qiskit_aqt_provider import AQTProvider
-from qiskit_aqt_provider.primitives import AQTSampler
+# from qiskit_aqt_provider import AQTProvider
+# from qiskit_aqt_provider.primitives import AQTSampler
+from qiskit_ibm_runtime.fake_provider.backends import FakeGeneva
 
 from qc_app_benchmarks.benchmark import BenchmarkSuite
 from qc_app_benchmarks.apps import grover, qaoa, vqe, qsvm, qft, toffoli
+from qc_app_benchmarks.utils import get_fake_backend_sampler
 
 
 ideal_sampler = AerSampler(run_options={"shots": None})
 
-backend = AQTProvider("token").get_backend("offline_simulator_noise")
-aqt_sampler = AQTSampler(backend, options={"shots": 200})
+# backend = AQTProvider("token").get_backend("offline_simulator_noise")
+# aqt_sampler = AQTSampler(backend, options={"shots": 200})
+backend_sampler = get_fake_backend_sampler(FakeGeneva(), shots=1000)
 
 qaoa_circuit, qaoa_params = qaoa.jssp_7q_24d()
 vqe_circuit, vqe_params = vqe.uccsd_3q_56d()
@@ -20,7 +23,7 @@ grover_circuit = grover.grover_nq(3, marked_state="111")
 toffoli_circuit = toffoli.toffoli_circuit(5, input_state="11111")
 
 suite = BenchmarkSuite(
-    backend_sampler=aqt_sampler, ideal_sampler=ideal_sampler, name="test_suite"
+    backend_sampler=backend_sampler, ideal_sampler=ideal_sampler, name="test_suite"
 )
 suite.add_circuits(
     [

@@ -1,6 +1,6 @@
 [project]
 name = "qc_app_benchmarks"
-version = "0.0.3"
+version = "0.1.0"
 authors = [
     { name = "Konrad Wojciechowski", email = "kwojciechowski@man.poznan.pl" },
 ]
@@ -12,13 +12,14 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "qiskit-terra>=0.23.3,!=0.24.0,<0.25.0",
-    "qiskit-aer>=0.12",
-    "qiskit-aqt-provider~=0.17",
+    "qiskit>=1.0",
+    "qiskit-aer>=0.13",
+    "qiskit-ibm-runtime",
+    # "qiskit-aqt-provider~=0.17", # doesn't yet support Qiskit 1.0 
 ]
 
 [project.optional-dependencies]
-VQE = ["qiskit-nature~=0.6.0", "pyscf~=2.2"]
+VQE = ["qiskit-nature~=0.7", "pyscf"]
 QSVM = ["scikit-image~=0.21"]
 
 [build-system]
