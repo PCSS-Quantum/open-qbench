@@ -1,11 +1,9 @@
-from typing import Tuple
-
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.circuit.library import QAOAAnsatz
 
 
-def jssp_7q_24d() -> Tuple[QuantumCircuit, tuple]:
+def jssp_7q_24d() -> tuple[QuantumCircuit, tuple[float, ...]]:
     """Returns a 7-qubit QAOA circuit with normalized depth 24, as in the document.
     Returned parameters are chosen arbitrarily, so that the final distribution is
     not uniform."""

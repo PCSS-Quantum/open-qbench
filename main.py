@@ -4,10 +4,10 @@ from qiskit_aer.primitives import Sampler as AerSampler
 # from qiskit_aqt_provider.primitives import AQTSampler
 from qiskit_ibm_runtime.fake_provider.backends import FakeGeneva
 
-from qc_app_benchmarks.benchmark import BenchmarkSuite
+from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite
 from qc_app_benchmarks.apps import grover, qaoa, vqe, qsvm, qft, toffoli
 from qc_app_benchmarks.utils import get_fake_backend_sampler
-
+from qc_app_benchmarks.fidelities import normalized_fidelity
 
 ideal_sampler = AerSampler(run_options={"shots": None})
 
@@ -15,26 +15,21 @@ ideal_sampler = AerSampler(run_options={"shots": None})
 # aqt_sampler = AQTSampler(backend, options={"shots": 200})
 backend_sampler = get_fake_backend_sampler(FakeGeneva(), shots=1000)
 
-qaoa_circuit, qaoa_params = qaoa.jssp_7q_24d()
-vqe_circuit, vqe_params = vqe.uccsd_3q_56d()
-qsvm_circuit, qsvm_params = qsvm.trained_qsvm_8q()
-qft_circuit = qft.prepare_QFT(encoded_number=13)
-grover_circuit = grover.grover_nq(3, marked_state="111")
-toffoli_circuit = toffoli.toffoli_circuit(5, input_state="11111")
-
 suite = BenchmarkSuite(
-    backend_sampler=backend_sampler, ideal_sampler=ideal_sampler, name="test_suite"
+    backend_sampler=backend_sampler,
+    ideal_sampler=ideal_sampler,
+    calculate_accuracy=normalized_fidelity,
+    name="test_suite",
 )
-suite.add_circuits(
+suite.add_benchmarks(
     [
-        qaoa_circuit,
-        vqe_circuit,
-        qsvm_circuit,
-        qft_circuit,
-        grover_circuit,
-        toffoli_circuit,
-    ],
-    [qaoa_params, vqe_params, qsvm_params, [], [], []],
+        qaoa.jssp_7q_24d(),
+        vqe.uccsd_3q_56d(),
+        qsvm.trained_qsvm_8q(),
+        qft.prepare_QFT(encoded_number=13),
+        grover.grover_nq(3, marked_state="111"),
+        toffoli.toffoli_circuit(5, input_state="11111"),
+    ]
 )
 suite.run_all()
 print("Results:")
@@ -43,5 +38,5 @@ for res in suite.results:
         f"{res.name:>15}: depth = {res.normalized_depth:3}, fidelity = {res.average_fidelity}"
     )
 
-suite.save_results("test_res")
-suite.export_qasm("qasm_circuits", ver=3)
+# suite.save_results("test_res")
+# suite.export_qasm("qasm_circuits", ver=3)

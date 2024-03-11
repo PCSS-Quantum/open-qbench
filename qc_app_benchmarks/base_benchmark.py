@@ -1,0 +1,94 @@
+from abc import ABC, abstractmethod
+from typing import Union, Sequence
+
+from qiskit.primitives import BaseSampler
+from qiskit.primitives.containers import SamplerPubLike
+from qiskit import QuantumCircuit
+
+
+class BaseQuantumBenchmark(ABC):
+    """Abstract class defining the interface of a quantum benchmark
+
+    A QuantumBenchmark is composed from two samplers:
+        - ideal_sampler for generating ideal theoretical distributions
+        - backend_sampler for sampling from a backend
+
+    an benchmark_input is either:
+        - a Qiskit-native PUB (Primitive Unified Bloc) for gate-based QC
+        - a tuple with an input state and a sequence of parameters for bosonic samplers
+        - a hamiltonian for quantum annealers
+    """
+
+    def __init__(
+        self,
+        backend_sampler: BaseSampler,
+        reference_state_sampler,
+        benchmark_input: Union[
+            SamplerPubLike,
+            tuple[Sequence[int], Sequence[float]],
+            # [and some general form of dwave input]
+        ],
+        name: str | None = None,
+    ):
+        self.benchmark_input = benchmark_input
+        self.backend_sampler = backend_sampler
+        self.reference_state_sampler = reference_state_sampler
+
+        if name is not None:
+            self.name = name
+        else:
+            if isinstance(benchmark_input, QuantumCircuit):
+                self.name = benchmark_input.name
+        # self.result = BenchmarkResult(name=name)
+
+    def __str__(self) -> str:
+        return f"Benchmark {self.name}"
+
+    def __repr__(self) -> str:
+        return f"QuantumBenchmark({self.benchmark_input.__repr__()})"
+
+    @property
+    def backend_sampler(self):
+        return self._backend_sampler
+
+    @backend_sampler.setter
+    def backend_sampler(self, sampler_instance: BaseSampler):
+        if not isinstance(sampler_instance, BaseSampler):
+            raise TypeError(
+                "backend_sampler must be an instance of qiskit.primitives.BaseSampler"
+            )
+        self._backend_sampler = sampler_instance
+
+    @property
+    def reference_state_sampler(self):
+        return self._reference_state_sampler
+
+    @reference_state_sampler.setter
+    def reference_state_sampler(self, sampler_instance: BaseSampler):
+        if not isinstance(sampler_instance, BaseSampler):
+            raise TypeError(
+                "ideal_sampler must be an instance of qiskit.primitives.BaseSampler"
+            )
+        self._reference_state_sampler = sampler_instance
+
+    @abstractmethod
+    def run(self):
+        pass
+
+    @abstractmethod
+    def calculate_accuracy(self, dist_ref: dict, dist_backend: dict):
+        """This method defines how we measure the accuracy of execution of
+        the quantum benchmark, e.g. fidelity between probability distributions
+        [Lubinski 2021] or difference in a probability of a single desired
+        output state [polarization in Proctor 2022]
+
+        Args:
+            dist_ref (dict): A probability distribution generated from
+            the reference quantum state that we benchmark against
+            dist_backend (dict): A probability dsitribution generated
+            from a backend
+        """
+
+    @abstractmethod
+    def measure_creation_time(self):
+        pass

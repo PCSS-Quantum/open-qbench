@@ -1,5 +1,3 @@
-from typing import Optional
-
 from qiskit_ibm_runtime import Sampler as RuntimeSampler
 from qiskit_ibm_runtime import QiskitRuntimeService
 from qiskit_ibm_runtime import Options
@@ -10,7 +8,7 @@ from qiskit_ibm_runtime.fake_provider.fake_backend import FakeBackend, FakeBacke
 
 
 def get_fake_backend_sampler(
-    fake_backend: FakeBackend | FakeBackendV2, shots: int, seed: Optional[int] = None
+    fake_backend: FakeBackend | FakeBackendV2, shots: int, seed: int | None = None
 ) -> AerSampler:
     """Creates a sampler from qiskit_aer based on a noise model supplied by a Qiskit fake backend
 

@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from qiskit import QuantumCircuit
 
 from qiskit_nature.second_q.mappers import ParityMapper
@@ -12,7 +10,7 @@ from qiskit_nature.settings import settings
 settings.use_pauli_sum_op = False
 
 
-def uccsd_3q_56d() -> Tuple[QuantumCircuit, tuple]:
+def uccsd_3q_56d() -> tuple[QuantumCircuit, tuple[float, ...]]:
     """Returns a 3-qubit UCCSD circuit with normalized depth 56, as in the document.
     Returned parameters are chosen arbitrarily, so that the final distribution is
     not uniform."""

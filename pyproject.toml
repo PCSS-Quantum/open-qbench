@@ -20,7 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 VQE = ["qiskit-nature~=0.7", "pyscf"]
-QSVM = ["scikit-image~=0.21"]
+QSVM = ["scikit-image==0.21"]
 
 [build-system]
 requires = ["setuptools>=61.0"]
