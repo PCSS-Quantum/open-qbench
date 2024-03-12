@@ -8,12 +8,13 @@ from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite
 from qc_app_benchmarks.apps import grover, qaoa, vqe, qsvm, qft, toffoli
 from qc_app_benchmarks.utils import get_fake_backend_sampler
 from qc_app_benchmarks.fidelities import normalized_fidelity
+from qc_app_benchmarks.sampler import CircuitSampler
 
-ideal_sampler = AerSampler(run_options={"shots": None})
+ideal_sampler = CircuitSampler(AerSampler(run_options={"shots": None}))
 
 # backend = AQTProvider("token").get_backend("offline_simulator_noise")
 # aqt_sampler = AQTSampler(backend, options={"shots": 200})
-backend_sampler = get_fake_backend_sampler(FakeGeneva(), shots=1000)
+backend_sampler = CircuitSampler(get_fake_backend_sampler(FakeGeneva(), shots=1000))
 
 suite = BenchmarkSuite(
     backend_sampler=backend_sampler,

@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Union, Sequence
 
 from qiskit.primitives.base.base_sampler import (
     BaseSampler,
     PrimitiveResult,
 )
+from qiskit import QuantumCircuit
 
 from ptseries.tbi.tbi_abstract import TBI
 
@@ -34,9 +35,12 @@ class CircuitSampler(BaseBenchmarkSampler):
         self.sampler = sampler
 
     def run(self, sampler_input, num_samples=None) -> SamplerResult:
-        circuits = sampler_input[0]
-        parameter_values = sampler_input[1]
-        job = self.sampler.run(circuits, parameter_values, shots=num_samples)
+        if isinstance(sampler_input, QuantumCircuit):
+            job = self.sampler.run(sampler_input, shots=num_samples)
+        elif isinstance(sampler_input, Sequence) and len(sampler_input) == 2:
+            circuits = sampler_input[0]
+            parameter_values = sampler_input[1]
+            job = self.sampler.run(circuits, parameter_values, shots=num_samples)
         return job.result().quasi_dists[0]
 
 

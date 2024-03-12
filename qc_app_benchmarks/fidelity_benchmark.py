@@ -1,19 +1,14 @@
 from dataclasses import dataclass, asdict
-from typing import Sequence
 import time
 import os
 import json
 
 from qiskit import QuantumCircuit, transpile
 from qiskit import qasm3
-from qiskit.primitives import BaseSampler
 
 from .base_benchmark import BaseQuantumBenchmark
 from .fidelities import normalized_fidelity
-
-
-class BenchmarkError(Exception):
-    """Base class for errors raised by the benchmarking suite"""
+from .sampler import BaseBenchmarkSampler
 
 
 @dataclass
@@ -45,25 +40,13 @@ class FidelityBenchmark(BaseQuantumBenchmark):
     basis_gates = {"rx", "ry", "rz", "cx"}
 
     def run(self) -> FidelityBenchmarkResult:
-        if isinstance(self.benchmark_input, Sequence):
-            job = self.reference_state_sampler.run(
-                self.benchmark_input[0], self.benchmark_input[1]
-            )
-        else:
-            job = self.reference_state_sampler.run(self.benchmark_input)
-        result = job.result()
-        dist_ideal = result.quasi_dists[0].binary_probabilities()
+        result = self.reference_state_sampler.run(self.benchmark_input)
+        dist_ideal = result.binary_probabilities()
 
         start = time.time()
-        if isinstance(self.benchmark_input, Sequence):
-            job = self.backend_sampler.run(
-                self.benchmark_input[0], self.benchmark_input[1]
-            )
-        else:
-            job = self.backend_sampler.run(self.benchmark_input)
-        result = job.result()
+        result = self.backend_sampler.run(self.benchmark_input)
         execution_time = time.time() - start
-        dist_backend = result.quasi_dists[0].binary_probabilities()
+        dist_backend = result.binary_probabilities()
 
         fidelity = self.calculate_accuracy(dist_ideal, dist_backend)
 
@@ -78,8 +61,8 @@ class FidelityBenchmark(BaseQuantumBenchmark):
             execution_time,
         )
 
-    def calculate_accuracy(self, dist_ref: dict, dist_backend: dict):
-        return normalized_fidelity(dist_ref, dist_backend)
+    def calculate_accuracy(self, state_ref: dict, dist_backend: dict):
+        return normalized_fidelity(state_ref, dist_backend)
 
     def normalized_depth(self) -> int:
         """Returns depth of the circuit after transpiling to the normalized basis gate set.
@@ -107,8 +90,8 @@ class BenchmarkSuite(list[FidelityBenchmark]):
 
     def __init__(
         self,
-        backend_sampler: BaseSampler,
-        ideal_sampler: BaseSampler,
+        backend_sampler: BaseBenchmarkSampler,
+        ideal_sampler: BaseBenchmarkSampler,
         calculate_accuracy,
         name: str,
     ) -> None:
@@ -123,10 +106,10 @@ class BenchmarkSuite(list[FidelityBenchmark]):
         return self._backend_sampler
 
     @backend_sampler.setter
-    def backend_sampler(self, sampler_instance: BaseSampler):
-        if not isinstance(sampler_instance, BaseSampler):
+    def backend_sampler(self, sampler_instance: BaseBenchmarkSampler):
+        if not isinstance(sampler_instance, BaseBenchmarkSampler):
             raise TypeError(
-                "backend_sampler must be an instance of qiskit.primitives.BaseSampler"
+                "backend_sampler must be an instance of qc_app_benchmarks.sampler.BaseBenchmarkSampler"
             )
         self._backend_sampler = sampler_instance
 
@@ -135,10 +118,10 @@ class BenchmarkSuite(list[FidelityBenchmark]):
         return self._ideal_sampler
 
     @ideal_sampler.setter
-    def ideal_sampler(self, sampler_instance: BaseSampler):
-        if not isinstance(sampler_instance, BaseSampler):
+    def ideal_sampler(self, sampler_instance: BaseBenchmarkSampler):
+        if not isinstance(sampler_instance, BaseBenchmarkSampler):
             raise TypeError(
-                "ideal_sampler must be an instance of qiskit.primitives.BaseSampler"
+                "ideal_sampler must be an instance of qc_app_benchmarks.sampler.BaseBenchmarkSampler"
             )
         self._ideal_sampler = sampler_instance
 
