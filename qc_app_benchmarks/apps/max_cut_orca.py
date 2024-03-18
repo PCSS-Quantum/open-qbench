@@ -1,3 +1,24 @@
+<<<<<<< HEAD
+=======
+def max_cut_thetas_3_edges(return_graph=False, return_input_state=False):
+    if return_graph:
+        return "Graph with 3 nodes and 2 edges"
+    if return_input_state:
+        return {"input_state1": (1, 1, 1), "input_state2": (0, 1, 1)}
+    if return_graph and return_input_state:
+        return "Graph with 3 nodes and 2 edges", {"input_state1": (1, 1, 1), "input_state2": (0, 1, 1)}
+    return [-1.7229, -1.1057]
+
+def max_cut_thetas_4_edges(return_graph=False, return_input_state=False):
+    if return_graph:
+        return "Graph with 4 nodes and 4 edges"
+    if return_input_state:
+        return {"input_state1": (1, 1, 1, 1), "input_state2": (0, 1, 1, 1)}
+    if return_graph and return_input_state:
+        return "Graph with 4 nodes and 4 edges", {"input_state1": (1, 1, 1, 1), "input_state2": (0, 1, 1, 1)}
+    return [1.9212, 1.8164, 1.3147]
+
+>>>>>>> origin/algorithms_for_orca
 def max_cut_thetas_6_edges(return_graph=False, return_input_state=False):
     if return_graph:
         return "Graph with 6 nodes and 10 edges"
