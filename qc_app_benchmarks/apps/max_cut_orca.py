@@ -35,6 +35,24 @@ def max_cut_thetas_7_edges(return_graph=False, return_input_state=False):
                                                    "input_state2": (0, 1, 1, 1, 1, 1, 1)}
     return [-1.5334,  0.0372,  0.8819, -1.9504,  0.6715,  2.6831]
 
+def max_cut_5_edges_new_input(return_graph=False, return_input_state=False):
+    if return_graph:
+        return "Graph with 5 nodes and 6 edges"
+    if return_input_state:
+        return {"input_state1": (1, 0, 1, 0, 1), "input_state2": (1, 0, 1, 0, 1)}
+    if return_graph and return_input_state:
+        return "Graph with 5 nodes and 6 edges", {"input_state1": (1, 0, 1, 0, 1), "input_state2": (1, 0, 1, 0, 1)}
+    return [-0.7304,  1.5838,  0.0172,  1.2462]
+
+def max_cut_6_edges_new_input(return_graph=False, return_input_state=False):
+    if return_graph:
+        return "Graph with 6 nodes and 13 edges"
+    if return_input_state:
+        return {"input_state1": (1, 0, 1, 0, 1, 0), "input_state2": (1, 0, 1, 0, 1, 0)}
+    if return_graph and return_input_state:
+        return "Graph with 6 nodes and 13 edges", {"input_state1": (1, 0, 1, 0, 1, 0), "input_state2": (1, 0, 1, 0, 1, 0)}
+    return [0.8479, -0.0095,  0.2154, -1.3921,  0.0614]
+
 def max_cut_thetas_6_edges_double_loop(return_graph=False, return_input_state=False):
     if return_graph:
         return "Graph with 6 nodes and 11 edges"
