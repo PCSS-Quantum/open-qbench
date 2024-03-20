@@ -17,7 +17,7 @@
 
 
 from ptseries.tbi import create_tbi
-from qc_app_benchmarks.apps.max_cut_orca import max_cut_thetas_6_edges
+from qc_app_benchmarks.apps.max_cut_orca import max_cut_thetas_6_edges, max_cut_6_edges_new_input
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import numpy as np
@@ -72,9 +72,8 @@ n_samples = 200
 n_loops = 1
 
 
-# input_state = max_cut_thetas_6_edges(return_graph=False, return_input_state=True)['input_state1']
-thetas = max_cut_thetas_6_edges(return_graph=False, return_input_state=False)
-input_state = (0, 0, 0, 1, 1, 1)
+input_state = max_cut_6_edges_new_input(return_graph=False, return_input_state=True)['input_state1']
+thetas = max_cut_6_edges_new_input(return_graph=False, return_input_state=False)
 
 print(input_state)
 print(thetas)
@@ -101,14 +100,14 @@ orca_labels = list(orca_samples_sorted.keys())
 orca_labels = [str(i) for i in orca_labels]
 orca_values = list(orca_samples_sorted.values())
 
-# print(ideal_samples)
-# print(orca_samples)
+print(ideal_samples)
+print(orca_samples)
 
-with open('qc_app_benchmarks/results/ideal_samples.txt' + str(n_loops) + '.txt', 'w') as file:
-    file.write(ideal_samples)
+with open('qc_app_benchmarks/results/ideal_samples' + str(n_loops) + '.txt', 'w') as file:
+    file.write(str(ideal_samples))
 
-with open('qc_app_benchmarks/results/ideal_samples.txt' + str(n_loops) + '.txt', 'w') as file:
-    file.write(orca_samples)
+with open('qc_app_benchmarks/results/orca_samples' + str(n_loops) + '.txt', 'w') as file:
+    file.write(str(orca_samples))
 
 
 ### Plots (optional)
