@@ -44,6 +44,15 @@ def max_cut_5_edges_new_input(return_graph=False, return_input_state=False):
         return "Graph with 5 nodes and 6 edges", {"input_state1": (1, 0, 1, 0, 1), "input_state2": (1, 0, 1, 0, 1)}
     return [-0.7304,  1.5838,  0.0172,  1.2462]
 
+def max_cut_5_edges_new_input_double_loop(return_graph=False, return_input_state=False):
+    if return_graph:
+        return "Graph with 5 nodes and 8 edges"
+    if return_input_state:
+        return {"input_state1": (1, 0, 1, 0, 1), "input_state2": (1, 0, 1, 0, 1)}
+    if return_graph and return_input_state:
+        return "Graph with 5 nodes and 8 edges", {"input_state1": (1, 0, 1, 0, 1), "input_state2": (1, 0, 1, 0, 1)}
+    return [-2.5717, -0.8906,  2.1858,  0.5305,  3.0327,  2.1154, -0.0739,  0.4309]
+
 def max_cut_6_edges_new_input(return_graph=False, return_input_state=False):
     if return_graph:
         return "Graph with 6 nodes and 13 edges"
@@ -52,6 +61,16 @@ def max_cut_6_edges_new_input(return_graph=False, return_input_state=False):
     if return_graph and return_input_state:
         return "Graph with 6 nodes and 13 edges", {"input_state1": (1, 0, 1, 0, 1, 0), "input_state2": (1, 0, 1, 0, 1, 0)}
     return [0.8479, -0.0095,  0.2154, -1.3921,  0.0614]
+
+def max_cut_6_edges_new_input_double_loop(return_graph=False, return_input_state=False):
+    if return_graph:
+        return "Graph with 6 nodes and 11 edges"
+    if return_input_state:
+        return {"input_state1": (1, 0, 1, 0, 1, 0), "input_state2": (1, 0, 1, 0, 1, 0)}
+    if return_graph and return_input_state:
+        return "Graph with 6 nodes and 11 edges", {"input_state1": (1, 0, 1, 0, 1, 0), "input_state2": (1, 0, 1, 0, 1, 0)}
+    return [-0.3523, -0.4798,  2.8224,  0.7053, -3.0474,  0.3007, -1.5556, -1.9770,
+         -0.9119, -0.4838]
 
 def max_cut_thetas_6_edges_double_loop(return_graph=False, return_input_state=False):
     if return_graph:
