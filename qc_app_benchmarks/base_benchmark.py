@@ -1,16 +1,33 @@
+import os
 from abc import ABC, abstractmethod
+import json
 from typing import Union, Sequence
+from dataclasses import dataclass, asdict
 
 from qiskit.primitives.containers.sampler_pub import SamplerPubLike
-from qiskit import QuantumCircuit
 
 from dimod import BinaryQuadraticModel
 
-from .sampler import BaseBenchmarkSampler
+from .sampler.base_sampler import BaseBenchmarkSampler
 
 
 class BenchmarkError(Exception):
     """Base class for errors raised by the benchmarking suite"""
+
+
+@dataclass
+class BenchmarkResult:
+    """Dataclass for storing the results of running a fidelity benchmark"""
+
+    name: str
+
+    def save_to_file(self, path: str = "./results"):
+        if not os.path.exists(path):
+            os.makedirs(path)
+        with open(
+            os.path.join(path, self.name + ".json"), "w", encoding="utf-8"
+        ) as file:
+            file.write(json.dumps(asdict(self), indent=4))
 
 
 class BaseQuantumBenchmark(ABC):
@@ -20,7 +37,7 @@ class BaseQuantumBenchmark(ABC):
         - ideal_sampler for generating ideal theoretical distributions
         - backend_sampler for sampling from a backend
 
-    an benchmark_input is:
+    a benchmark_input is:
         for quantum circuits:
             - an input to a Qiskit Sampler in PUB-like format
         for a bosonic sampler:
@@ -35,7 +52,7 @@ class BaseQuantumBenchmark(ABC):
         reference_state_sampler: BaseBenchmarkSampler,
         benchmark_input: Union[
             SamplerPubLike, tuple[Sequence[int], Sequence[float]], BinaryQuadraticModel
-        ],
+        ],  # maybe create a custom class for input
         name: str | None = None,
     ):
         self.benchmark_input = benchmark_input
@@ -45,7 +62,7 @@ class BaseQuantumBenchmark(ABC):
         if name is not None:
             self.name = name
         else:
-            if isinstance(benchmark_input, QuantumCircuit):
+            if hasattr(benchmark_input, "name"):
                 self.name = benchmark_input.name
         # self.result = BenchmarkResult(name=name)
 
@@ -80,7 +97,7 @@ class BaseQuantumBenchmark(ABC):
         self._reference_state_sampler = sampler_instance
 
     @abstractmethod
-    def run(self):
+    def run(self) -> BenchmarkResult:
         pass
 
     @abstractmethod

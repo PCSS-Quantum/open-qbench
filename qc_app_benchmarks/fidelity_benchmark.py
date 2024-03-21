@@ -6,18 +6,17 @@ import json
 from qiskit import QuantumCircuit, transpile
 from qiskit import qasm3
 
-from .base_benchmark import BaseQuantumBenchmark
+from .base_benchmark import BaseQuantumBenchmark, BenchmarkResult
 from .fidelities import normalized_fidelity
-from .sampler import BaseBenchmarkSampler
+from .sampler.base_sampler import BaseBenchmarkSampler
 
 
 @dataclass
-class FidelityBenchmarkResult:
+class FidelityBenchmarkResult(BenchmarkResult):
     """Dataclass for storing the results of running a fidelity benchmark"""
 
-    name: str
-    num_qubits: int
-    normalized_depth: int
+    benchmark_input: str
+    input_properties: dict
     dist_backend: dict
     dist_ideal: dict
     average_fidelity: float
@@ -50,11 +49,11 @@ class FidelityBenchmark(BaseQuantumBenchmark):
 
         fidelity = self.calculate_accuracy(dist_ideal, dist_backend)
 
+        input_properties = {"normalized_depth": None, "num_q_vars": None}
         return FidelityBenchmarkResult(
             self.name,
-            self.benchmark_input,
-            # self.normalized_depth(),
-            0,  # TO DO: fix normalized_depth
+            repr(self.benchmark_input),
+            input_properties,
             dist_backend,
             dist_ideal,
             fidelity,
@@ -64,22 +63,22 @@ class FidelityBenchmark(BaseQuantumBenchmark):
     def calculate_accuracy(self, state_ref: dict, dist_backend: dict):
         return normalized_fidelity(state_ref, dist_backend)
 
-    def normalized_depth(self) -> int:
-        """Returns depth of the circuit after transpiling to the normalized basis gate set.
-        By default: {"rx", "ry", "rz", "cx"}
+    # def normalized_depth(self) -> int:
+    #     """Returns depth of the circuit after transpiling to the normalized basis gate set.
+    #     By default: {"rx", "ry", "rz", "cx"}
 
-        Returns:
-            int: circuit depth
-        """
-        if isinstance(self.benchmark_input, QuantumCircuit):
-            trans_circuit = transpile(
-                self.benchmark_input, basis_gates=list(self.basis_gates)
-            )
-            if "measure" in trans_circuit.count_ops().keys():
-                return trans_circuit.depth() - 1
-            return trans_circuit.depth()
-        else:
-            raise NotImplementedError
+    #     Returns:
+    #         int: circuit depth
+    #     """
+    #     if isinstance(self.backend_sampler, CircuitSampler):
+    #         trans_circuit = transpile(
+    #             self.benchmark_input, basis_gates=list(self.basis_gates)
+    #         )
+    #         if "measure" in trans_circuit.count_ops().keys():
+    #             return trans_circuit.depth() - 1
+    #         return trans_circuit.depth()
+    #     else:
+    #         raise NotImplementedError
 
     def measure_creation_time(self):
         pass
@@ -166,24 +165,25 @@ class BenchmarkSuite(list[FidelityBenchmark]):
                 basis_gates=list(FidelityBenchmark.basis_gates),
                 optimization_level=1,
             )
-            if ben.params is not None:
-                if isinstance(qc, QuantumCircuit):
-                    bounded_qc = qc.assign_parameters(ben.params)
+        circuits = qc if isinstance(qc, list) else [qc]
+        if ben.params is not None:
+            for circ in circuits:
+                bounded_qc = circ.assign_parameters(ben.params)
 
-                    if ver == 2:
-                        bounded_qc.qasm(
-                            filename=os.path.join(directory, ben.name + ".qasm")
-                        )
-                    elif ver == 3:
-                        with open(
-                            os.path.join(directory, ben.name + ".qasm3"),
-                            "w",
-                            encoding="UTF-8",
-                        ) as f:
-                            qasm3.dump(bounded_qc, f)
-                elif isinstance(qc, list):
-                    for circ in qc:
-                        bounded_circ = circ.assign_parameters(ben.params)
-                        bounded_circ.qasm(
-                            filename=os.path.join(directory, ben.name + ".qasm")
-                        )
+                if ver == 2:
+                    bounded_qc.qasm(
+                        filename=os.path.join(directory, ben.name + ".qasm")
+                    )
+                elif ver == 3:
+                    with open(
+                        os.path.join(directory, ben.name + ".qasm3"),
+                        "w",
+                        encoding="UTF-8",
+                    ) as f:
+                        qasm3.dump(bounded_qc, f)
+            # elif isinstance(qc, list):
+            #     for circ in qc:
+            #         bounded_circ = circ.assign_parameters(ben.params)
+            #         bounded_circ.qasm(
+            #             filename=os.path.join(directory, ben.name + ".qasm")
+            #         )
