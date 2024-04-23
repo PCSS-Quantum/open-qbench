@@ -1,6 +1,6 @@
 from ptseries.tbi.tbi_abstract import TBI
 
-from .base_sampler import BaseBenchmarkSampler, SamplerResult
+from qc_app_benchmarks.sampler.base_sampler import BaseBenchmarkSampler, SamplerResult
 
 
 class BosonicSampler(BaseBenchmarkSampler):
@@ -8,17 +8,18 @@ class BosonicSampler(BaseBenchmarkSampler):
         super().__init__(default_samples=default_samples)
         self.sampler = sampler
 
+
     def run(self, sampler_input, num_samples=None) -> SamplerResult:
         input_state = sampler_input[0]
         theta_list = sampler_input[1]
         n_samples = num_samples or self.default_samples
-        return self.sampler.sample(
+        result = self.sampler.sample(
             input_state,
             theta_list,
             n_samples=n_samples,
-            output_format="dict",
-            n_tiling=1,
+            output_format="dict"
         )
+        return {k: (v / n_samples) for (k, v) in result.items()}
 
 
 if __name__ == "__main__":

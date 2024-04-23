@@ -39,13 +39,17 @@ class FidelityBenchmark(BaseQuantumBenchmark):
     basis_gates = {"rx", "ry", "rz", "cx"}
 
     def run(self) -> FidelityBenchmarkResult:
-        result = self.reference_state_sampler.run(self.benchmark_input)
-        dist_ideal = result.binary_probabilities()
+        dist_ideal = self.reference_state_sampler.run(self.benchmark_input)
+        # result = self.reference_state_sampler.run(self.benchmark_input)
+        # dist_ideal = result.binary_probabilities()
+
 
         start = time.time()
         result = self.backend_sampler.run(self.benchmark_input)
         execution_time = time.time() - start
-        dist_backend = result.binary_probabilities()
+        # dist_backend = result.binary_probabilities
+        dist_backend = result
+
 
         fidelity = self.calculate_accuracy(dist_ideal, dist_backend)
 

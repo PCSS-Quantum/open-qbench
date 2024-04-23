@@ -4,7 +4,7 @@ import json
 from typing import Union, Sequence
 from dataclasses import dataclass, asdict
 
-from qiskit.primitives.containers.sampler_pub import SamplerPubLike
+# from qiskit.primitives.containers.sampler_pub import SamplerPubLike
 
 from dimod import BinaryQuadraticModel
 
@@ -50,9 +50,7 @@ class BaseQuantumBenchmark(ABC):
         self,
         backend_sampler: BaseBenchmarkSampler,
         reference_state_sampler: BaseBenchmarkSampler,
-        benchmark_input: Union[
-            SamplerPubLike, tuple[Sequence[int], Sequence[float]], BinaryQuadraticModel
-        ],  # maybe create a custom class for input
+        benchmark_input,  # maybe create a custom class for input
         name: str | None = None,
     ):
         self.benchmark_input = benchmark_input

@@ -1,60 +1,36 @@
-# class BosonicSampler(BaseBenchmarkSampler):
-#     def __init__(self, sampler: TBI, default_samples: int = 100):
-#         super().__init__(default_samples=default_samples)
-#         self.sampler = sampler
-#
-#     def run(self, sampler_input, num_samples=None) -> SamplerResult:
-#         input_state = sampler_input[0]
-#         theta_list = sampler_input[1]
-#         n_samples = num_samples or self.default_samples
-#         return self.sampler.sample(
-#             input_state,
-#             theta_list,
-#             n_samples=n_samples,
-#             output_format="dict",
-#             n_tiling=1,
-#         )
-
-
 from ptseries.tbi import create_tbi
-from qc_app_benchmarks.apps.max_cut_orca import max_cut_thetas_6_edges, max_cut_6_edges_new_input
+from qc_app_benchmarks.apps.max_cut_orca import max_cut_6_edges_new_input, max_cut_6_edges_new_input_double_loop
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import numpy as np
+from qc_app_benchmarks.fidelities import normalized_fidelity, classical_fidelity, normalized_fidelity_orca
+from qc_app_benchmarks.sampler.bosonic_sampler import BosonicSampler
+from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite, FidelityBenchmark
 
-def merge_dicts(dicts):
-    ret = defaultdict(int)
-    for d in dicts:
-        for k, v in d.items():
-            ret[k] += v
-    return dict(ret)
+# Single loop experiment
 
+#number_of_samples
+n_samples = 1000
+# #number_of_loops
+n_loops = 1
 
 ### Define samplers
 
 #ideal sampler
-#TODO - replace it with a newer version
-
-# ideal_sampler = BosonicSampler(ideal_tbi)
-# ideal sampler definition
 ideal_tbi = create_tbi(
     n_loops = 1
 )
+ideal_sampler = BosonicSampler(ideal_tbi, default_samples=n_samples)
 
 #ORCA sampler
-#TODO - replace it with a newer version
-
 # orca_tbi = create_tbi(
 #     tbi_type="PT-1",
 #     n_loops = 1,
 #     ip_address="169.254.109.10"
 # )
-
 # orca_sampler = BosonicSampler(orca_tbi, default_samples=10)
 
-
-#simulator sampler
-# TODO - just a mock-up
+#simulator sampler (for testing)
 orca_tbi = create_tbi(
     n_loops = 1,
     bs_loss=0.01,
@@ -62,90 +38,145 @@ orca_tbi = create_tbi(
     input_loss=0.01,
     detector_efficiency=0.99
 )
+orca_sampler = BosonicSampler(orca_tbi, default_samples=n_samples)
 
-
-### Experiments
-
-#number_of_samples
-n_samples = 200
-#number_of_loops
-n_loops = 1
-
-
+#input_state and thetas
 input_state = max_cut_6_edges_new_input(return_graph=False, return_input_state=True)['input_state1']
 thetas = max_cut_6_edges_new_input(return_graph=False, return_input_state=False)
 
 print(input_state)
 print(thetas)
 
+# Run the fidelity benchmark
 
-ideal_samples = ideal_tbi.sample(
-        input_state=input_state,
-        theta_list=thetas,
-        n_samples=n_samples)
+fb = FidelityBenchmark(orca_sampler, ideal_sampler, [input_state, thetas], "orca_test_n_loops_1")
+fb.calculate_accuracy = normalized_fidelity_orca
 
-ideal_samples_sorted = dict(sorted(ideal_samples.items(), key=lambda state: state[0]))
-ideal_labels = list(ideal_samples_sorted.keys())
-ideal_labels = [str(i) for i in ideal_labels]
-ideal_values = list(ideal_samples_sorted.values())
+res = fb.run()
+print(f"{res=}")
 
 
-orca_samples = orca_tbi.sample(
-        input_state=input_state,
-        theta_list=thetas,
-        n_samples=n_samples)
+# Double loop experiment
 
-orca_samples_sorted = dict(sorted(orca_samples.items(), key=lambda state: state[0]))
-orca_labels = list(orca_samples_sorted.keys())
-orca_labels = [str(i) for i in orca_labels]
-orca_values = list(orca_samples_sorted.values())
+#number_of_samples
+n_samples = 1000
+# #number_of_loops
+n_loops = 2
 
-print(ideal_samples)
-print(orca_samples)
+### Define samplers
 
-with open('qc_app_benchmarks/results/ideal_samples' + str(n_loops) + '.txt', 'w') as file:
-    file.write(str(ideal_samples))
+#ideal sampler
+ideal_tbi = create_tbi(
+    n_loops = 2
+)
+ideal_sampler = BosonicSampler(ideal_tbi, default_samples=n_samples)
 
-with open('qc_app_benchmarks/results/orca_samples' + str(n_loops) + '.txt', 'w') as file:
-    file.write(str(orca_samples))
+#ORCA sampler
+# orca_tbi = create_tbi(
+#     tbi_type="PT-1",
+#     n_loops = 2,
+#     ip_address="169.254.109.10"
+# )
+# orca_sampler = BosonicSampler(orca_tbi, default_samples=10)
 
+#simulator sampler (for testing)
+orca_tbi = create_tbi(
+    n_loops = 2 # double-loop doesn't work with noise parameters
+)
+orca_sampler = BosonicSampler(orca_tbi, default_samples=n_samples)
 
-### Plots (optional)
-list_of_dicts = [ideal_samples, orca_samples]
-merged_dicts = merge_dicts(list_of_dicts)
+#input_state and thetas
+input_state = max_cut_6_edges_new_input_double_loop(return_graph=False, return_input_state=True)['input_state1']
+thetas = max_cut_6_edges_new_input_double_loop(return_graph=False, return_input_state=False)
 
-master_dict = {}
-for key in merged_dicts:
-    samples = []
-    for d in list_of_dicts:
-        if key in d.keys():
-            sample = d[key]
-        else:
-            sample = 0
-        samples.append(sample)
+print(input_state)
+print(thetas)
 
-    master_dict[key] = [samples]
+# Run the fidelity benchmark
 
-samples_sorted = dict(sorted(master_dict.items(), key=lambda state: state[0]))
-labels = list(samples_sorted.keys())
-labels = [str(i) for i in labels]
-values = np.array(list(samples_sorted.values()))[:, 0]
+fb = FidelityBenchmark(orca_sampler, ideal_sampler, [input_state, thetas], "orca_test_n_loops_2")
+fb.calculate_accuracy = normalized_fidelity_orca
 
-fig, axs = plt.subplots(2, 2)
-fig.set_size_inches(8, 8)
+res = fb.run()
+print(f"{res=}")
 
-axs[0, 0].bar(labels, values[:, 0], tick_label=labels, alpha = 1)
-plt.setp(axs[0, 0].get_xticklabels(), rotation=45, ha='right')
+############
+# Some additional code, generating plots
 
-axs[0, 1].bar(labels, values[:, 1], tick_label=labels, alpha = 1)
-plt.setp(axs[0, 1].get_xticklabels(), rotation=45, ha='right')
+# def merge_dicts(dicts):
+#     ret = defaultdict(int)
+#     for d in dicts:
+#         for k, v in d.items():
+#             ret[k] += v
+#     return dict(ret)
 
-axs[1, 0].bar(labels, values[:, 0] - values[:, 1], tick_label=labels, alpha = 1)
-plt.setp(axs[1, 0].get_xticklabels(), rotation=45, ha='right')
-
-axs[1, 1].bar(labels, values[:, 0], tick_label=labels, alpha = 0.5)
-axs[1, 1].bar(labels, values[:, 1], tick_label=labels, alpha = 0.5)
-plt.setp(axs[1, 1].get_xticklabels(), rotation=45, ha='right')
-
-plt.tight_layout()
-plt.savefig("qc_app_benchmarks/results/orca_benchmark_plots.pdf")
+# ideal_samples = ideal_tbi.sample(
+#         input_state=input_state,
+#         theta_list=thetas,
+#         n_samples=n_samples)
+#
+# ideal_samples_sorted = dict(sorted(ideal_samples.items(), key=lambda state: state[0]))
+# ideal_labels = list(ideal_samples_sorted.keys())
+# ideal_labels = [str(i) for i in ideal_labels]
+# ideal_values = list(ideal_samples_sorted.values())
+#
+#
+# orca_samples = orca_tbi.sample(
+#         input_state=input_state,
+#         theta_list=thetas,
+#         n_samples=n_samples)
+#
+# orca_samples_sorted = dict(sorted(orca_samples.items(), key=lambda state: state[0]))
+# orca_labels = list(orca_samples_sorted.keys())
+# orca_labels = [str(i) for i in orca_labels]
+# orca_values = list(orca_samples_sorted.values())
+#
+# print(ideal_samples)
+# print(orca_samples)
+#
+# with open('qc_app_benchmarks/results/ideal_samples' + str(n_loops) + '.txt', 'w') as file:
+#     file.write(str(ideal_samples))
+#
+# with open('qc_app_benchmarks/results/orca_samples' + str(n_loops) + '.txt', 'w') as file:
+#     file.write(str(orca_samples))
+#
+#
+# ### Plots (optional)
+# list_of_dicts = [ideal_samples, orca_samples]
+# merged_dicts = merge_dicts(list_of_dicts)
+#
+# master_dict = {}
+# for key in merged_dicts:
+#     samples = []
+#     for d in list_of_dicts:
+#         if key in d.keys():
+#             sample = d[key]
+#         else:
+#             sample = 0
+#         samples.append(sample)
+#
+#     master_dict[key] = [samples]
+#
+# samples_sorted = dict(sorted(master_dict.items(), key=lambda state: state[0]))
+# labels = list(samples_sorted.keys())
+# labels = [str(i) for i in labels]
+# values = np.array(list(samples_sorted.values()))[:, 0]
+#
+# fig, axs = plt.subplots(2, 2)
+# fig.set_size_inches(8, 8)
+#
+# axs[0, 0].bar(labels, values[:, 0], tick_label=labels, alpha = 1)
+# plt.setp(axs[0, 0].get_xticklabels(), rotation=45, ha='right')
+#
+# axs[0, 1].bar(labels, values[:, 1], tick_label=labels, alpha = 1)
+# plt.setp(axs[0, 1].get_xticklabels(), rotation=45, ha='right')
+#
+# axs[1, 0].bar(labels, values[:, 0] - values[:, 1], tick_label=labels, alpha = 1)
+# plt.setp(axs[1, 0].get_xticklabels(), rotation=45, ha='right')
+#
+# axs[1, 1].bar(labels, values[:, 0], tick_label=labels, alpha = 0.5)
+# axs[1, 1].bar(labels, values[:, 1], tick_label=labels, alpha = 0.5)
+# plt.setp(axs[1, 1].get_xticklabels(), rotation=45, ha='right')
+#
+# plt.tight_layout()
+# plt.savefig("qc_app_benchmarks/results/orca_benchmark_plots.pdf")
