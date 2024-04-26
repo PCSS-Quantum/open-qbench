@@ -21,17 +21,17 @@ def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
     fidelity = max([raw_fidelity, 0])
     return fidelity
 
+def create_normalized_fidelity(input_state):
+    def normalized_fidelity_orca(dist_ideal: dict, dist_backend: dict) -> float:
+        """Normalized fidelity modified for Boson Sampling"""
+        backend_fidelity = classical_fidelity(dist_ideal, dist_backend)
+        uniform_fidelity = classical_fidelity(dist_ideal, _uniform_dist_orca(input_state))
 
-def normalized_fidelity_orca(dist_ideal: dict, dist_backend: dict) -> float:
-    """Normalized fidelity modified for Boson Sampling"""
-    backend_fidelity = classical_fidelity(dist_ideal, dist_backend)
-    input_state = (1, 0, 1, 0, 1, 0)
-    uniform_fidelity = classical_fidelity(dist_ideal, _uniform_dist_orca(input_state))
+        raw_fidelity = (backend_fidelity - uniform_fidelity) / (1 - uniform_fidelity)
 
-    raw_fidelity = (backend_fidelity - uniform_fidelity) / (1 - uniform_fidelity)
-
-    fidelity = max([raw_fidelity, 0])
-    return fidelity
+        fidelity = max([raw_fidelity, 0])
+        return fidelity
+    return normalized_fidelity_orca
 
 def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
     """Compute classical fidelity of two probability distributions
