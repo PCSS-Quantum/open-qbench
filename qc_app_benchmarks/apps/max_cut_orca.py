@@ -7,6 +7,24 @@ def max_cut_thetas_3_edges(return_graph=False, return_input_state=False):
         return "Graph with 3 nodes and 2 edges", {"input_state1": (1, 1, 1), "input_state2": (0, 1, 1)}
     return [-1.7229, -1.1057]
 
+def max_cut_thetas_4_edges_new_input(return_graph=False, return_input_state=False):
+    if return_graph:
+        return "Graph with 4 nodes and 6 edges"
+    if return_input_state:
+        return {"input_state1": (1, 0, 1, 0), "input_state2": (1, 0, 1, 0)}
+    if return_graph and return_input_state:
+        return "Graph with 4 nodes and 6 edges", {"input_state1": (1, 0, 1, 0), "input_state2": (1, 0, 1, 0)}
+    return [-1.7846,  0.7264,  0.3091]
+
+def max_cut_thetas_4_edges_new_input_double_loop(return_graph=False, return_input_state=False):
+    if return_graph:
+        return "Graph with 4 nodes and 4 edges"
+    if return_input_state:
+        return {"input_state1": (1, 0, 1, 0), "input_state2": (1, 0, 1, 0)}
+    if return_graph and return_input_state:
+        return "Graph with 4 nodes and 4 edges", {"input_state1": (1, 0, 1, 0), "input_state2": (1, 0, 1, 0)}
+    return [-1.4590, -1.5862,  1.2811,  0.0099, -2.1094,  0.4486]
+
 def max_cut_thetas_4_edges(return_graph=False, return_input_state=False):
     if return_graph:
         return "Graph with 4 nodes and 4 edges"
