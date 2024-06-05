@@ -4,17 +4,24 @@ from qiskit_aer.primitives import Sampler as AerSampler
 # from qiskit_aqt_provider.primitives import AQTSampler
 from qiskit_ibm_runtime.fake_provider.backends import FakeGeneva
 
-from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite
+from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite, FidelityBenchmark
 from qc_app_benchmarks.apps import grover, qaoa, vqe, qsvm, qft, toffoli
 from qc_app_benchmarks.utils import get_fake_backend_sampler
-from qc_app_benchmarks.fidelities import normalized_fidelity
-from qc_app_benchmarks.sampler import CircuitSampler
+from qc_app_benchmarks.fidelities import normalized_fidelity, classical_fidelity
+from qc_app_benchmarks.sampler.circuit_sampler import CircuitSampler
 
 ideal_sampler = CircuitSampler(AerSampler(run_options={"shots": None}))
+
 
 # backend = AQTProvider("token").get_backend("offline_simulator_noise")
 # aqt_sampler = AQTSampler(backend, options={"shots": 200})
 backend_sampler = CircuitSampler(get_fake_backend_sampler(FakeGeneva(), shots=1000))
+
+fb = FidelityBenchmark(backend_sampler, ideal_sampler, qaoa.jssp_7q_24d(), "test")
+fb.calculate_accuracy = classical_fidelity
+
+res = fb.run()
+print(f"{res=}")
 
 suite = BenchmarkSuite(
     backend_sampler=backend_sampler,
