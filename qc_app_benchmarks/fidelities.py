@@ -10,11 +10,9 @@ import math
 def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
     """Normalized fidelity of Lubinski et al."""
     backend_fidelity = classical_fidelity(dist_ideal, dist_backend)
-    num_qubits = len(list(dist_ideal.keys())[0])
-    uniform_fidelity = classical_fidelity(dist_ideal, _uniform_dist(num_qubits))
+    uniform_fidelity = fidelity_with_uniform(dist_ideal)
 
     raw_fidelity = (backend_fidelity - uniform_fidelity) / (1 - uniform_fidelity)
-
     fidelity = max([raw_fidelity, 0])
     return fidelity
 
@@ -23,11 +21,12 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
     """Compute classical fidelity of two probability distributions
 
     Args:
-        counts_a (dict): Distribution of experiment A
-        counts_b (dict): Distribution of experiment B
+        dist_a (dict): Distribution of experiment A
+        dist_b (dict): Distribution of experiment B
 
     Returns:
-        float: Classical fidelity
+        float: Classical fidelity given by:
+        F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
     """
     num_qubits = len(list(dist_a.keys())[0])
     bitstrings = ("".join(i) for i in itertools.product("01", repeat=num_qubits))
@@ -40,11 +39,22 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
     return fidelity
 
 
-def _uniform_dist(num_qubits) -> dict:
-    bitstrings = ("".join(i) for i in itertools.product("01", repeat=num_qubits))
-    prob = 1 / num_qubits**2
-    dist = {b: prob for b in bitstrings}
-    return dist
+def fidelity_with_uniform(dist: dict) -> float:
+    """Compute classical fidelity of a probability distribution with a same-sized uniform distribution
+
+    Args:
+        dist (dict): Probability distribution
+
+    Returns:
+        float: Classical fidelity given by:
+        F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
+    """
+    num_qubits = len(list(dist.keys())[0])
+    fidelity = 0
+    for prob in dist.values():
+        fidelity += math.sqrt(prob * 1 / 2**num_qubits)
+    fidelity = fidelity**2
+    return fidelity
 
 
 def counts_to_dist(counts: dict) -> dict:

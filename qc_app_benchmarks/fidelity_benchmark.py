@@ -2,6 +2,7 @@ from dataclasses import dataclass, asdict
 import time
 import os
 import json
+from typing import Sequence
 
 from qiskit import QuantumCircuit, transpile
 from qiskit import qasm3
@@ -9,6 +10,7 @@ from qiskit import qasm3
 from .base_benchmark import BaseQuantumBenchmark, BenchmarkResult
 from .fidelities import normalized_fidelity
 from .sampler.base_sampler import BaseBenchmarkSampler
+from .sampler import CircuitSampler
 
 
 @dataclass
@@ -50,8 +52,16 @@ class FidelityBenchmark(BaseQuantumBenchmark):
         fidelity = self.calculate_accuracy(dist_ideal, dist_backend)
 
         input_properties = {"normalized_depth": None, "num_q_vars": None}
+        if isinstance(self.backend_sampler, CircuitSampler):
+            input_properties["normalized_depth"] = self.normalized_depth()
+            if isinstance(self.benchmark_input, Sequence):
+                name = self.benchmark_input[0].name
+            else:
+                name = self.benchmark_input.name
+        else:
+            name = str(self.benchmark_input)
         return FidelityBenchmarkResult(
-            self.name,
+            name,
             repr(self.benchmark_input),
             input_properties,
             dist_backend,
@@ -63,22 +73,24 @@ class FidelityBenchmark(BaseQuantumBenchmark):
     def calculate_accuracy(self, state_ref: dict, dist_backend: dict):
         return normalized_fidelity(state_ref, dist_backend)
 
-    # def normalized_depth(self) -> int:
-    #     """Returns depth of the circuit after transpiling to the normalized basis gate set.
-    #     By default: {"rx", "ry", "rz", "cx"}
+    def normalized_depth(self) -> int:
+        """Returns depth of the circuit after transpiling to the normalized basis gate set.
+        By default: {"rx", "ry", "rz", "cx"}
 
-    #     Returns:
-    #         int: circuit depth
-    #     """
-    #     if isinstance(self.backend_sampler, CircuitSampler):
-    #         trans_circuit = transpile(
-    #             self.benchmark_input, basis_gates=list(self.basis_gates)
-    #         )
-    #         if "measure" in trans_circuit.count_ops().keys():
-    #             return trans_circuit.depth() - 1
-    #         return trans_circuit.depth()
-    #     else:
-    #         raise NotImplementedError
+        Returns:
+            int: circuit depth
+        """
+        if isinstance(self.backend_sampler, CircuitSampler):
+            if isinstance(self.benchmark_input, Sequence):
+                circuits = self.benchmark_input[0]
+            else:
+                circuits = self.benchmark_input
+            trans_circuits = transpile(circuits, basis_gates=list(self.basis_gates))
+            if "measure" in trans_circuits.count_ops().keys():
+                return trans_circuits.depth() - 1
+            return trans_circuits.depth()
+        else:
+            raise NotImplementedError
 
     def measure_creation_time(self):
         pass
@@ -105,7 +117,7 @@ class BenchmarkSuite(list[FidelityBenchmark]):
         return self._backend_sampler
 
     @backend_sampler.setter
-    def backend_sampler(self, sampler_instance: BaseBenchmarkSampler):
+    def backend_sampler(self, sampler_instance):
         if not isinstance(sampler_instance, BaseBenchmarkSampler):
             raise TypeError(
                 "backend_sampler must be an instance of qc_app_benchmarks.sampler.BaseBenchmarkSampler"
@@ -117,7 +129,7 @@ class BenchmarkSuite(list[FidelityBenchmark]):
         return self._ideal_sampler
 
     @ideal_sampler.setter
-    def ideal_sampler(self, sampler_instance: BaseBenchmarkSampler):
+    def ideal_sampler(self, sampler_instance):
         if not isinstance(sampler_instance, BaseBenchmarkSampler):
             raise TypeError(
                 "ideal_sampler must be an instance of qc_app_benchmarks.sampler.BaseBenchmarkSampler"

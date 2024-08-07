@@ -12,6 +12,8 @@ class CircuitSampler(BaseBenchmarkSampler):
         self.sampler = sampler
 
     def run(self, sampler_input, num_samples=None) -> SamplerResult:
+        if num_samples is None:
+            num_samples = self.default_samples
         if isinstance(sampler_input, QuantumCircuit):
             job = self.sampler.run(sampler_input, shots=num_samples)
         elif isinstance(sampler_input, Sequence) and len(sampler_input) == 2:
