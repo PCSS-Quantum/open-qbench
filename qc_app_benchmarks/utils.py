@@ -1,3 +1,5 @@
+import json
+
 from qiskit_ibm_runtime import Sampler as RuntimeSampler
 from qiskit_ibm_runtime import QiskitRuntimeService
 from qiskit_ibm_runtime import Options
@@ -5,6 +7,8 @@ from qiskit_ibm_runtime import Options
 from qiskit_aer.noise import NoiseModel
 from qiskit_aer.primitives import Sampler as AerSampler
 from qiskit_ibm_runtime.fake_provider.fake_backend import FakeBackend, FakeBackendV2
+
+from .fidelities import normalized_fidelity
 
 
 def get_fake_backend_sampler(
@@ -49,3 +53,17 @@ def get_ibm_backend_sampler(name: str, shots):
     ibm_sampler = RuntimeSampler(backend, options=options)
 
     return ibm_sampler
+
+
+def calculate_from_file(file: str) -> float:
+    """Recalculate the normalized fidelity from a JSON file with benchmark results
+
+    Args:
+        file (str): A path to a JSON file with benchmark results
+
+    Returns:
+        float: Normalized fidelity of the provided distributions
+    """
+    with open(file, "rb") as f:
+        result = json.load(f)
+    return normalized_fidelity(result["dist_ideal"], result["dist_backend"])
