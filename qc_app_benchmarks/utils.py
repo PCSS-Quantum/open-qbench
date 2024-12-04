@@ -1,11 +1,9 @@
 import json
 
-from qiskit_ibm_runtime import Sampler as RuntimeSampler
-from qiskit_ibm_runtime import QiskitRuntimeService
-from qiskit_ibm_runtime import Options
-
 from qiskit_aer.noise import NoiseModel
 from qiskit_aer.primitives import Sampler as AerSampler
+from qiskit_ibm_runtime import Options, QiskitRuntimeService
+from qiskit_ibm_runtime import Sampler as RuntimeSampler
 from qiskit_ibm_runtime.fake_provider.fake_backend import FakeBackend, FakeBackendV2
 
 from .fidelities import normalized_fidelity
@@ -49,7 +47,7 @@ def get_ibm_backend_sampler(name: str, shots):
     service = QiskitRuntimeService(channel="ibm_quantum")
     backend = service.backend(name)
     options = Options(optimization_level=3, resilience_level=0)
-    options.execution.shots = shots
+    options.execution.shots = shots  # type: ignore
     ibm_sampler = RuntimeSampler(backend, options=options)
 
     return ibm_sampler

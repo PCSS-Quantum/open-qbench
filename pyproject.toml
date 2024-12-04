@@ -15,7 +15,7 @@ dependencies = [
     "qiskit>=1.0",
     "qiskit-aer>=0.13",
     "qiskit-ibm-runtime",
-    # "qiskit-aqt-provider~=0.17", # doesn't yet support Qiskit 1.0 
+    # "qiskit-aqt-provider" 
 ]
 
 [project.optional-dependencies]
