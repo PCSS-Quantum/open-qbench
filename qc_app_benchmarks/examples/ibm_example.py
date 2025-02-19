@@ -1,4 +1,4 @@
-from qiskit_aer.primitives import Sampler as AerSampler
+from qiskit_aer.primitives import SamplerV2 as AerSampler
 
 # from qiskit_aqt_provider import AQTProvider
 # from qiskit_aqt_provider.primitives import AQTSampler
@@ -10,8 +10,8 @@ from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite, FidelityBenchma
 from qc_app_benchmarks.sampler.circuit_sampler import CircuitSampler
 from qc_app_benchmarks.utils import calculate_from_file, get_fake_backend_sampler
 
-calculate_from_file("aqt_results/benchmark_results/Grover_3q.json")
-ideal_sampler = CircuitSampler(AerSampler(run_options={"shots": None}))
+# calculate_from_file("aqt_results/benchmark_results/Grover_3q.json")
+ideal_sampler = CircuitSampler(AerSampler())
 
 
 # backend = AQTProvider("token").get_backend("offline_simulator_noise")

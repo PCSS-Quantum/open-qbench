@@ -1,16 +1,15 @@
-from dataclasses import dataclass, asdict
-import time
-import os
 import json
+import os
+import time
+from dataclasses import asdict, dataclass
 from typing import Sequence
 
-from qiskit import QuantumCircuit, transpile
-from qiskit import qasm3
+from qiskit import QuantumCircuit, qasm3, transpile
 
 from .base_benchmark import BaseQuantumBenchmark, BenchmarkResult
 from .fidelities import normalized_fidelity
-from .sampler.base_sampler import BaseBenchmarkSampler
 from .sampler import CircuitSampler
+from .sampler.base_sampler import BaseBenchmarkSampler
 
 
 @dataclass

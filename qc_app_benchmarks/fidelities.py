@@ -51,8 +51,9 @@ def fidelity_with_uniform(dist: dict) -> float:
     """
     num_qubits = len(list(dist.keys())[0])
     fidelity = 0
+    uniform_prob = 1 / 2**num_qubits
     for prob in dist.values():
-        fidelity += math.sqrt(prob * 1 / 2**num_qubits)
+        fidelity += math.sqrt(prob * uniform_prob)
     fidelity = fidelity**2
     return fidelity
 

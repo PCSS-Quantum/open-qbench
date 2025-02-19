@@ -4,20 +4,20 @@ from qiskit_aer.noise import NoiseModel
 from qiskit_aer.primitives import Sampler as AerSampler
 from qiskit_ibm_runtime import Options, QiskitRuntimeService
 from qiskit_ibm_runtime import Sampler as RuntimeSampler
-from qiskit_ibm_runtime.fake_provider.fake_backend import FakeBackend, FakeBackendV2
+from qiskit_ibm_runtime.fake_provider.fake_backend import FakeBackendV2
 
 from .fidelities import normalized_fidelity
 
 
 def get_fake_backend_sampler(
-    fake_backend: FakeBackend | FakeBackendV2,
+    fake_backend: FakeBackendV2,
     shots: int | None = None,
     seed: int | None = None,
 ) -> AerSampler:
     """Creates a sampler from qiskit_aer based on a noise model supplied by a Qiskit fake backend
 
     Args:
-        fake_backend (FakeBackend | FakeBackendV2): an object representing a Qiskit fake backend
+        fake_backend (FakeBackendV2): an object representing a Qiskit fake backend
         shots (int): number of shots for the sampler
         seed (Optional[int], optional): Random seed for the simulator and the transpiler.
         Defaults to None.
@@ -25,10 +25,7 @@ def get_fake_backend_sampler(
     Returns:
         AerSampler: _description_
     """
-    if isinstance(fake_backend, FakeBackendV2):
-        coupling_map = fake_backend.coupling_map
-    elif isinstance(fake_backend, FakeBackend):
-        coupling_map = fake_backend.configuration().coupling_map
+    coupling_map = fake_backend.coupling_map
     noise_model = NoiseModel.from_backend(fake_backend)
 
     backend_sampler = AerSampler(

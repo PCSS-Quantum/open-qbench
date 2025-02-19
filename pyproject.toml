@@ -1,31 +1,20 @@
 [project]
-name = "qc_app_benchmarks"
+name = "quantum-app-benchmarks"
 version = "0.1.0"
-authors = [
-    { name = "Konrad Wojciechowski", email = "kwojciechowski@man.poznan.pl" },
-]
-description = "Package for running benchmarks on quantum backends leveraging Qiskit"
+description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.8"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-]
-dependencies = [
-    "qiskit>=1.0",
-    "qiskit-aer>=0.13",
-    "qiskit-ibm-runtime",
-    # "qiskit-aqt-provider" 
-]
+requires-python = ">=3.12"
+dependencies = ["qiskit-aer~=0.16", "qiskit~=1.0"]
 
 [project.optional-dependencies]
-VQE = ["qiskit-nature~=0.7", "pyscf"]
-QSVM = ["scikit-image==0.21"]
+VQE = ["qiskit-nature[pyscf]>=0.7.2"]
+QSVM = ["scikit-image>=0.25.1"]
+IBM = ["qiskit-ibm-runtime>=0.36.1"]
 
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+[dependency-groups]
+dev = ["pytest>=8.3.4"]
 
+# Added manually to include .csv file for MNIST
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["qc_app_benchmarks*"]
