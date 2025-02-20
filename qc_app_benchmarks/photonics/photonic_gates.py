@@ -1,3 +1,5 @@
+"""Interfaces and classes used for working with PhotonicCircuit"""
+
 import itertools
 from abc import ABC, abstractmethod
 from typing import Sequence
@@ -6,12 +8,21 @@ from qiskit.circuit import Bit, ParameterExpression, Register
 
 
 class Qumode(Bit):
-    """Implement a quantum mode"""
+    """A quantum mode -- a fundamental unit of information for CV quantum computers.
+
+    Inheriting from :class:'Bit' might be confusing since qumodes are continous, but
+    it doesn't enforce constraints on the underlying data and provides some
+    usueful methods for working with :class:'Register'.
+    """
 
     pass
 
 
 class PhotonicRegister(Register):
+    """A register holding qumodes.
+    Analogous to :class:'QuantumRegister'.
+    """
+
     # Counter for the number of instances in this class.
     instances_counter = itertools.count()
     prefix = "qm"  # Prefix to use for auto naming.
@@ -19,6 +30,14 @@ class PhotonicRegister(Register):
 
 
 class PhotonicOperation(ABC):
+    """
+    This interface mirrors qiskit.circuit.operation.Operation, but instead of num_qubits,
+    we have num_qumodes and instead of num_clbits, we have num_clints, which are used
+    to count the photons.
+
+    This interface is used directly by :class:'PhotonicOperation'.
+    """
+
     __slots__ = ()
 
     @property
@@ -41,6 +60,15 @@ class PhotonicOperation(ABC):
 
 
 class PhotonicInstruction(PhotonicOperation):
+    """A generic photonic instruction based on :class:'qiskit.circuit.instruction.Instruction'.
+    It can describe both unitary operations (gates) and non-unitary operations (measurements).
+
+    They can be tied to hardware implementation, hence the 'duration' and 'unit' attributes.
+
+    Same as the original :class:'Instruction', these instructions do not have any context
+    about where they are in a circuit. This is handled by the circuit itself.
+    """
+
     def __init__(
         self,
         name: str,
@@ -83,9 +111,22 @@ class PhotonicInstruction(PhotonicOperation):
     def num_clints(self, num_clints):
         self._num_clints = num_clints
 
+    # TODO: implement methods from Instruction, that also apply to this class
+
 
 class PhotonicCircuitInstruction:
-    """Used to tie a PhotonicGate to qumodes in a PhotonicRegister"""
+    """Used to tie a :class:'PhotonicGate' to qumodes in a PhotonicRegister.
+    #TODO: generalize to PhotonicInstruction to also include measurements and clints.
+
+    Qiskit currently uses Rust to implement a :class:'CircuitInstruction'.
+    When instantiated in Python, these objects look like this:
+    .. code-block:: python
+        `CircuitInstruction(operation=Instruction(name='h', num_qubits=1,
+        num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 0),), clbits=())`
+
+    This class is a simplified analagoue of the corresponding Rust struct found in `qiskit._accelerate'.
+
+    """
 
     def __init__(
         self,
@@ -98,7 +139,9 @@ class PhotonicCircuitInstruction:
 
 
 class PhotonicGate(PhotonicInstruction):
-    """A photonic gate acting on qumodes"""
+    """A unitary gate acting on qumodes.
+    Based on :class:'qiskit.circuit.gate.Gate'.
+    """
 
     def __init__(
         self,
@@ -134,7 +177,7 @@ class PhotonicGate(PhotonicInstruction):
     def validate_operands(self, qumodes):
         for qumode in qumodes:
             if not isinstance(qumode, Qumode):
-                raise TypeError(f"A photonic gate can only be applied to Qumodes")
+                raise TypeError("A photonic gate can only be applied to Qumodes")
 
 
 class BS(PhotonicGate):

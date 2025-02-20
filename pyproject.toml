@@ -10,11 +10,14 @@ dependencies = ["qiskit-aer~=0.16", "qiskit~=1.0"]
 VQE = ["qiskit-nature[pyscf]>=0.7.2"]
 QSVM = ["scikit-image>=0.25.1"]
 IBM = ["qiskit-ibm-runtime>=0.36.1"]
+AQT = ["qiskit-aqt-provider>=1.10.0"]
 
 [dependency-groups]
 dev = ["pytest>=8.3.4"]
 
-# Added manually to include .csv file for MNIST
+[tool.pytest.ini_options]
+pythonpath = "."
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["qc_app_benchmarks*"]

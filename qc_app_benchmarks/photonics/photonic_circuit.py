@@ -22,6 +22,14 @@ QumodeSpecifier = Union[
 
 
 class PhotonicCircuit(QuantumCircuit):
+    """This class was created to provide a Qiskit-like interface for creating photonic
+    quantum circuits.
+
+    Thanks to the PhotonicCircuit type, the :class:'BenchmarkSampler' can recognize
+    the type of the circuit and call an appropriate sampler internally, eliminating the
+    need to interact with separate samplers for gate-based and photonic quantum computers.
+    """
+
     def __init__(self, photonic_register: PhotonicRegister):
         super().__init__()
         self.pregs: list[PhotonicRegister] = []
@@ -45,8 +53,8 @@ class PhotonicCircuit(QuantumCircuit):
         """Append to circuit directly, without any validation
 
         Args:
-            instruction (Operation): _description_
-            qargs (Sequence[QumodeSpecifier] | None, optional): _description_. Defaults to None.
+            instruction (PhotonicOperation): The instruction to be appended to the circuit
+            qargs (Sequence[Qumode]): Concrete qumodes of the circuit that the operation uses
 
         Raises:
             CircuitError: If the instruction is not a PhotonicGate
@@ -67,7 +75,11 @@ class PhotonicCircuit(QuantumCircuit):
             raise CircuitError("duplicate qubit arguments")
 
     def bs(
-        self, theta, qumode1, qumode2, label: str | None = None
+        self,
+        theta: float,  # float for now, later extend to Parameter
+        qumode1: int | Qumode,
+        qumode2: int | Qumode,
+        label: str | None = None,
     ) -> PhotonicOperation:
         """Apply BS gate."""
         # this whole thing should go into the safe append()
