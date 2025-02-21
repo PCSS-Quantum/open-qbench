@@ -1,7 +1,7 @@
 [project]
 name = "quantum-app-benchmarks"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.2.0"
+description = "Package for developing and executing quantum computing benchmarks"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["qiskit-aer~=0.16", "qiskit~=1.0"]
@@ -11,6 +11,7 @@ VQE = ["qiskit-nature[pyscf]>=0.7.2"]
 QSVM = ["scikit-image>=0.25.1"]
 IBM = ["qiskit-ibm-runtime>=0.36.1"]
 AQT = ["qiskit-aqt-provider>=1.10.0"]
+ORCA = ["ptseries @ git+ssh://git@sdk.orcacomputing.com/orca/ptseries.git"]
 
 [dependency-groups]
 dev = ["pytest>=8.3.4"]
