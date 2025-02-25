@@ -9,7 +9,10 @@ from ..photonics import PhotonicCircuit
 class BosonicSampler(BaseSamplerV2):
     @abstractmethod
     def run(
-        self, pubs: Iterable[Tuple[PhotonicCircuit, float]], *, shots: int | None = None
+        self,
+        pubs: Iterable[Tuple[PhotonicCircuit, Iterable[float]]],
+        *,
+        shots: int | None = None,
     ) -> BasePrimitiveJob:
         """This class differs from BaseSamplerV2 only in types of pubs and the returned job object.
 
