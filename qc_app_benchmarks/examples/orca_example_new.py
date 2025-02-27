@@ -1,24 +1,21 @@
 """Running this example requires adding your SSH key to https://sdk.orcacomputing.com/ and installing with pip install .[ORCA]"""
 
-from ast import arg
+import select
 from typing import override
 from ptseries.tbi import create_tbi
-from ptseries.tbi import PT1
 from ptseries.tbi.pt1 import PT1AsynchronousResults
 from pprint import pprint
 import numpy as np
 
-import uuid
-from concurrent.futures import ThreadPoolExecutor
+from collections.abc import Iterable
 
 from qiskit.providers import JobError, JobStatus
-from qiskit.providers.jobstatus import JOB_FINAL_STATES
 
-from qiskit.primitives.base.base_primitive_job import BasePrimitiveJob, ResultT
+from qiskit.primitives.base.base_primitive_job import ResultT
 from qiskit.primitives.primitive_job import PrimitiveJob
 from qiskit.primitives.containers.primitive_result import PrimitiveResult
 
-from qc_app_benchmarks.photonics import PhotonicCircuitInstruction, PhotonicGate, PhotonicInstruction, BS, PhotonicCircuit, PhotonicRegister
+from qc_app_benchmarks.photonics import PhotonicCircuitInstruction, PhotonicInstruction, BS, PhotonicCircuit, PhotonicRegister
 from qc_app_benchmarks.sampler import BosonicSampler
 
 
@@ -26,71 +23,99 @@ class OrcaJob(PrimitiveJob):
 
     def __init__(self, function, *args, **kwargs):
         super().__init__(function, *args, **kwargs)
-        self.pt_async_res=None
+        self.orca_results = None
         self.cancelled = False
 
     @override
     def _submit(self):
-        if self._future is not None:
-            raise JobError("Primitive job has been submitted already.")
+        if self.orca_results is not None:
+            raise JobError("Orca job has been submitted already.")
+        self.orca_results = self._function(*self._args, **self._kwargs)
 
-        self.pt_async_res = self._function(*self._args, **self._kwargs)
-        
     @override
     def result(self) -> ResultT:
         self._check_submitted()
-        return self.pt_async_res.get()
-    
+        return self.orca_results.get()
+
     @override
     def status(self) -> JobStatus:
         self._check_submitted()
         if self.cancelled:
             return JobStatus.CANCELLED
-        if self.pt_async_res.is_done:
+        if self.orca_results.done():
             return JobStatus.DONE
         else:
             return JobStatus.RUNNING
-        
+
     @override
     def _check_submitted(self):
-        if self.pt_async_res is None:
+        if self.orca_results is None:
             raise JobError("Orca Job has not been submitted yet.")
-        
+
     @override
     def cancel(self):
         self._check_submitted()
         self.cancelled = True
-        return self.pt_async_res.cancel()
+        self.orca_results.cancel()
+
+
+class OrcaResult(PrimitiveResult):
+    def __init__(self, pub_results: list[PT1AsynchronousResults], metadata=None):
+        super().__init__(pub_results, metadata)
+
+    def cancel(self):
+        for pt1_async_result in self._pub_results:
+            pt1_async_result.cancel()
+
+    def get(self) -> PrimitiveResult:
+        return PrimitiveResult([pt1_async_result.get() for pt1_async_result in self._pub_results])
+    
+    def done(self)->bool:
+        return all([pt1_async_result.is_done for pt1_async_result in self._pub_results])
 
 
 class OrcaSampler(BosonicSampler):
     """This class is separate from the library as the ptseries SDK
     is not public and we want to avoid adding it as dependency."""
 
-    def run(self, pubs, *, shots=None, **options):
-        for circuit, thetas in pubs:
-            circuit_length = circuit.pregs[0].size
-            input_state = circuit.input_state  # TODO Replace with proper input state extraction
-            loop_lengths = self.validate_and_extract_lengths(thetas, circuit, circuit_length)
-            if "tbi_type" in options and "url" in options:
-                tbi_params = {"tbi_type": options["tbi_type"],
-                              "url": options["url"]}
-            else:
-                tbi_params = {}
-            tbi = create_tbi(loop_lengths=loop_lengths, **tbi_params)
-            if isinstance(tbi, PT1):
-                job = OrcaJob(tbi.sample_async, input_state, thetas, shots)
-                job._submit()
-            else:
-                job = PrimitiveJob(tbi.sample, input_state, thetas, shots)
-                job._submit()
-            pprint(job.result())
+    def run(self, pubs: Iterable[tuple[PhotonicCircuit, Iterable[float]]], *, shots: int | None = None, options: dict = {}):
+        if shots is None:
+            shots = self._options.default_shots
+        validated_pubs = [self._validate_nd_extract_lengths(pub) for pub in pubs]
+        if "tbi_type" in options and "url" in options and options["tbi_type"] == "PT-1":
+            job = OrcaJob(self._run_orca, validated_pubs, options, shots)
+        else:
+            job = PrimitiveJob(self._run_sim, validated_pubs, options, shots)
+        job._submit()
+        return job
 
-    def validate_and_extract_lengths(self, thetas, circuit, circuit_length):
+    def _run_orca(self, validated_pubs, options, shots):
+        results = []
+        for circuit, thetas, loop_lengths in validated_pubs:
+            input_state = circuit.input_state  # TODO Replace with proper input state extraction
+            tbi_params = {"tbi_type": options["tbi_type"],
+                          "url": options["url"]}
+            tbi = create_tbi(loop_lengths=loop_lengths, **tbi_params)
+            pt1_async_results = tbi.sample_async(input_state, thetas, shots)
+            results.append(pt1_async_results)
+        return OrcaResult(results)
+
+    def _run_sim(self, validated_pubs, options, shots):
+        results = []
+        for circuit, thetas, loop_lengths in validated_pubs:
+            input_state = circuit.input_state  # TODO Replace with proper input state extraction
+            tbi = create_tbi(loop_lengths=loop_lengths)
+            sim_results = tbi.sample(input_state, thetas, shots)
+            results.append(sim_results)
+        return PrimitiveResult(results)
+
+    def _validate_nd_extract_lengths(self, pub: tuple[PhotonicCircuit, Iterable[float]]):
+        circuit, thetas = pub
+        circuit_length = circuit.pregs[0].size
         instructions: list[PhotonicCircuitInstruction] = circuit._data
         t = 0
         loop_length = None
-        loop_lengths = []
+        loop_lengths: list[int] = []
         if len(thetas) != len(instructions):
             raise Exception("Number of parameters should be the same as number of gates")
         for instruction, theta in zip(instructions, thetas):
@@ -118,20 +143,34 @@ class OrcaSampler(BosonicSampler):
             raise Exception("Not enough gates")
         else:
             loop_lengths.append(loop_length)
-        return loop_lengths
+        return (circuit, thetas, loop_lengths)
 
 
 if __name__ == "__main__":
-    # Valid Circuit
-    ph_circuit = PhotonicCircuit(PhotonicRegister(4))
-    ph_circuit.input_state = [1, 1, 1, 1]
-    ph_circuit.bs(np.pi/4, 0, 1)
-    ph_circuit.bs(np.pi/4, 1, 2)
-    ph_circuit.bs(np.pi/4, 2, 3)
-    ph_circuit.bs(np.pi/4, 0, 2)
-    ph_circuit.bs(np.pi/4, 1, 3)
-    ph_circuit.bs(np.pi/4, 0, 3)
-    orca_sampler = OrcaSampler().run([(ph_circuit, [np.pi/4]*6)], shots=1000)
+    # Valid Circuits
+    ph_circuit1 = PhotonicCircuit(PhotonicRegister(4))
+    ph_circuit1.input_state = [1, 1, 1, 1]
+    ph_circuit1.bs(np.pi/4, 0, 1)
+    ph_circuit1.bs(np.pi/4, 1, 2)
+    ph_circuit1.bs(np.pi/4, 2, 3)
+    ph_circuit1.bs(np.pi/4, 0, 2)
+    ph_circuit1.bs(np.pi/4, 1, 3)
+    ph_circuit1.bs(np.pi/4, 0, 3)
+
+    ph_circuit2 = PhotonicCircuit(PhotonicRegister(4))
+    ph_circuit2.input_state = [1, 1, 1, 0]
+    ph_circuit2.bs(np.pi/4, 0, 1)
+    ph_circuit2.bs(np.pi/4, 1, 2)
+    ph_circuit2.bs(np.pi/4, 2, 3)
+    ph_circuit2.bs(np.pi/4, 0, 1)
+    ph_circuit2.bs(np.pi/4, 1, 2)
+    ph_circuit2.bs(np.pi/4, 2, 3)
+
+    job = orca_sampler = OrcaSampler().run([(ph_circuit1, [np.pi/4]*6), (ph_circuit2, [np.pi/4]*6)], shots=1000)
+
+    pprint(job.result()[0])
+
+    pprint(job.result()[1])
 
     # Invalid Circuit
     ph_circuit = PhotonicCircuit(PhotonicRegister(4))
@@ -141,7 +180,7 @@ if __name__ == "__main__":
     ph_circuit.bs(np.pi/4, 0, 2)
     ph_circuit.bs(np.pi/4, 1, 3)
     ph_circuit.bs(np.pi/4, 0, 3)
-    # orca_sampler = OrcaSampler().run([(ph_circuit, [np.pi/4]*5)], shots=1000)
+    #orca_sampler = OrcaSampler().run([(ph_circuit, [np.pi/4]*5)], shots=1000)
 
     # Invalid Circuit
     ph_circuit = PhotonicCircuit(PhotonicRegister(4))
