@@ -148,10 +148,15 @@ class PhotonicCircuit(QuantumCircuit):
 if __name__ == "__main__":
     input_state = [1, 1, 1, 1]
     loop_lengths = [1, 2, 3]
+    expected_qumodes = []
+    for length in loop_lengths:
+        for qumode in range(length, len(input_state)):
+            expected_qumodes.append((qumode-length, qumode))
     thetas = [np.pi/4]*6
     ph_circuit: PhotonicCircuit = PhotonicCircuit.from_tbi_params(input_state, loop_lengths, thetas)
     for i, op in enumerate(ph_circuit):
         assert isinstance(op.operation, BS)
-        print(op.operation)
-        print(op.qumodes)
-        print(op.params)
+        assert isinstance(op.operation, PhotonicGate)
+        assert op.qumodes[0]._index == expected_qumodes[i][0]
+        assert op.qumodes[1]._index == expected_qumodes[i][1]
+        assert op.params[0] == thetas[i]
