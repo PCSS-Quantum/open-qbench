@@ -78,13 +78,16 @@ class OrcaSampler(BosonicSampler):
     """This class is separate from the library as the ptseries SDK
     is not public and we want to avoid adding it as dependency."""
 
-    def __init__(self, default_shots=1024, *args, **kwargs):
+    def __init__(self, default_shots=1024, default_options: dict | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._default_shots = default_shots
+        if default_options is None:
+            default_options = {}
+        self._default_options = default_options
 
     def run(self, pubs: Iterable[tuple[PhotonicCircuit, Iterable[float]]], *, shots: int | None = None, options: dict | None = None):
         if options is None:
-            options = {}
+            options = self._default_options
         if shots is None:
             shots = self._default_shots
         validated_pubs = [self._extract_lengths(pub) for pub in pubs]
