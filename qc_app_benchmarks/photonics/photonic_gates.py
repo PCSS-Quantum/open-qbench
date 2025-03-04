@@ -2,7 +2,7 @@
 
 import itertools
 from abc import ABC, abstractmethod
-from typing import Sequence
+from collections.abc import Sequence
 
 from qiskit.circuit import Bit, ParameterExpression, Register
 
@@ -12,10 +12,8 @@ class Qumode(Bit):
 
     Inheriting from :class:'Bit' might be confusing since qumodes are continous, but
     it doesn't enforce constraints on the underlying data and provides some
-    usueful methods for working with :class:'Register'.
+    useful methods for working with :class:'Register'.
     """
-
-    pass
 
 
 class PhotonicRegister(Register):
@@ -186,7 +184,6 @@ class BS(PhotonicGate):
     def __init__(
         self,
         theta: ParameterExpression,
-        float,
         label: str | None = None,
         *,
         duration=None,
@@ -206,7 +203,7 @@ class BS(PhotonicGate):
 
     def __eq__(self, other):
         if isinstance(other, BS):
-            return self._compare_parameters(other)
+            return self._compare_parameters(other)  # TODO Fix: there is no such method in BS, define it as abstract or implement
         return False
 
     def _define(self):

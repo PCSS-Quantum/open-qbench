@@ -1,7 +1,8 @@
-from typing import Sequence, Union, override
+from typing import override
+from collections.abc import Sequence
 
 from qiskit import QuantumCircuit
-from qiskit.circuit.exceptions import CircuitError
+from qiskit.circuit import ParameterExpression, CircuitError
 
 from .photonic_gates import (
     BS,
@@ -12,13 +13,7 @@ from .photonic_gates import (
     Qumode,
 )
 
-QumodeSpecifier = Union[
-    Qumode,
-    PhotonicRegister,
-    int,
-    slice,
-    Sequence[Union[Qumode, int]],
-]
+QumodeSpecifier = Qumode | PhotonicRegister | int | slice | Sequence[Qumode | int]
 
 
 class PhotonicCircuit(QuantumCircuit):
@@ -76,7 +71,7 @@ class PhotonicCircuit(QuantumCircuit):
 
     def bs(
         self,
-        theta: float,  # float for now, later extend to Parameter
+        theta: ParameterExpression,  # float for now, later extend to Parameter
         qumode1: int | Qumode,
         qumode2: int | Qumode,
         label: str | None = None,
