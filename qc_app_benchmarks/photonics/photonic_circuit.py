@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterExpression, CircuitError
 
-from .photonic_gates import (
+from qc_app_benchmarks.photonics.photonic_gates import (
     BS,
     PhotonicCircuitInstruction,
     PhotonicGate,
@@ -12,6 +12,13 @@ from .photonic_gates import (
     PhotonicRegister,
     Qumode,
 )
+
+PRINTING_ENABLED: bool = True
+try:
+    from ptseries.tbi.representation.representation import Drawer
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:
+    PRINTING_ENABLED = False
 
 QumodeSpecifier = Qumode | PhotonicRegister | int | slice | Sequence[Qumode | int]
 
@@ -32,6 +39,7 @@ class PhotonicCircuit(QuantumCircuit):
             raise CircuitError("Expected a PhotonicRegister")  # TODO: According to typehints this line is unnecessary
         self.pregs.append(photonic_register)
         self._data: list[PhotonicCircuitInstruction] = []
+        self.input_state: list[int] = []
 
     @override
     def append(self, operation: PhotonicCircuitInstruction, qargs):
@@ -85,3 +93,39 @@ class PhotonicCircuit(QuantumCircuit):
             # args are already Qumodes
             qumodes = [qumode1, qumode2]
         return self._append(BS(theta, label), qumodes)
+
+    def draw(self, padding: int = 1, draw: bool = True):
+        """Draw function for Photonic Circuits, currently only Orca circuits supported (because of loop lengths).
+
+        Args:
+            padding (int, optional): Padding. Defaults to 1.
+
+        Raises:
+            ModuleNotFoundError: If optional dependencies are not installed properly this exception is raised.
+        """
+        if PRINTING_ENABLED is False:
+            raise ModuleNotFoundError('To use `PhotonicCircuit.draw` method you need to install `[ORCA]` optional dependencies')
+        loop_length = None
+        loop_lengths: list[int] = []
+        t = 0
+        circuit_length = self.pregs[0].size
+        # loop_length_calculation
+        for instruction in self._data:
+            if loop_length is not None and t+loop_length >= circuit_length:
+                if t != 0:
+                    loop_lengths.append(loop_length)
+                t = 0
+            qumodes = instruction.qumodes
+            if t == 0:
+                loop_length = qumodes[1]._index - qumodes[0]._index
+            t += 1
+        if loop_length is not None:
+            loop_lengths.append(loop_length)
+        assert len(loop_lengths) > 0
+        input_state = self.input_state if self.input_state else [0] * int(sum(len(preg) for preg in self.pregs))
+        n_modes = len(input_state)
+        representation = Drawer()  # type: ignore
+        structure = representation.get_structure(n_modes, len(loop_lengths), loop_lengths)
+        if draw:
+            representation.draw(structure, input_state, padding=padding)
+            plt.show()  # type: ignore
