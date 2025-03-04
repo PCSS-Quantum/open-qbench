@@ -25,7 +25,7 @@ def test_sampler():
     ph_circuit2.bs(np.pi/4, 1, 2)
     ph_circuit2.bs(np.pi/4, 2, 3)
 
-    job = orca_sampler = OrcaSampler().run([(ph_circuit1, [np.pi/4]*6), (ph_circuit2, [np.pi/4]*6)], shots=1000)
+    job = OrcaSampler().run([(ph_circuit1, [np.pi/4]*6), (ph_circuit2, [np.pi/4]*6)], shots=1000)
 
     assert isinstance(job.result()[0], dict)
 

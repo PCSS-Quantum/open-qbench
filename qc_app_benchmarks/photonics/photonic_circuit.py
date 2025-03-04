@@ -111,22 +111,21 @@ class PhotonicCircuit(QuantumCircuit):
         """
         if PRINTING_ENABLED is False:
             raise ModuleNotFoundError('To use `PhotonicCircuit.draw` method you need to install `[ORCA]` optional dependencies')
-        loop_length = None
-        loop_lengths: list[int] = []
-        t = 0
-        circuit_length = self.pregs[0].size
         # loop_length_calculation
+        loop_length = 0
+        loop_lengths: list[int] = []
+        current_loop_length, last_position = 0, 0
         for instruction in self._data:
-            if loop_length is not None and t+loop_length >= circuit_length:
-                if t != 0:
-                    loop_lengths.append(loop_length)
-                t = 0
             qumodes = instruction.qumodes
-            if t == 0:
-                loop_length = qumodes[1]._index - qumodes[0]._index
-            t += 1
-        if loop_length is not None:
+            starting_qumode, ending_qumode = qumodes
+            first, second = starting_qumode._index, ending_qumode._index
+            assert isinstance(first, int) and isinstance(second, int)
+            loop_length = second - first
+            if loop_length == current_loop_length and first > last_position:
+                continue
             loop_lengths.append(loop_length)
+            current_loop_length = loop_length
+            last_position = first
         assert len(loop_lengths) > 0
         input_state = self.input_state if self.input_state else [0] * int(sum(len(preg) for preg in self.pregs))
         n_modes = len(input_state)
