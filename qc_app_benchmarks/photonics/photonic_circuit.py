@@ -29,7 +29,7 @@ class PhotonicCircuit(QuantumCircuit):
         super().__init__()
         self.pregs: list[PhotonicRegister] = []
         if not isinstance(photonic_register, PhotonicRegister):
-            raise CircuitError("Expected a PhotonicRegister")
+            raise CircuitError("Expected a PhotonicRegister")  # TODO: According to typehints this line is unnecessary
         self.pregs.append(photonic_register)
         self._data: list[PhotonicCircuitInstruction] = []
 

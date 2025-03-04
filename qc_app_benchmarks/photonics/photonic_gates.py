@@ -10,7 +10,7 @@ from qiskit.circuit import Bit, ParameterExpression, Register
 class Qumode(Bit):
     """A quantum mode -- a fundamental unit of information for CV quantum computers.
 
-    Inheriting from :class:'Bit' might be confusing since qumodes are continous, but
+    Inheriting from :class:'Bit' might be confusing since qumodes are continuous, but
     it doesn't enforce constraints on the underlying data and provides some
     useful methods for working with :class:'Register'.
     """
@@ -122,7 +122,7 @@ class PhotonicCircuitInstruction:
         `CircuitInstruction(operation=Instruction(name='h', num_qubits=1,
         num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 0),), clbits=())`
 
-    This class is a simplified analagoue of the corresponding Rust struct found in `qiskit._accelerate'.
+    This class is a simplified analogue of the corresponding Rust struct found in `qiskit._accelerate'.
 
     """
 
