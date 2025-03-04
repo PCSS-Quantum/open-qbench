@@ -11,6 +11,8 @@ from .fidelities import normalized_fidelity
 from .sampler import CircuitSampler
 from .sampler.base_sampler import BaseBenchmarkSampler
 
+from qiskit.primitives import BaseSamplerV2
+
 
 @dataclass
 class FidelityBenchmarkResult(BenchmarkResult):
@@ -24,6 +26,10 @@ class FidelityBenchmarkResult(BenchmarkResult):
     execution_time: float
 
     def save_to_file(self, path: str = "./results"):
+        for key in list(self.dist_backend.keys()).copy():
+            self.dist_backend["".join(str(x) for x in key)] = self.dist_backend.pop(key)
+        for key in list(self.dist_ideal.keys()).copy():
+            self.dist_ideal["".join(str(x) for x in key)] = self.dist_ideal.pop(key)
         if not os.path.exists(path):
             os.makedirs(path)
         with open(
@@ -41,12 +47,12 @@ class FidelityBenchmark(BaseQuantumBenchmark):
 
     def run(self) -> FidelityBenchmarkResult:
         result = self.reference_state_sampler.run(self.benchmark_input)
-        dist_ideal = result.binary_probabilities()
+        dist_ideal = result.binary_probabilities() if hasattr(result,"binary_probabilities") else result.result()[0]
 
         start = time.time()
         result = self.backend_sampler.run(self.benchmark_input)
         execution_time = time.time() - start
-        dist_backend = result.binary_probabilities()
+        dist_backend = result.binary_probabilities() if hasattr(result,"binary_probabilities") else result.result()[0]
 
         fidelity = self.calculate_accuracy(dist_ideal, dist_backend)
 
@@ -117,9 +123,9 @@ class BenchmarkSuite(list[FidelityBenchmark]):
 
     @backend_sampler.setter
     def backend_sampler(self, sampler_instance):
-        if not isinstance(sampler_instance, BaseBenchmarkSampler):
+        if not isinstance(sampler_instance, BaseSamplerV2):
             raise TypeError(
-                "backend_sampler must be an instance of qc_app_benchmarks.sampler.BaseBenchmarkSampler"
+                "backend_sampler must be an instance of qiskit.primitives.BaseSamplerV2"
             )
         self._backend_sampler = sampler_instance
 
@@ -129,9 +135,9 @@ class BenchmarkSuite(list[FidelityBenchmark]):
 
     @ideal_sampler.setter
     def ideal_sampler(self, sampler_instance):
-        if not isinstance(sampler_instance, BaseBenchmarkSampler):
+        if not isinstance(sampler_instance, BaseSamplerV2):
             raise TypeError(
-                "ideal_sampler must be an instance of qc_app_benchmarks.sampler.BaseBenchmarkSampler"
+                "ideal_sampler must be an instance of qiskit.primitives.BaseSamplerV2"
             )
         self._ideal_sampler = sampler_instance
 
