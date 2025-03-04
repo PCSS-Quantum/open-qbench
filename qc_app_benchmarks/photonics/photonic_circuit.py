@@ -9,9 +9,8 @@ from qc_app_benchmarks.photonics.photonic_gates import (
 from qiskit.circuit import ParameterExpression, CircuitError
 from qiskit import QuantumCircuit
 import numpy as np
-from typing import Sequence, Union, overload, override
 from collections.abc import Sequence
-from typing import override
+from typing import overload, override
 
 
 PRINTING_ENABLED: bool = True
@@ -33,27 +32,20 @@ class PhotonicCircuit(QuantumCircuit):
     need to interact with separate samplers for gate-based and photonic quantum computers.
     """
 
-    def __init__(self, photonic_register: PhotonicRegister):
+    def __init__(self, *regs: PhotonicRegister | int, input_state: list[int] | None = None):
         super().__init__()
         self.pregs: list[PhotonicRegister] = []
-        if not isinstance(photonic_register, PhotonicRegister):
-            raise CircuitError("Expected a PhotonicRegister")  # TODO: According to typehints this line is unnecessary
-        self.pregs.append(photonic_register)
         self._data: list[PhotonicCircuitInstruction] = []
-        self.input_state: list[int] = []
-
-    # def __init__(self, num_qumodes: int):
-    #     super().__init__()
-    #     self.pregs: list[PhotonicRegister] = []
-    #     self.pregs.append(PhotonicRegister(num_qumodes))
-    #     self._data: list[PhotonicCircuitInstruction] = []
-
-    # def __init__(self, input_state: list[int]):
-    #     super().__init__()
-    #     self.pregs: list[PhotonicRegister] = []
-    #     self.pregs.append(PhotonicRegister(len(input_state)))
-    #     self._data: list[PhotonicCircuitInstruction] = []
-    #     self.input_state = input_state
+        self.input_state: list[int] = input_state if input_state is not None else []
+        for reg in regs:
+            if isinstance(reg, PhotonicRegister):
+                self.pregs.append(reg)
+            elif isinstance(reg, int):
+                self.pregs.append(PhotonicRegister(reg))
+            else:
+                raise ValueError(f'Wrong Argument passed as an register to {self.__class__.__name__}')
+        if len(regs) == 0 and input_state is not None:
+            self.pregs.append(PhotonicRegister(len(input_state)))
 
     @override
     def append(self, operation: PhotonicCircuitInstruction, qargs):
