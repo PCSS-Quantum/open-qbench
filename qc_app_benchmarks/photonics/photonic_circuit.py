@@ -12,9 +12,6 @@ import numpy as np
 from typing import Sequence, Union, overload, override
 from collections.abc import Sequence
 from typing import override
-<< << << < HEAD
-== == == =
->>>>>> > origin/orca-sampler
 
 
 PRINTING_ENABLED: bool = True
