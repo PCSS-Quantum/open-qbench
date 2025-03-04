@@ -41,7 +41,9 @@ def test_vaildation1():
     ph_circuit.bs(np.pi/4, 0, 2)
     ph_circuit.bs(np.pi/4, 1, 3)
     ph_circuit.bs(np.pi/4, 0, 3)
-    _ = OrcaSampler().run([(ph_circuit, [np.pi/4]*5)], shots=1000)
+    _, new_thetas, loop_lengths = OrcaSampler()._extract_lengths((ph_circuit, [np.pi/4]*5))
+    assert loop_lengths == [1, 2, 3]
+    assert new_thetas == [np.pi/4, np.pi/4, 0, np.pi/4, np.pi/4, np.pi/4]
 
 
 def test_validation2():
@@ -54,4 +56,6 @@ def test_validation2():
     ph_circuit.bs(np.pi/4, 1, 2)
     ph_circuit.bs(np.pi/4, 0, 2)
     ph_circuit.bs(np.pi/4, 1, 3)
-    _ = OrcaSampler().run([(ph_circuit, [np.pi/4]*6)], shots=1000)
+    _, new_thetas, loop_lengths = OrcaSampler()._extract_lengths((ph_circuit, [np.pi/4]*6))
+    assert loop_lengths == [1, 3, 1, 1, 2]
+    assert new_thetas == [np.pi/4, 0, 0, np.pi/4, 0, 0, np.pi/4, 0, np.pi/4, 0, np.pi/4, np.pi/4]
