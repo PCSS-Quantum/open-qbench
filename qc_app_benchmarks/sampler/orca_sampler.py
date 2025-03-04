@@ -140,11 +140,12 @@ class OrcaSampler(BosonicSampler):
                 if len(new_thetas) != 0:
                     assert num_qumods - last_position - current_loop_length - 1 >= 0
                     new_thetas.extend([0] * (num_qumods - last_position - current_loop_length - 1))
+                new_thetas.extend([0] * first)
                 new_thetas.append(theta)
                 loop_lengths.append(loop_length)
                 current_loop_length = loop_length
                 last_position = first
-        return (circuit, new_thetas, loop_lengths)
+        return circuit, new_thetas, loop_lengths
 
     def _BS_validation(self, theta, gate):
         if not isinstance(gate, BS):
