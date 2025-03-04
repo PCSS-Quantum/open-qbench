@@ -1,10 +1,4 @@
-from typing import Sequence, Union, overload, override
-
-import numpy as np
-from qiskit import QuantumCircuit
-from qiskit.circuit.exceptions import CircuitError
-
-from .photonic_gates import (
+from qc_app_benchmarks.photonics.photonic_gates import (
     BS,
     PhotonicCircuitInstruction,
     PhotonicGate,
@@ -12,14 +6,22 @@ from .photonic_gates import (
     PhotonicRegister,
     Qumode,
 )
+from qiskit.circuit import ParameterExpression, CircuitError
+from qiskit import QuantumCircuit
+import numpy as np
+from typing import Sequence, Union, overload, override
+from collections.abc import Sequence
+from typing import override
 
-QumodeSpecifier = Union[
-    Qumode,
-    PhotonicRegister,
-    int,
-    slice,
-    Sequence[Union[Qumode, int]],
-]
+
+PRINTING_ENABLED: bool = True
+try:
+    from ptseries.tbi.representation.representation import Drawer
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:
+    PRINTING_ENABLED = False
+
+QumodeSpecifier = Qumode | PhotonicRegister | int | slice | Sequence[Qumode | int]
 
 
 class PhotonicCircuit(QuantumCircuit):
@@ -35,9 +37,10 @@ class PhotonicCircuit(QuantumCircuit):
         super().__init__()
         self.pregs: list[PhotonicRegister] = []
         if not isinstance(photonic_register, PhotonicRegister):
-            raise CircuitError("Expected a PhotonicRegister")
+            raise CircuitError("Expected a PhotonicRegister")  # TODO: According to typehints this line is unnecessary
         self.pregs.append(photonic_register)
         self._data: list[PhotonicCircuitInstruction] = []
+        self.input_state: list[int] = []
 
     def __init__(self, num_qumodes: int):
         super().__init__()
@@ -90,7 +93,7 @@ class PhotonicCircuit(QuantumCircuit):
 
     def bs(
         self,
-        theta: float,  # float for now, later extend to Parameter
+        theta: ParameterExpression,  # float for now, later extend to Parameter
         qumode1: int | Qumode,
         qumode2: int | Qumode,
         label: str | None = None,
@@ -104,6 +107,42 @@ class PhotonicCircuit(QuantumCircuit):
             # args are already Qumodes
             qumodes = [qumode1, qumode2]
         return self._append(BS(theta, label), qumodes)
+
+    def draw(self, padding: int = 1, draw: bool = True):
+        """Draw function for Photonic Circuits, currently only Orca circuits supported (because of loop lengths).
+
+        Args:
+            padding (int, optional): Padding. Defaults to 1.
+
+        Raises:
+            ModuleNotFoundError: If optional dependencies are not installed properly this exception is raised.
+        """
+        if PRINTING_ENABLED is False:
+            raise ModuleNotFoundError('To use `PhotonicCircuit.draw` method you need to install `[ORCA]` optional dependencies')
+        loop_length = None
+        loop_lengths: list[int] = []
+        t = 0
+        circuit_length = self.pregs[0].size
+        # loop_length_calculation
+        for instruction in self._data:
+            if loop_length is not None and t+loop_length >= circuit_length:
+                if t != 0:
+                    loop_lengths.append(loop_length)
+                t = 0
+            qumodes = instruction.qumodes
+            if t == 0:
+                loop_length = qumodes[1]._index - qumodes[0]._index
+            t += 1
+        if loop_length is not None:
+            loop_lengths.append(loop_length)
+        assert len(loop_lengths) > 0
+        input_state = self.input_state if self.input_state else [0] * int(sum(len(preg) for preg in self.pregs))
+        n_modes = len(input_state)
+        representation = Drawer()  # type: ignore
+        structure = representation.get_structure(n_modes, len(loop_lengths), loop_lengths)
+        if draw:
+            representation.draw(structure, input_state, padding=padding)
+            plt.show()  # type: ignore
 
     @staticmethod
     def from_tbi_params(input_state: list[int], loop_lengths: list[int], thetas: list[float]):
@@ -119,7 +158,7 @@ if __name__ == "__main__":
     input_state = [1, 1, 1, 1]
     loop_lengths = [1, 2, 3]
     thetas = [np.pi/4]*6
-    ph_circuit: PhotonicCircuit = PhotonicCircuit.from_tbi_params(input_state,loop_lengths,thetas)
+    ph_circuit: PhotonicCircuit = PhotonicCircuit.from_tbi_params(input_state, loop_lengths, thetas)
     for i, op in enumerate(ph_circuit):
         assert isinstance(op.operation, BS)
         print(op.operation)

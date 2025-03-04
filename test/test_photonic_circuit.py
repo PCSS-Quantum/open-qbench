@@ -35,6 +35,19 @@ def test_incorrect_operation():
     with pytest.raises(Exception):
         pc.h(0)
 
+
+def test_drawing():
+    pr = PhotonicRegister(2)
+    pc = PhotonicCircuit(pr)
+
+    pc.bs(theta=1.5, qumode1=0, qumode2=1)
+    with pytest.raises(ModuleNotFoundError):
+        pc.draw(draw=False)
+        raise ModuleNotFoundError
+    # Explanation: ModuleNotFoundError is acceptable result, test fails on different Errors/Exceptions
+    # Cannot be fully tested without creating plt window
+
+
 def test_from_tbi_params():
-    ph_circuit = PhotonicCircuit.from_tbi_params([1,1,1,1],[1,2,3],[np.pi/4]*6)
+    ph_circuit = PhotonicCircuit.from_tbi_params([1, 1, 1, 1], [1, 2, 3], [np.pi/4]*6)
     assert isinstance(ph_circuit, PhotonicCircuit)

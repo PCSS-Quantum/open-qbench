@@ -2,7 +2,7 @@
 
 import itertools
 from abc import ABC, abstractmethod
-from typing import Sequence
+from collections.abc import Sequence
 
 from qiskit.circuit import Bit, ParameterExpression, Register
 
@@ -10,12 +10,10 @@ from qiskit.circuit import Bit, ParameterExpression, Register
 class Qumode(Bit):
     """A quantum mode -- a fundamental unit of information for CV quantum computers.
 
-    Inheriting from :class:'Bit' might be confusing since qumodes are continous, but
+    Inheriting from :class:'Bit' might be confusing since qumodes are continuous, but
     it doesn't enforce constraints on the underlying data and provides some
-    usueful methods for working with :class:'Register'.
+    useful methods for working with :class:'Register'.
     """
-
-    pass
 
 
 class PhotonicRegister(Register):
@@ -124,7 +122,7 @@ class PhotonicCircuitInstruction:
         `CircuitInstruction(operation=Instruction(name='h', num_qubits=1,
         num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 0),), clbits=())`
 
-    This class is a simplified analagoue of the corresponding Rust struct found in `qiskit._accelerate'.
+    This class is a simplified analogue of the corresponding Rust struct found in `qiskit._accelerate'.
 
     """
 
@@ -186,7 +184,6 @@ class BS(PhotonicGate):
     def __init__(
         self,
         theta: ParameterExpression,
-        float,
         label: str | None = None,
         *,
         duration=None,
@@ -206,7 +203,7 @@ class BS(PhotonicGate):
 
     def __eq__(self, other):
         if isinstance(other, BS):
-            return self._compare_parameters(other)
+            return self._compare_parameters(other)  # TODO Fix: there is no such method in BS, define it as abstract or implement
         return False
 
     def _define(self):
