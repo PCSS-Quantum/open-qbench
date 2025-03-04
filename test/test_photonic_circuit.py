@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from qc_app_benchmarks.photonics import PhotonicCircuit, PhotonicRegister
@@ -33,3 +34,7 @@ def test_incorrect_operation():
 
     with pytest.raises(Exception):
         pc.h(0)
+
+def test_from_tbi_params():
+    ph_circuit = PhotonicCircuit.from_tbi_params([1,1,1,1],[1,2,3],[np.pi/4]*6)
+    assert isinstance(ph_circuit, PhotonicCircuit)

@@ -1,10 +1,6 @@
-"""Running this example requires adding your SSH key to https://sdk.orcacomputing.com/ and installing with pip install .[ORCA]"""
-
-import select
 from typing import override
 from ptseries.tbi import create_tbi
 from ptseries.tbi.pt1 import PT1AsynchronousResults
-from pprint import pprint
 import numpy as np
 
 from collections.abc import Iterable

@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from qc_app_benchmarks.photonics import PhotonicCircuit, PhotonicRegister
 from qc_app_benchmarks.sampler.orca_sampler import OrcaSampler
-from qc_app_benchmarks.fidelities import classical_fidelity, normalized_fidelity
+from qc_app_benchmarks.fidelities import normalized_fidelity
 from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite, FidelityBenchmarkResult
 
 def test_orca_benchmark():

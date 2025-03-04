@@ -1,9 +1,10 @@
+"""Running this example requires adding your SSH key to https://sdk.orcacomputing.com/ and installing with pip install .[ORCA]"""
+
 import numpy as np
 from qc_app_benchmarks.photonics import PhotonicCircuit, PhotonicRegister
 from qc_app_benchmarks.sampler.orca_sampler import OrcaSampler
 from qc_app_benchmarks.fidelities import  normalized_fidelity
 from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite
-
 
 ph_circuit1 = PhotonicCircuit(PhotonicRegister(4))
 ph_circuit1.input_state = [1, 1, 1, 1]

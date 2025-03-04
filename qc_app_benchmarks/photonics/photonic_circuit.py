@@ -1,5 +1,6 @@
-from typing import Sequence, Union, override
+from typing import Sequence, Union, overload, override
 
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.exceptions import CircuitError
 
@@ -37,6 +38,19 @@ class PhotonicCircuit(QuantumCircuit):
             raise CircuitError("Expected a PhotonicRegister")
         self.pregs.append(photonic_register)
         self._data: list[PhotonicCircuitInstruction] = []
+
+    def __init__(self, num_qumodes: int):
+        super().__init__()
+        self.pregs: list[PhotonicRegister] = []
+        self.pregs.append(PhotonicRegister(num_qumodes))
+        self._data: list[PhotonicCircuitInstruction] = []
+
+    def __init__(self, input_state: list[int]):
+        super().__init__()
+        self.pregs: list[PhotonicRegister] = []
+        self.pregs.append(PhotonicRegister(len(input_state)))
+        self._data: list[PhotonicCircuitInstruction] = []
+        self.input_state = input_state
 
     @override
     def append(self, operation: PhotonicCircuitInstruction, qargs):
@@ -90,3 +104,24 @@ class PhotonicCircuit(QuantumCircuit):
             # args are already Qumodes
             qumodes = [qumode1, qumode2]
         return self._append(BS(theta, label), qumodes)
+
+    @staticmethod
+    def from_tbi_params(input_state: list[int], loop_lengths: list[int], thetas: list[float]):
+        thetas_copy = thetas.copy()
+        circuit = PhotonicCircuit(input_state=input_state)
+        for length in loop_lengths:
+            for qumode in range(length, len(input_state)):
+                circuit.bs(theta=thetas_copy.pop(0), qumode1=qumode-length, qumode2=qumode)
+        return circuit
+
+
+if __name__ == "__main__":
+    input_state = [1, 1, 1, 1]
+    loop_lengths = [1, 2, 3]
+    thetas = [np.pi/4]*6
+    ph_circuit: PhotonicCircuit = PhotonicCircuit.from_tbi_params(input_state,loop_lengths,thetas)
+    for i, op in enumerate(ph_circuit):
+        assert isinstance(op.operation, BS)
+        print(op.operation)
+        print(op.qumodes)
+        print(op.params)
