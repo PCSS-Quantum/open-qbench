@@ -53,3 +53,5 @@ env.bak/
 venv.bak/
 
 *.json
+
+results/

@@ -88,6 +88,10 @@ class OrcaSampler(BosonicSampler):
     def run(self, pubs: Iterable[tuple[PhotonicCircuit, Iterable[float]]], *, shots: int | None = None, options: dict | None = None):
         if options is None:
             options = self._default_options
+        else:
+            default_copy = self._default_options.copy()
+            default_copy.update(options)
+            options = default_copy
         if shots is None:
             shots = self._default_shots
         validated_pubs = [self._extract_lengths(pub) for pub in pubs]
@@ -102,9 +106,7 @@ class OrcaSampler(BosonicSampler):
         results = []
         for circuit, thetas, loop_lengths in validated_pubs:
             input_state = circuit.input_state  # TODO Replace with proper input state extraction
-            tbi_params = {"tbi_type": options["tbi_type"],
-                          "url": options["url"]}
-            tbi = create_tbi(loop_lengths=loop_lengths, **tbi_params)
+            tbi = create_tbi(loop_lengths=loop_lengths, **options)
             pt1_async_results = tbi.sample_async(input_state, thetas, shots)
             results.append(pt1_async_results)
         return OrcaResult(results)
@@ -113,7 +115,7 @@ class OrcaSampler(BosonicSampler):
         results = []
         for circuit, thetas, loop_lengths in validated_pubs:
             input_state = circuit.input_state  # TODO Replace with proper input state extraction
-            tbi = create_tbi(loop_lengths=loop_lengths)
+            tbi = create_tbi(loop_lengths=loop_lengths, **options)
             sim_results = tbi.sample(input_state, thetas, shots)
             results.append(sim_results)
         return PrimitiveResult(results)
@@ -158,7 +160,7 @@ class OrcaSampler(BosonicSampler):
 
 
 if __name__ == "__main__":
-    # Valid Circuits
+    # Valid circuit 1
     ph_circuit1 = PhotonicCircuit(PhotonicRegister(4))
     ph_circuit1.input_state = [1, 1, 1, 1]
     ph_circuit1.bs(np.pi/4, 0, 1)
@@ -168,6 +170,7 @@ if __name__ == "__main__":
     ph_circuit1.bs(np.pi/4, 1, 3)
     ph_circuit1.bs(np.pi/4, 0, 3)
 
+    # Valid circuit 2
     ph_circuit2 = PhotonicCircuit(PhotonicRegister(4))
     ph_circuit2.input_state = [1, 1, 1, 0]
     ph_circuit2.bs(np.pi/4, 0, 1)
@@ -177,27 +180,31 @@ if __name__ == "__main__":
     ph_circuit2.bs(np.pi/4, 1, 2)
     ph_circuit2.bs(np.pi/4, 2, 3)
 
-    ideal_sampler = OrcaSampler(default_shots=1024)
-    backend_sampler = OrcaSampler(default_shots=1024)
+    job = OrcaSampler().run([(ph_circuit1, [np.pi/4]*6), (ph_circuit2, [np.pi/4]*6)], shots=10000)
 
-    suite = BenchmarkSuite(
-        backend_sampler=backend_sampler,
-        ideal_sampler=ideal_sampler,
-        calculate_accuracy=normalized_fidelity,
-        name="test_suite",
-    )
+    assert isinstance(job.result()[0], dict)
 
-    suite.add_benchmarks(
-        [
-            [(ph_circuit1, [np.pi/4]*6),],
-            [(ph_circuit2, [np.pi/4]*6),]
-        ]
-    )
-    suite.run_all()
-    print("Results:")
-    for res in suite.results:
-        print(
-            f"{res.name:>15}: depth = {res.input_properties['normalized_depth']}, fidelity = {res.average_fidelity}"
-        )
-
-    suite.save_results("test_res")
+    assert isinstance(job.result()[1], dict)
+    
+    from ptseries.tbi import create_tbi
+    pt_series_tbi = create_tbi(loop_lengths=[1,2,3])
+    samples = pt_series_tbi.sample(input_state=ph_circuit1.input_state, theta_list=[np.pi/4]*6, n_samples=10000)
+    
+    for sample in samples:
+        res1 = samples[sample]
+        try:
+            res2 = job.result()[0][sample]
+        except KeyError:
+            res2 = 0
+        print(str(res1)+" == "+str(res2))
+    
+    pt_series_tbi = create_tbi(loop_lengths=[1,1])
+    samples = pt_series_tbi.sample(input_state=ph_circuit2.input_state, theta_list=[np.pi/4]*6, n_samples=10000)
+    
+    for sample in samples:
+        res1 = samples[sample]
+        try:
+            res2 = job.result()[1][sample]
+        except KeyError:
+            res2 = 0
+        print(str(res1)+" == "+str(res2))
