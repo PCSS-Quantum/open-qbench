@@ -24,7 +24,7 @@ class OrcaJob(PrimitiveJob):
     def __init__(self, function, *args, **kwargs):
         super().__init__(function, *args, **kwargs)
         self.orca_results = None
-        self.cancelled = False
+        self.cancelled = lambda: False
 
     @override
     def _submit(self):
@@ -87,7 +87,7 @@ class OrcaSampler(BosonicSampler):
             options = {}
         if shots is None:
             shots = self._default_shots
-        validated_pubs = [self._validate_nd_extract_lengths(pub) for pub in pubs]
+        validated_pubs = [self._extract_lengths(pub) for pub in pubs]
         if "tbi_type" in options and "url" in options and options["tbi_type"] == "PT-1":
             job = OrcaJob(self._run_orca, validated_pubs, options, shots)
         else:
@@ -115,40 +115,42 @@ class OrcaSampler(BosonicSampler):
             results.append(sim_results)
         return PrimitiveResult(results)
 
-    def _validate_nd_extract_lengths(self, pub: tuple[PhotonicCircuit, Iterable[float]]):
+    def _extract_lengths(self, pub: tuple[PhotonicCircuit, Iterable[float]]) -> tuple[PhotonicCircuit, list[float], list[int]]:
         circuit, thetas = pub
-        circuit_length = circuit.pregs[0].size
+        num_qumods = circuit.pregs[0].size
         instructions: list[PhotonicCircuitInstruction] = circuit._data
-        t = 0
-        loop_length = None
         loop_lengths: list[int] = []
-        if len(thetas) != len(instructions):
-            raise ValueError("Number of parameters should be the same as number of gates")
+        new_thetas: Iterable[float] = []
+        current_loop_length: int = 0
+        last_position: int = 0
         for instruction, theta in zip(instructions, thetas):
-            if loop_length is not None and t+loop_length >= circuit_length:
-                if t != 0:
-                    loop_lengths.append(loop_length)
-                t = 0
+            gate = instruction.operation
+            self._BS_validation(theta, gate)
             qumodes = instruction.qumodes
-            gate: PhotonicInstruction = instruction.operation
-            if not isinstance(gate, BS):
-                raise TypeError("Orca accepts only BS gates!")
-            if theta != gate.params[0]:
-                raise ValueError("Conflicting parameters!")
-            if t == 0:
-                loop_length = qumodes[1]._index-qumodes[0]._index
+            starting_qumode, ending_qumode = qumodes
+            first, second = starting_qumode._index, ending_qumode._index
+            assert isinstance(first, int) and isinstance(second, int)
+            loop_length = second - first
+            if loop_length == current_loop_length and first > last_position:
+                assert first - last_position - 1 >= 0
+                new_thetas.extend([0] * (first - last_position - 1))
+                new_thetas.append(theta)
+                last_position = first
             else:
-                if loop_length != qumodes[1]._index-qumodes[0]._index:
-                    raise ValueError("Qumodes selection not consistent with previous gate!")
-            if t+loop_length >= circuit_length:
-                continue
-            if qumodes[0]._index != t or qumodes[1]._index != t+loop_length:
-                raise ValueError("Qumodes selection not consistent with previous gate!")
-            t += 1
-        if t+loop_length < circuit_length:
-            raise ValueError("Not enough gates")
-        loop_lengths.append(loop_length)
-        return (circuit, thetas, loop_lengths)
+                if len(new_thetas) != 0:
+                    assert num_qumods - last_position - current_loop_length - 1 >= 0
+                    new_thetas.extend([0] * (num_qumods - last_position - current_loop_length - 1))
+                new_thetas.append(theta)
+                loop_lengths.append(loop_length)
+                current_loop_length = loop_length
+                last_position = first
+        return (circuit, new_thetas, loop_lengths)
+
+    def _BS_validation(self, theta, gate):
+        if not isinstance(gate, BS):
+            raise TypeError("Orca accepts only BS gates!")
+        if theta != gate.params[0]:
+            raise TypeError("Conflicting parameters!")
 
 
 if __name__ == "__main__":

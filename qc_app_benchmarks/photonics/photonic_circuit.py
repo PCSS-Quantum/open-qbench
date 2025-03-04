@@ -42,18 +42,18 @@ class PhotonicCircuit(QuantumCircuit):
         self._data: list[PhotonicCircuitInstruction] = []
         self.input_state: list[int] = []
 
-    def __init__(self, num_qumodes: int):
-        super().__init__()
-        self.pregs: list[PhotonicRegister] = []
-        self.pregs.append(PhotonicRegister(num_qumodes))
-        self._data: list[PhotonicCircuitInstruction] = []
+    # def __init__(self, num_qumodes: int):
+    #     super().__init__()
+    #     self.pregs: list[PhotonicRegister] = []
+    #     self.pregs.append(PhotonicRegister(num_qumodes))
+    #     self._data: list[PhotonicCircuitInstruction] = []
 
-    def __init__(self, input_state: list[int]):
-        super().__init__()
-        self.pregs: list[PhotonicRegister] = []
-        self.pregs.append(PhotonicRegister(len(input_state)))
-        self._data: list[PhotonicCircuitInstruction] = []
-        self.input_state = input_state
+    # def __init__(self, input_state: list[int]):
+    #     super().__init__()
+    #     self.pregs: list[PhotonicRegister] = []
+    #     self.pregs.append(PhotonicRegister(len(input_state)))
+    #     self._data: list[PhotonicCircuitInstruction] = []
+    #     self.input_state = input_state
 
     @override
     def append(self, operation: PhotonicCircuitInstruction, qargs):

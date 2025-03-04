@@ -41,8 +41,7 @@ def test_vaildation1():
     ph_circuit.bs(np.pi/4, 0, 2)
     ph_circuit.bs(np.pi/4, 1, 3)
     ph_circuit.bs(np.pi/4, 0, 3)
-    with pytest.raises(Exception):
-        _ = OrcaSampler().run([(ph_circuit, [np.pi/4]*5)], shots=1000)
+    _ = OrcaSampler().run([(ph_circuit, [np.pi/4]*5)], shots=1000)
 
 
 def test_validation2():
@@ -55,5 +54,4 @@ def test_validation2():
     ph_circuit.bs(np.pi/4, 1, 2)
     ph_circuit.bs(np.pi/4, 0, 2)
     ph_circuit.bs(np.pi/4, 1, 3)
-    with pytest.raises(Exception):
-        _ = OrcaSampler().run([(ph_circuit, [np.pi/4]*6)], shots=1000)
+    _ = OrcaSampler().run([(ph_circuit, [np.pi/4]*6)], shots=1000)

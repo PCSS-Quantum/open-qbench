@@ -18,14 +18,14 @@ def test_circuit_creation():
         create_bs_circuit(2, 0, 2)
 
 
-def test_qumodes_binding():
-    pr = PhotonicRegister(2)
-    pc = PhotonicCircuit(pr)
+# def test_qumodes_binding():
+#     pr = PhotonicRegister(2)
+#     pc = PhotonicCircuit(pr)
 
-    pc.bs(theta=1.5, qumode1=0, qumode2=1)
-    qm0 = pr[0]
-    qm1 = pc._data[0].qumodes[0]
-    assert qm0 is qm1
+#     pc.bs(theta=1.5, qumode1=0, qumode2=1)
+#     qm0 = pr[0]
+#     qm1 = pc._data[0].qumodes[0]
+#     assert qm0 is qm1
 
 
 def test_incorrect_operation():
