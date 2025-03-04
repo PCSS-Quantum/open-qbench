@@ -7,7 +7,7 @@ from typing import Sequence, Union
 from qiskit.primitives.containers.sampler_pub import SamplerPubLike
 
 from .sampler.base_sampler import BaseBenchmarkSampler
-
+from qiskit.primitives import BaseSamplerV2
 
 class BenchmarkError(Exception):
     """Base class for errors raised by the benchmarking suite"""
@@ -75,10 +75,10 @@ class BaseQuantumBenchmark(ABC):
         return self._backend_sampler
 
     @backend_sampler.setter
-    def backend_sampler(self, sampler_instance: BaseBenchmarkSampler):
-        if not isinstance(sampler_instance, BaseBenchmarkSampler):
+    def backend_sampler(self, sampler_instance: BaseSamplerV2):
+        if not isinstance(sampler_instance, BaseSamplerV2):
             raise TypeError(
-                "backend_sampler must be an instance of qc_app_benchmarks.sampler.BaseBenchmarkSampler"
+                "backend_sampler must be an instance of qiskit.primitives.BaseSamplerV2"
             )
         self._backend_sampler = sampler_instance
 
@@ -87,10 +87,10 @@ class BaseQuantumBenchmark(ABC):
         return self._reference_state_sampler
 
     @reference_state_sampler.setter
-    def reference_state_sampler(self, sampler_instance: BaseBenchmarkSampler):
-        if not isinstance(sampler_instance, BaseBenchmarkSampler):
+    def reference_state_sampler(self, sampler_instance: BaseSamplerV2):
+        if not isinstance(sampler_instance, BaseSamplerV2):
             raise TypeError(
-                "ideal_sampler must be an instance of qc_app_benchmarks.sampler.BaseBenchmarkSampler"
+                "ideal_sampler must be an instance of qiskit.primitives.BaseSamplerV2"
             )
         self._reference_state_sampler = sampler_instance
 
