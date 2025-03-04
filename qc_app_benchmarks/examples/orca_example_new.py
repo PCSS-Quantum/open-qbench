@@ -69,8 +69,8 @@ class OrcaResult(PrimitiveResult):
 
     def get(self) -> PrimitiveResult:
         return PrimitiveResult([pt1_async_result.get() for pt1_async_result in self._pub_results])
-    
-    def done(self)->bool:
+
+    def done(self) -> bool:
         return all([pt1_async_result.is_done for pt1_async_result in self._pub_results])
 
 
@@ -117,7 +117,7 @@ class OrcaSampler(BosonicSampler):
         loop_length = None
         loop_lengths: list[int] = []
         if len(thetas) != len(instructions):
-            raise Exception("Number of parameters should be the same as number of gates")
+            raise ValueError("Number of parameters should be the same as number of gates")
         for instruction, theta in zip(instructions, thetas):
             if loop_length is not None and t+loop_length >= circuit_length:
                 if t != 0:
@@ -128,21 +128,20 @@ class OrcaSampler(BosonicSampler):
             if not isinstance(gate, BS):
                 raise TypeError("Orca accepts only BS gates!")
             if theta != gate.params[0]:
-                raise Exception("Conflicting parameters!")
+                raise ValueError("Conflicting parameters!")
             if t == 0:
                 loop_length = qumodes[1]._index-qumodes[0]._index
             else:
                 if loop_length != qumodes[1]._index-qumodes[0]._index:
-                    raise Exception("Qumodes selection not consistent with previous gate!")
+                    raise ValueError("Qumodes selection not consistent with previous gate!")
             if t+loop_length >= circuit_length:
                 continue
             if qumodes[0]._index != t or qumodes[1]._index != t+loop_length:
-                raise Exception("Qumodes selection not consistent with previous gate!")
+                raise ValueError("Qumodes selection not consistent with previous gate!")
             t += 1
         if t+loop_length < circuit_length:
-            raise Exception("Not enough gates")
-        else:
-            loop_lengths.append(loop_length)
+            raise ValueError("Not enough gates")
+        loop_lengths.append(loop_length)
         return (circuit, thetas, loop_lengths)
 
 
@@ -180,7 +179,7 @@ if __name__ == "__main__":
     ph_circuit.bs(np.pi/4, 0, 2)
     ph_circuit.bs(np.pi/4, 1, 3)
     ph_circuit.bs(np.pi/4, 0, 3)
-    #orca_sampler = OrcaSampler().run([(ph_circuit, [np.pi/4]*5)], shots=1000)
+    # orca_sampler = OrcaSampler().run([(ph_circuit, [np.pi/4]*5)], shots=1000)
 
     # Invalid Circuit
     ph_circuit = PhotonicCircuit(PhotonicRegister(4))
