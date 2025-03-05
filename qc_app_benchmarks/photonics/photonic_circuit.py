@@ -10,7 +10,6 @@ from qiskit.circuit import ParameterExpression, CircuitError
 from qiskit import QuantumCircuit
 import numpy as np
 from collections.abc import Sequence
-from typing import overload, override
 
 
 PRINTING_ENABLED: bool = True
@@ -47,7 +46,6 @@ class PhotonicCircuit(QuantumCircuit):
         if len(regs) == 0 and input_state is not None:
             self.pregs.append(PhotonicRegister(len(input_state)))
 
-    @override
     def append(self, operation: PhotonicCircuitInstruction, qargs):
         """Perform validation and broadcasting before calling _append"""
         # TODO Implement safe append

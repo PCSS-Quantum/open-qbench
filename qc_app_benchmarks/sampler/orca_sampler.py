@@ -1,4 +1,4 @@
-from typing import override
+
 from ptseries.tbi import create_tbi
 from ptseries.tbi.pt1 import PT1AsynchronousResults
 import numpy as np
@@ -26,18 +26,15 @@ class OrcaJob(PrimitiveJob):
         self.orca_results = None
         self.cancelled = lambda: False
 
-    @override
     def _submit(self):
         if self.orca_results is not None:
             raise JobError("Orca job has been submitted already.")
         self.orca_results = self._function(*self._args, **self._kwargs)
 
-    @override
     def result(self) -> ResultT:
         self._check_submitted()
         return self.orca_results.get()
 
-    @override
     def status(self) -> JobStatus:
         self._check_submitted()
         if self.cancelled:
@@ -47,12 +44,10 @@ class OrcaJob(PrimitiveJob):
         else:
             return JobStatus.RUNNING
 
-    @override
     def _check_submitted(self):
         if self.orca_results is None:
             raise JobError("Orca Job has not been submitted yet.")
 
-    @override
     def cancel(self):
         self._check_submitted()
         self.cancelled = True
@@ -185,11 +180,11 @@ if __name__ == "__main__":
     assert isinstance(job.result()[0], dict)
 
     assert isinstance(job.result()[1], dict)
-    
+
     from ptseries.tbi import create_tbi
-    pt_series_tbi = create_tbi(loop_lengths=[1,2,3])
+    pt_series_tbi = create_tbi(loop_lengths=[1, 2, 3])
     samples = pt_series_tbi.sample(input_state=ph_circuit1.input_state, theta_list=[np.pi/4]*6, n_samples=10000)
-    
+
     for sample in samples:
         res1 = samples[sample]
         try:
@@ -197,10 +192,10 @@ if __name__ == "__main__":
         except KeyError:
             res2 = 0
         print(str(res1)+" == "+str(res2))
-    
-    pt_series_tbi = create_tbi(loop_lengths=[1,1])
+
+    pt_series_tbi = create_tbi(loop_lengths=[1, 1])
     samples = pt_series_tbi.sample(input_state=ph_circuit2.input_state, theta_list=[np.pi/4]*6, n_samples=10000)
-    
+
     for sample in samples:
         res1 = samples[sample]
         try:
