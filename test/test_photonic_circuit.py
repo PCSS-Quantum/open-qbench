@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
 
-from qc_app_benchmarks.photonics import PhotonicCircuit, PhotonicRegister, BS, PhotonicGate
+from qc_app_benchmarks.photonics import PhotonicCircuit, PhotonicRegister
+from qc_app_benchmarks.photonics.photonic_gates import BS, PhotonicGate
 
 
 def create_bs_circuit(size: int, qm1: int, qm2: int):
@@ -63,3 +64,10 @@ def test_from_tbi_params():
         assert op.qumodes[0]._index == expected_qumodes[i][0]
         assert op.qumodes[1]._index == expected_qumodes[i][1]
         assert op.params[0] == thetas[i]
+
+def test_BS_compare():
+    bs1 = BS(np.pi/4)
+    bs2 = BS(np.pi/6)
+    bs3 = BS(np.pi/4)
+    assert not bs1 == bs2
+    assert bs1 == bs3

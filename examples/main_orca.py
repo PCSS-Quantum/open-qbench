@@ -1,5 +1,5 @@
 from qc_app_benchmarks.photonics import PhotonicCircuit, photonic_circuit
-from qc_app_benchmarks.sampler.orca_sampler import OrcaSampler
+from examples.orca_sampler import OrcaSampler
 
 
 from ptseries.tbi import create_tbi

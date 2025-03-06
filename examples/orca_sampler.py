@@ -1,22 +1,15 @@
-
-from ptseries.tbi import create_tbi
-from ptseries.tbi.pt1 import PT1AsynchronousResults
 import numpy as np
-
-from collections.abc import Iterable
-
-from qiskit.providers import JobError, JobStatus
-
 from qiskit.primitives.base.base_primitive_job import ResultT
-from qiskit.primitives.primitive_job import PrimitiveJob
+from qc_app_benchmarks.photonics import PhotonicRegister
+from ptseries.tbi import create_tbi
+from collections.abc import Iterable
+from ptseries.tbi.pt1 import PT1AsynchronousResults
 from qiskit.primitives.containers.primitive_result import PrimitiveResult
-
-from qc_app_benchmarks.photonics import PhotonicCircuitInstruction, PhotonicInstruction, BS, PhotonicCircuit, PhotonicRegister
+from qiskit.primitives.primitive_job import PrimitiveJob
+from qiskit.providers import JobError, JobStatus
+from qc_app_benchmarks.photonics import PhotonicCircuit
+from qc_app_benchmarks.photonics.photonic_gates import BS, PhotonicCircuitInstruction
 from qc_app_benchmarks.sampler import BosonicSampler
-
-
-from qc_app_benchmarks.fidelities import classical_fidelity, normalized_fidelity
-from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite, FidelityBenchmark
 
 
 class OrcaJob(PrimitiveJob):
@@ -125,20 +118,17 @@ class OrcaSampler(BosonicSampler):
         last_position: int = 0
         for instruction, theta in zip(instructions, thetas):
             gate = instruction.operation
-            self._BS_validation(theta, gate)
+            self._BS_validation(theta, instruction)
             qumodes = instruction.qumodes
             starting_qumode, ending_qumode = qumodes
             first, second = starting_qumode._index, ending_qumode._index
-            assert isinstance(first, int) and isinstance(second, int)
             loop_length = second - first
             if loop_length == current_loop_length and first > last_position:
-                assert first - last_position - 1 >= 0
                 new_thetas.extend([0] * (first - last_position - 1))
                 new_thetas.append(theta)
                 last_position = first
             else:
                 if len(new_thetas) != 0:
-                    assert num_qumods - last_position - current_loop_length - 1 >= 0
                     new_thetas.extend([0] * (num_qumods - last_position - current_loop_length - 1))
                 new_thetas.extend([0] * first)
                 new_thetas.append(theta)
@@ -147,12 +137,18 @@ class OrcaSampler(BosonicSampler):
                 last_position = first
         return circuit, new_thetas, loop_lengths
 
-    def _BS_validation(self, theta, gate):
+    def _BS_validation(self, theta, instruction: PhotonicCircuitInstruction):
+        gate = instruction.operation
         if not isinstance(gate, BS):
             raise TypeError("Orca accepts only BS gates!")
+        qumodes = instruction.qumodes
+        if len(qumodes) != 2:
+            raise ValueError
+        if not (isinstance(qumodes[0]._index, int) and isinstance(qumodes[1]._index, int)):
+            raise ValueError
         if theta != gate.params[0]:
             raise TypeError("Conflicting parameters!")
-
+        
 
 if __name__ == "__main__":
     # Valid circuit 1

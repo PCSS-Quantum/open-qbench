@@ -205,6 +205,9 @@ class BS(PhotonicGate):
         if isinstance(other, BS):
             return self._compare_parameters(other)  # TODO Fix: there is no such method in BS, define it as abstract or implement
         return False
+    
+    def _compare_parameters(self, other):
+        return isinstance(other, BS) and self.params[0] == other.params[0]    
 
     def _define(self):
         # define decomposition, if needed

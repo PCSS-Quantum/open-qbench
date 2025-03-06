@@ -2,9 +2,11 @@ import json
 import os
 import time
 from dataclasses import asdict, dataclass
-from typing import Sequence
+from collections.abc import Callable, Sequence
 
-from qiskit import QuantumCircuit, qasm3, transpile
+from qiskit import qasm3, transpile
+
+from examples.orca_sampler import OrcaSampler
 
 from .base_benchmark import BaseQuantumBenchmark, BenchmarkResult
 from .fidelities import normalized_fidelity
@@ -43,18 +45,21 @@ class FidelityBenchmark(BaseQuantumBenchmark):
     distributions as its accuracy measure.
     """
 
+    def __init__(self, backend_sampler, reference_state_sampler, benchmark_input, name=None, accuracy_measure: Callable[[dict, dict], float] | None = None):
+        super().__init__(backend_sampler, reference_state_sampler, benchmark_input, name)
+        self.accuracy_measure = accuracy_measure if accuracy_measure is not None else self.calculate_accuracy
     basis_gates = {"rx", "ry", "rz", "cx"}
 
     def run(self) -> FidelityBenchmarkResult:
         result = self.reference_state_sampler.run(self.benchmark_input)
-        dist_ideal = result.binary_probabilities() if hasattr(result,"binary_probabilities") else result.result()[0]
+        dist_ideal = result.binary_probabilities() if hasattr(result, "binary_probabilities") else result.result()[0]
 
         start = time.time()
         result = self.backend_sampler.run(self.benchmark_input)
         execution_time = time.time() - start
-        dist_backend = result.binary_probabilities() if hasattr(result,"binary_probabilities") else result.result()[0]
+        dist_backend = result.binary_probabilities() if hasattr(result, "binary_probabilities") else result.result()[0]
 
-        fidelity = self.calculate_accuracy(dist_ideal, dist_backend)
+        fidelity = self.accuracy_measure(dist_ideal, dist_backend)
 
         input_properties = {"normalized_depth": None, "num_q_vars": None}
         if isinstance(self.backend_sampler, CircuitSampler):
@@ -63,6 +68,8 @@ class FidelityBenchmark(BaseQuantumBenchmark):
                 name = self.benchmark_input[0].name
             else:
                 name = self.benchmark_input.name
+        elif isinstance(self.backend_sampler, OrcaSampler):
+            name = str(self.benchmark_input[0][0])
         else:
             name = str(self.benchmark_input)
         return FidelityBenchmarkResult(
@@ -153,6 +160,7 @@ class BenchmarkSuite(list[FidelityBenchmark]):
                         reference_state_sampler=self.ideal_sampler,
                         benchmark_input=bench_in,
                         name=str(bench_in),
+                        accuracy_measure=self.calculate_accuracy,
                     )
                 ]
             )

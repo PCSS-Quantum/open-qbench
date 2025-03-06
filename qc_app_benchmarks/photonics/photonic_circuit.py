@@ -117,14 +117,12 @@ class PhotonicCircuit(QuantumCircuit):
             qumodes = instruction.qumodes
             starting_qumode, ending_qumode = qumodes
             first, second = starting_qumode._index, ending_qumode._index
-            assert isinstance(first, int) and isinstance(second, int)
             loop_length = second - first
             if loop_length == current_loop_length and first > last_position:
                 continue
             loop_lengths.append(loop_length)
             current_loop_length = loop_length
             last_position = first
-        assert len(loop_lengths) > 0
         input_state = self.input_state if self.input_state else [0] * int(sum(len(preg) for preg in self.pregs))
         n_modes = len(input_state)
         representation = Drawer()  # type: ignore
@@ -141,6 +139,9 @@ class PhotonicCircuit(QuantumCircuit):
             for qumode in range(length, len(input_state)):
                 circuit.bs(theta=thetas_copy.pop(0), qumode1=qumode-length, qumode2=qumode)
         return circuit
+    
+    def __str__(self):
+        return self.__class__.__name__ +"_"+''.join(str(x) for x in self.input_state)
 
 
 if __name__ == "__main__":
