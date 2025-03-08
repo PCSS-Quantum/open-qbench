@@ -13,7 +13,7 @@ class CircuitSampler(BaseBenchmarkSampler):
 
     def _transform_input(sampler_input):
         # if input contains quantum circuits, transpile for backend
-        # if photonic ciruicts - transform for ORCA (only this backend for simplicity, but able to generalize in the future)
+        # if photonic circuits - transform for ORCA (only this backend for simplicity, but able to generalize in the future)
         return
 
     def run(self, sampler_input, num_samples=None) -> SamplerResult:

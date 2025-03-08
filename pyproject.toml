@@ -14,7 +14,10 @@ AQT = ["qiskit-aqt-provider>=1.10.0"]
 ORCA = ["ptseries @ git+ssh://git@sdk.orcacomputing.com/orca/ptseries.git"]
 
 [dependency-groups]
-dev = ["pytest>=8.3.4"]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-httpx>=0.35.0",
+]
 
 [tool.pytest.ini_options]
 pythonpath = "."
