@@ -52,12 +52,21 @@ class FidelityBenchmark(BaseQuantumBenchmark):
 
     def run(self) -> FidelityBenchmarkResult:
         result = self.reference_state_sampler.run(self.benchmark_input)
-        dist_ideal = result.binary_probabilities() if hasattr(result, "binary_probabilities") else result.result()[0]
+        if hasattr(result, "binary_probabilities"):
+            dist_ideal = result.binary_probabilities()
+        else:
+            dist_ideal: dict = result.result()[0]
+            dist_ideal = {x: y/sum(dist_ideal.values()) for x, y in dist_ideal.items()}
 
         start = time.time()
         result = self.backend_sampler.run(self.benchmark_input)
         execution_time = time.time() - start
-        dist_backend = result.binary_probabilities() if hasattr(result, "binary_probabilities") else result.result()[0]
+
+        if hasattr(result, "binary_probabilities"):
+            dist_backend = result.binary_probabilities()
+        else:
+            dist_backend: dict = result.result()[0]
+            dist_backend = {x: y/sum(dist_ideal.values()) for x, y in dist_ideal.items()}
 
         fidelity = self.accuracy_measure(dist_ideal, dist_backend)
 
