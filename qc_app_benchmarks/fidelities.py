@@ -23,8 +23,8 @@ def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
 def create_normalized_fidelity(input_state):
     def normalized_fidelity_orca(dist_ideal: dict, dist_backend: dict) -> float:
         """Normalized fidelity modified for Boson Sampling"""
-        backend_fidelity = classical_fidelity_orca(dist_ideal, dist_backend)
-        uniform_fidelity = classical_fidelity_orca(dist_ideal, _uniform_dist_orca(input_state))
+        backend_fidelity = classical_fidelity_orca(dist_ideal, dist_backend, input_state)
+        uniform_fidelity = classical_fidelity_orca(dist_ideal, _uniform_dist_orca(input_state), input_state)
 
         raw_fidelity = (backend_fidelity - uniform_fidelity) / (1 - uniform_fidelity)
 
@@ -55,7 +55,7 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
     return fidelity
 
 
-def classical_fidelity_orca(dist_a: dict, dist_b: dict) -> float:
+def classical_fidelity_orca(dist_a: dict, dist_b: dict, input_state: list[int]) -> float:
     """Compute classical fidelity of two probability distributions
 
     Args:
@@ -67,7 +67,7 @@ def classical_fidelity_orca(dist_a: dict, dist_b: dict) -> float:
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
     """
     num_qubits = len(list(dist_a.keys())[0])
-    bitstrings = generate_all_possible_outputs_orca((1,) * num_qubits)
+    bitstrings = generate_all_possible_outputs_orca(input_state)
     fidelity = 0
     for b in bitstrings:
         p_a = dist_a.get(b, 0)
