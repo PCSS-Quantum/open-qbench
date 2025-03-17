@@ -66,7 +66,6 @@ def classical_fidelity_orca(dist_a: dict, dist_b: dict, input_state: list[int]) 
         float: Classical fidelity given by:
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
     """
-    num_qubits = len(list(dist_a.keys())[0])
     bitstrings = generate_all_possible_outputs_orca(input_state)
     fidelity = 0
     for b in bitstrings:
