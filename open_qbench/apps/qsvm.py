@@ -182,7 +182,7 @@ def load_prepared_mnist(file: str, train_size: int = 20, img_dim=3, seed: int = 
 
 
 def trained_qsvm_8q() -> tuple[QuantumCircuit, tuple[float, ...]]:
-    datafile = files("qc_app_benchmarks.data").joinpath("mnist_train100.csv")
+    datafile = files("open_qbench.data").joinpath("mnist_train100.csv")
     train_data_x, _ = load_prepared_mnist(datafile, 20, 4, seed=123)
     circuit = prepare_qsvm_circuit(train_data_x)
     circuit.name = "QSVM_MNIST_8q"

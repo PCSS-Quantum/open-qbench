@@ -1,15 +1,14 @@
 import numpy as np
 from qiskit.primitives.base.base_primitive_job import ResultT
-from qc_app_benchmarks.photonics import PhotonicRegister
 from ptseries.tbi import create_tbi
 from collections.abc import Iterable
 from ptseries.tbi.pt1 import PT1AsynchronousResults
 from qiskit.primitives.containers.primitive_result import PrimitiveResult
 from qiskit.primitives.primitive_job import PrimitiveJob
 from qiskit.providers import JobError, JobStatus
-from qc_app_benchmarks.photonics import PhotonicCircuit
-from qc_app_benchmarks.photonics.photonic_gates import BS, PhotonicCircuitInstruction
-from qc_app_benchmarks.sampler import BosonicSampler
+from open_qbench.photonics import PhotonicCircuit, PhotonicRegister
+from open_qbench.photonics.photonic_gates import BS, PhotonicCircuitInstruction
+from open_qbench.sampler import BosonicSampler
 
 
 class OrcaJob(PrimitiveJob):
@@ -148,7 +147,7 @@ class OrcaSampler(BosonicSampler):
             raise ValueError
         if theta != gate.params[0]:
             raise TypeError("Conflicting parameters!")
-        
+
 
 if __name__ == "__main__":
     # Valid circuit 1
