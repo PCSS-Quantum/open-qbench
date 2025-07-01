@@ -1,8 +1,8 @@
 import numpy as np
-from qc_app_benchmarks.photonics import PhotonicCircuit
+from open_qbench.photonics import PhotonicCircuit
 from examples.orca_sampler import OrcaSampler
-from qc_app_benchmarks.fidelities import normalized_fidelity
-from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite, FidelityBenchmarkResult
+from open_qbench.fidelities import normalized_fidelity
+from open_qbench.fidelity_benchmark import BenchmarkSuite, FidelityBenchmarkResult
 
 
 def test_orca_benchmark():

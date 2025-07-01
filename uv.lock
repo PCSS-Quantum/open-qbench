@@ -730,6 +730,51 @@ wheels = [
 ]
 
 [[package]]
+name = "open-qbench"
+version = "0.2.0"
+source = { editable = "." }
+dependencies = [
+    { name = "qiskit" },
+    { name = "qiskit-aer" },
+]
+
+[package.optional-dependencies]
+aqt = [
+    { name = "qiskit-aqt-provider" },
+]
+ibm = [
+    { name = "qiskit-ibm-runtime" },
+]
+qsvm = [
+    { name = "scikit-image" },
+]
+vqe = [
+    { name = "qiskit-nature", extra = ["pyscf"] },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-httpx" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "qiskit", specifier = "~=1.0" },
+    { name = "qiskit-aer", specifier = "~=0.16" },
+    { name = "qiskit-aqt-provider", marker = "extra == 'aqt'", specifier = ">=1.10.0" },
+    { name = "qiskit-ibm-runtime", marker = "extra == 'ibm'", specifier = ">=0.36.1" },
+    { name = "qiskit-nature", extras = ["pyscf"], marker = "extra == 'vqe'", specifier = ">=0.7.2" },
+    { name = "scikit-image", marker = "extra == 'qsvm'", specifier = ">=0.25.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.3.4" },
+    { name = "pytest-httpx", specifier = ">=0.35.0" },
+]
+
+[[package]]
 name = "packaging"
 version = "25.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1290,6 +1335,19 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-httpx"
+version = "0.35.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1f/89/5b12b7b29e3d0af3a4b9c071ee92fa25a9017453731a38f08ba01c280f4c/pytest_httpx-0.35.0.tar.gz", hash = "sha256:d619ad5d2e67734abfbb224c3d9025d64795d4b8711116b1a13f72a251ae511f", size = 54146 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b0/ed/026d467c1853dd83102411a78126b4842618e86c895f93528b0528c7a620/pytest_httpx-0.35.0-py3-none-any.whl", hash = "sha256:ee11a00ffcea94a5cbff47af2114d34c5b231c326902458deed73f9c459fd744", size = 19442 },
+]
+
+[[package]]
 name = "pywavelets"
 version = "1.4.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1684,6 +1742,52 @@ sdist = { url = "https://files.pythonhosted.org/packages/89/36/d8dfb1b241a5c3ec5
 wheels = [
     { url = "https://files.pythonhosted.org/packages/66/16/2bf5c270457dbda2123604108f007f4b7087fa5a3913e60f5a4f75b76d92/qiskit_nature-0.7.2-py3-none-any.whl", hash = "sha256:9bc8900626b9a6f9c5dbe44589c53932408a661d61ad9003b8feadb30979cc05", size = 2156071 },
 ]
+
+[package.optional-dependencies]
+pyscf = [
+    { name = "pyscf", marker = "sys_platform != 'win32'" },
+]
+
+[[package]]
+name = "quantum-app-benchmarks"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "qiskit" },
+    { name = "qiskit-aer" },
+]
+
+[package.optional-dependencies]
+aqt = [
+    { name = "qiskit-aqt-provider" },
+]
+ibm = [
+    { name = "qiskit-ibm-runtime" },
+]
+qsvm = [
+    { name = "scikit-image" },
+]
+vqe = [
+    { name = "qiskit-nature", extra = ["pyscf"] },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "qiskit", specifier = "~=1.0" },
+    { name = "qiskit-aer", specifier = "~=0.16" },
+    { name = "qiskit-aqt-provider", marker = "extra == 'aqt'", specifier = ">=1.10.0" },
+    { name = "qiskit-ibm-runtime", marker = "extra == 'ibm'", specifier = ">=0.36.1" },
+    { name = "qiskit-nature", extras = ["pyscf"], marker = "extra == 'vqe'", specifier = ">=0.7.2" },
+    { name = "scikit-image", marker = "extra == 'qsvm'", specifier = ">=0.25.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8.3.4" }]
 
 [[package]]
 name = "requests"
@@ -2226,7 +2330,7 @@ resolution-markers = [
     "python_full_version == '3.10.*'",
 ]
 dependencies = [
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "colorama", marker = "platform_system == 'Windows'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/44/d0/18fed0fc0916578a4463f775b0fbd9c5fed2392152d039df2fb533bfdd5d/tifffile-2025.5.10.tar.gz", hash = "sha256:018335d34283aa3fd8c263bae5c3c2b661ebc45548fde31504016fcae7bf1103", size = 365290 }
 wheels = [

@@ -1,28 +1,28 @@
 from ptseries.tbi import create_tbi
-from qc_app_benchmarks.apps.max_cut_orca import max_cut_6_edges_new_input, max_cut_6_edges_new_input_double_loop
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import numpy as np
-from qc_app_benchmarks.fidelities import normalized_fidelity, classical_fidelity, create_normalized_fidelity
-from qc_app_benchmarks.sampler.bosonic_sampler import BosonicSampler
-from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite, FidelityBenchmark
+from open_qbench.apps.max_cut_orca import max_cut_6_edges_new_input, max_cut_6_edges_new_input_double_loop
+from open_qbench.fidelities import normalized_fidelity, classical_fidelity, create_normalized_fidelity
+from open_qbench.sampler.bosonic_sampler import BosonicSampler
+from open_qbench.fidelity_benchmark import BenchmarkSuite, FidelityBenchmark
 
 # Single loop experiment
 
-#number_of_samples
+# number_of_samples
 n_samples = 1000
 # #number_of_loops
 n_loops = 1
 
-### Define samplers
+# Define samplers
 
-#ideal sampler
+# ideal sampler
 ideal_tbi = create_tbi(
-    n_loops = 1
+    n_loops=1
 )
 ideal_sampler = BosonicSampler(ideal_tbi, default_samples=n_samples)
 
-#ORCA sampler
+# ORCA sampler
 # orca_tbi = create_tbi(
 #     tbi_type="PT-1",
 #     n_loops = 1,
@@ -31,7 +31,7 @@ ideal_sampler = BosonicSampler(ideal_tbi, default_samples=n_samples)
 
 # simulator sampler (for testing)
 orca_tbi = create_tbi(
-    n_loops = 1,
+    n_loops=1,
     bs_loss=0.01,
     bs_noise=0.01,
     input_loss=0.01,
@@ -39,7 +39,7 @@ orca_tbi = create_tbi(
 )
 orca_sampler = BosonicSampler(orca_tbi, default_samples=n_samples)
 
-#input_state and thetas
+# input_state and thetas
 input_state = max_cut_6_edges_new_input(return_graph=False, return_input_state=True)['input_state1']
 thetas = max_cut_6_edges_new_input(return_graph=False, return_input_state=False)
 
@@ -57,33 +57,33 @@ print(f"{res=}")
 
 # Double loop experiment
 
-#number_of_samples
+# number_of_samples
 n_samples = 1000
 # #number_of_loops
 n_loops = 2
 
-### Define samplers
+# Define samplers
 
-#ideal sampler
+# ideal sampler
 ideal_tbi = create_tbi(
-    n_loops = 2
+    n_loops=2
 )
 ideal_sampler = BosonicSampler(ideal_tbi, default_samples=n_samples)
 
-#ORCA sampler
+# ORCA sampler
 # orca_tbi = create_tbi(
 #     tbi_type="PT-1",
 #     n_loops = 2,
 #     ip_address="192.168.34.2"
 # )
 
-#simulator sampler (for testing)
+# simulator sampler (for testing)
 orca_tbi = create_tbi(
-    n_loops = 2 # double-loop doesn't work with noise parameters
+    n_loops=2  # double-loop doesn't work with noise parameters
 )
 orca_sampler = BosonicSampler(orca_tbi, default_samples=n_samples)
 
-#input_state and thetas
+# input_state and thetas
 input_state = max_cut_6_edges_new_input_double_loop(return_graph=False, return_input_state=True)['input_state1']
 thetas = max_cut_6_edges_new_input_double_loop(return_graph=False, return_input_state=False)
 
@@ -132,10 +132,10 @@ print(f"{res=}")
 # print(ideal_samples)
 # print(orca_samples)
 #
-# with open('qc_app_benchmarks/results/ideal_samples' + str(n_loops) + '.txt', 'w') as file:
+# with open('open_qbench/results/ideal_samples' + str(n_loops) + '.txt', 'w') as file:
 #     file.write(str(ideal_samples))
 #
-# with open('qc_app_benchmarks/results/orca_samples' + str(n_loops) + '.txt', 'w') as file:
+# with open('open_qbench/results/orca_samples' + str(n_loops) + '.txt', 'w') as file:
 #     file.write(str(orca_samples))
 #
 #
@@ -177,4 +177,4 @@ print(f"{res=}")
 # plt.setp(axs[1, 1].get_xticklabels(), rotation=45, ha='right')
 #
 # plt.tight_layout()
-# plt.savefig("qc_app_benchmarks/results/orca_benchmark_plots.pdf")
+# plt.savefig("open_qbench/results/orca_benchmark_plots.pdf")

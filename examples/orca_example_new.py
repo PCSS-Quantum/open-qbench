@@ -1,18 +1,20 @@
 """Running this example requires adding your SSH key to https://sdk.orcacomputing.com/ and installing with pip install .[ORCA]"""
 
-from qc_app_benchmarks.photonics import PhotonicCircuit
-from examples.orca_sampler import OrcaSampler
-from qc_app_benchmarks.fidelities import create_normalized_fidelity, normalized_fidelity
-from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite
 import dill
 
-ph_circuit1 = PhotonicCircuit.from_tbi_params([1,0,1,0,1,0],[1],[0.8479, -0.0095, 0.2154, -1.3921, 0.0614])
+from open_qbench.photonics import PhotonicCircuit
+from open_qbench.fidelities import create_normalized_fidelity, normalized_fidelity
+from open_qbench.fidelity_benchmark import BenchmarkSuite
+
+from examples.orca_sampler import OrcaSampler
+
+ph_circuit1 = PhotonicCircuit.from_tbi_params([1, 0, 1, 0, 1, 0], [1], [0.8479, -0.0095, 0.2154, -1.3921, 0.0614])
 
 
 ideal_sampler = OrcaSampler(default_shots=1024)
 backend_sampler = OrcaSampler(default_shots=1024)
 
-normalized_fidelity_orca = create_normalized_fidelity(input_state=[1,0,1,0,1,0])
+normalized_fidelity_orca = create_normalized_fidelity(input_state=[1, 0, 1, 0, 1, 0])
 
 suite = BenchmarkSuite(
     backend_sampler=backend_sampler,
@@ -33,5 +35,5 @@ for res in suite.results:
     )
 suite.save_results("test_res")
 
-with open("object_dump","wb") as f:
+with open("object_dump", "wb") as f:
     dill.dump(suite, f)

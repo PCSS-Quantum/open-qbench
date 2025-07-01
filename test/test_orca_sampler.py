@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from qc_app_benchmarks.photonics import PhotonicCircuit, PhotonicRegister
+from open_qbench.photonics import PhotonicCircuit, PhotonicRegister
 from examples.orca_sampler import OrcaSampler
 
 

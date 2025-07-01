@@ -1,9 +1,10 @@
-from qc_app_benchmarks.photonics import PhotonicCircuit, photonic_circuit
+import os
+from open_qbench.photonics import PhotonicCircuit, photonic_circuit
 from examples.orca_sampler import OrcaSampler
 
 
 from ptseries.tbi import create_tbi
-from qc_app_benchmarks.apps.max_cut_orca import max_cut_thetas_6_edges, max_cut_6_edges_new_input
+from open_qbench.apps.max_cut_orca import max_cut_thetas_6_edges, max_cut_6_edges_new_input
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import numpy as np
@@ -61,7 +62,7 @@ n_samples = 200
 n_loops = 1
 
 ideal_sampler = OrcaSampler(default_shots=n_samples)
-#backend_sampler = OrcaSampler(default_options={"tbi_type": "PT-1", "url": "169.254.109.10"}, default_shots=n_samples)
+# backend_sampler = OrcaSampler(default_options={"tbi_type": "PT-1", "url": "169.254.109.10"}, default_shots=n_samples)
 backend_sampler = OrcaSampler(default_shots=n_samples)
 
 input_state = max_cut_6_edges_new_input(return_graph=False, return_input_state=True)['input_state1']
@@ -107,14 +108,13 @@ orca_values = list(orca_samples_sorted.values())
 print(ideal_samples)
 print(orca_samples)
 
-import os
-os.makedirs('qc_app_benchmarks/results/ideal_samples', exist_ok=True)
-os.makedirs('qc_app_benchmarks/results/orca_samples', exist_ok=True)
+os.makedirs('open_qbench/results/ideal_samples', exist_ok=True)
+os.makedirs('open_qbench/results/orca_samples', exist_ok=True)
 
-with open('qc_app_benchmarks/results/ideal_samples' + str(n_loops) + '.txt', 'w') as file:
+with open('open_qbench/results/ideal_samples' + str(n_loops) + '.txt', 'w') as file:
     file.write(str(ideal_samples))
 
-with open('qc_app_benchmarks/results/orca_samples' + str(n_loops) + '.txt', 'w') as file:
+with open('open_qbench/results/orca_samples' + str(n_loops) + '.txt', 'w') as file:
     file.write(str(orca_samples))
 
 
@@ -156,4 +156,4 @@ axs[1, 1].bar(labels, values[:, 1], tick_label=labels, alpha=0.5)
 plt.setp(axs[1, 1].get_xticklabels(), rotation=45, ha='right')
 
 plt.tight_layout()
-plt.savefig("qc_app_benchmarks/results/orca_benchmark_plots.pdf")
+plt.savefig("open_qbench/results/orca_benchmark_plots.pdf")
