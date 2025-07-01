@@ -11,7 +11,7 @@ import better_apidoc
 
 conf_path = os.path.dirname(os.path.abspath(__file__))
 project_path = os.path.dirname(conf_path)
-lib_path = os.path.join(project_path, 'qc_app_benchmarks')
+lib_path = os.path.join(project_path, 'open_qbench')
 sys.path.insert(0, project_path)
 
 

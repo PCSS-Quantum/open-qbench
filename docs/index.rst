@@ -28,4 +28,4 @@ Then you can get to know the library by checking out the following sections:
 
    examples
    tutorials
-   API Documentation <API/qc_app_benchmarks>
+   API Documentation <API/open_qbench>
