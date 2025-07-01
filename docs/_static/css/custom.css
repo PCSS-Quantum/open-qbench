@@ -1,0 +1,45 @@
+.bd-page-width {
+    max-width: 100% !important;
+}
+
+button.sidebar-toggle {
+    display: none !important;
+}
+
+.document {
+    width: 100% !important;
+    margin: 50px !important;
+}
+
+.body {
+    max-width: 100% !important;
+}
+
+.bd-sidebar-primary {
+    overflow-y: hidden !important;
+}
+
+.navbar-brand img {
+    max-height: 300px !important;
+    max-width: 300px !important;
+
+    height: 100%;
+    width: 100%;
+
+    min-height: 100px !important;
+    min-width: 100px !important;
+}
+
+.toctree-wrapper li[class^="toctree-l"] {
+    list-style: inside !important;
+    margin-left: 1rem !important;
+}
+
+.bd-article {
+    flex-grow: 1 !important;
+}
+
+a.right-next {
+    display: flex !important;
+    justify-content: flex-end !important;
+}
