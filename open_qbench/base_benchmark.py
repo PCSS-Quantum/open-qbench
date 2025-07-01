@@ -4,10 +4,11 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from typing import Sequence, Union
 
+from qiskit.primitives import BaseSamplerV2
 from qiskit.primitives.containers.sampler_pub import SamplerPubLike
 
 from .sampler.base_sampler import BaseBenchmarkSampler
-from qiskit.primitives import BaseSamplerV2
+
 
 class BenchmarkError(Exception):
     """Base class for errors raised by the benchmarking suite"""
