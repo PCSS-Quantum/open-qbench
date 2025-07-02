@@ -7,7 +7,6 @@ import itertools
 import math
 import numpy as np
 from ptseries.tbi import create_tbi
-from ptseries.tbi.tbi_multi_loop import _get_unitary_tbi_numerical
 
 
 def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
@@ -176,11 +175,11 @@ def construct_unitary(bm_parameters):
     return apply_sequential_beam_splitters(bm_parameters)
 
 
-def generate_submatrix(U, input, output):
+def generate_submatrix(U, input_bitstring, output):
     columns = [j for j, t in enumerate(output) for _ in range(t)]
     UT = U[:, columns]
 
-    rows = [i for i, s in enumerate(input) for _ in range(s)]
+    rows = [i for i, s in enumerate(input_bitstring) for _ in range(s)]
     UST = UT[rows, :]
     return UST
 
@@ -205,7 +204,6 @@ def output_probabilities(input_bitstring, U):
 def generate_analitically(input_bitstring):
     input_bitstring = input_bitstring[::-1]
     theta_list = [np.pi/4] * (len(input_bitstring) - 1)
-    modes = len(input_bitstring)
     U = construct_unitary(theta_list)
     probabilities = output_probabilities(input_bitstring, U)
     return sorted([(key[::-1]) for key, value in probabilities.items() if value > 1e-30 and sum(key) == sum(input_string)])
