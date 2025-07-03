@@ -1,6 +1,6 @@
+import math
 from qiskit import QuantumRegister, QuantumCircuit
 from qiskit.circuit.library import QFT
-import math
 
 
 def prepare_QFT(encoded_number: int):

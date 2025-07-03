@@ -1,16 +1,16 @@
 from abc import abstractmethod
-from typing import Iterable, Tuple
+from collections.abc import Iterable
 
 from qiskit.primitives import BasePrimitiveJob, BaseSamplerV2
 
-from ..photonics import PhotonicCircuit
+from open_qbench.photonics import PhotonicCircuit
 
 
 class BosonicSampler(BaseSamplerV2):
     @abstractmethod
     def run(
         self,
-        pubs: Iterable[Tuple[PhotonicCircuit, Iterable[float]]],
+        pubs: Iterable[tuple[PhotonicCircuit, Iterable[float]]],
         *,
         shots: int | None = None,
     ) -> BasePrimitiveJob:
@@ -24,4 +24,3 @@ class BosonicSampler(BaseSamplerV2):
         Returns:
             Job object of BosonicSampler's result
         """
-        pass

@@ -1,4 +1,9 @@
-from qc_app_benchmarks.photonics.photonic_gates import (
+from collections.abc import Sequence
+from qiskit.circuit import ParameterExpression, CircuitError
+from qiskit import QuantumCircuit
+import numpy as np
+
+from open_qbench.photonics.photonic_gates import (
     BS,
     PhotonicCircuitInstruction,
     PhotonicGate,
@@ -6,10 +11,6 @@ from qc_app_benchmarks.photonics.photonic_gates import (
     PhotonicRegister,
     Qumode,
 )
-from qiskit.circuit import ParameterExpression, CircuitError
-from qiskit import QuantumCircuit
-import numpy as np
-from collections.abc import Sequence
 
 
 PRINTING_ENABLED: bool = True
@@ -139,9 +140,9 @@ class PhotonicCircuit(QuantumCircuit):
             for qumode in range(length, len(input_state)):
                 circuit.bs(theta=thetas_copy.pop(0), qumode1=qumode-length, qumode2=qumode)
         return circuit
-    
+
     def __str__(self):
-        return self.__class__.__name__ +"_"+''.join(str(x) for x in self.input_state)
+        return self.__class__.__name__ + "_"+''.join(str(x) for x in self.input_state)
 
 
 if __name__ == "__main__":
