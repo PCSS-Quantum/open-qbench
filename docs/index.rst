@@ -27,5 +27,5 @@ Then you can get to know the library by checking out the following sections:
    :maxdepth: 1
 
    examples
-   tutorials
+   
    API Documentation <API/open_qbench>
