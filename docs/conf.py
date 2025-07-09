@@ -98,8 +98,8 @@ html_static_path = ['_static']
 html_css_files = ['css/custom.css']
 
 html_theme = 'sphinx_book_theme'
-html_logo = '_static/qbench_logo.png'
-html_favicon = "_static/logo.svg"
+html_logo = '_static/logo.svg'
+html_favicon = "_static/favicon.svg"
 
 html_show_sourcelink = False  # Disable option to show .rst source
 

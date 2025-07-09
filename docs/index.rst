@@ -4,12 +4,19 @@ Quantum Benchmarks Docs
 ----------------
 About project
 ----------------
-The main goal of this library is providing various ways to test different quantum computers.
+The main goal of this library is to provide a series of experiments and metrics that can be used to test the quality of different quantum devices.
+
+----------
+References
+----------
+
+- `Application Performance Benchmarks for Quantum Computers <https://arxiv.org/abs/2310.13637>`_ 
+- `Application-Oriented Performance Benchmarks for Quantum Computing <https://arxiv.org/abs/2110.03137>`_
 
 ----------------
 Getting started
 ----------------
-For now the library is not hosted on pypi so to install run
+For now the library is not yet hosted on PyPi so to install run
 
 ::
 
