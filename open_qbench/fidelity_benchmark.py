@@ -5,15 +5,14 @@ from dataclasses import asdict, dataclass
 from collections.abc import Callable, Sequence
 
 from qiskit import qasm3, transpile
+from qiskit.primitives import BaseSamplerV2
 
 from examples.orca_sampler import OrcaSampler
 
-from .base_benchmark import BaseQuantumBenchmark, BenchmarkResult
-from .fidelities import normalized_fidelity
-from .sampler import CircuitSampler
-from .sampler.base_sampler import BaseBenchmarkSampler
-
-from qiskit.primitives import BaseSamplerV2
+from open_qbench.base_benchmark import BaseQuantumBenchmark, BenchmarkResult
+from open_qbench.fidelities import normalized_fidelity
+from open_qbench.sampler import CircuitSampler
+from open_qbench.sampler.base_sampler import BaseBenchmarkSampler
 
 
 @dataclass

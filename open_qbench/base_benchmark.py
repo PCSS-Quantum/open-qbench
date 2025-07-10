@@ -2,12 +2,13 @@ import json
 import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
-from typing import Sequence, Union
+from collections.abc import Sequence
 
+from qiskit.primitives import BaseSamplerV2
 from qiskit.primitives.containers.sampler_pub import SamplerPubLike
 
-from .sampler.base_sampler import BaseBenchmarkSampler
-from qiskit.primitives import BaseSamplerV2
+from open_qbench.sampler.base_sampler import BaseBenchmarkSampler
+
 
 class BenchmarkError(Exception):
     """Base class for errors raised by the benchmarking suite"""
@@ -48,9 +49,7 @@ class BaseQuantumBenchmark(ABC):
         self,
         backend_sampler: BaseBenchmarkSampler,
         reference_state_sampler: BaseBenchmarkSampler,
-        benchmark_input: Union[
-            SamplerPubLike, tuple[Sequence[int], Sequence[float]]
-        ],  # maybe create a custom class for input
+        benchmark_input: SamplerPubLike | tuple[Sequence[int], Sequence[float]],  # maybe create a custom class for input
         name: str | None = None,
     ):
         self.benchmark_input = benchmark_input

@@ -15,7 +15,6 @@
 
 """The FeatureMap class adapted from qiskit-runtime supplemented with code for preparing MNIST data for QSVM"""
 
-from typing import Optional, List
 import csv
 import os
 from importlib.resources import files
@@ -34,7 +33,7 @@ class FeatureMap:
     """Mapping data with the feature map."""
 
     def __init__(
-        self, feature_dimension: int, entangler_map: Optional[List[list]] = None
+        self, feature_dimension: int, entangler_map: list[list] | None = None
     ):
         """
         Args:
@@ -77,9 +76,9 @@ class FeatureMap:
     def construct_circuit(
         self,
         data: npt.NDArray[np.float64],
-        parameters: Optional[npt.NDArray[np.float64] | ParameterVector] = None,
+        parameters: npt.NDArray[np.float64] | ParameterVector | None = None,
         inverse: bool = False,
-        name: Optional[str] = None,
+        name: str | None = None,
     ):
         """Construct the feature map circuit.
 

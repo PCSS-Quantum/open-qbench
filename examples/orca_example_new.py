@@ -3,7 +3,7 @@
 import dill
 
 from open_qbench.photonics import PhotonicCircuit
-from open_qbench.fidelities import create_normalized_fidelity, normalized_fidelity
+from open_qbench.fidelities import create_normalized_fidelity
 from open_qbench.fidelity_benchmark import BenchmarkSuite
 
 from examples.orca_sampler import OrcaSampler

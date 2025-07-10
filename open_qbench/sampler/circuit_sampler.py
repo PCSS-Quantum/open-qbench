@@ -1,4 +1,4 @@
-from typing import Sequence
+from collections.abc import Sequence
 
 from qiskit import QuantumCircuit
 from qiskit.primitives.base.base_sampler import BaseSamplerV2
@@ -19,9 +19,7 @@ class CircuitSampler(BaseBenchmarkSampler):
     def run(self, sampler_input, num_samples=None) -> SamplerResult:
         if num_samples is None:
             num_samples = self.default_samples
-        if isinstance(sampler_input, QuantumCircuit):
-            job = self.sampler.run([sampler_input], shots=num_samples)
-        elif isinstance(sampler_input, Sequence):
+        if isinstance(sampler_input, (QuantumCircuit, Sequence)):
             job = self.sampler.run([sampler_input], shots=num_samples)
         return job.result()[0].data.meas.get_counts()
 
