@@ -28,7 +28,7 @@ IBM Fidelity
         calculate_accuracy=normalized_fidelity,
         name="test_suite",
     )
-    
+
     suite.add_benchmarks(
         [
             qaoa.jssp_7q_24d(),

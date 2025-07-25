@@ -1,11 +1,16 @@
 from ptseries.tbi import create_tbi
-import matplotlib.pyplot as plt
-from collections import defaultdict
-import numpy as np
-from open_qbench.apps.max_cut_orca import max_cut_6_edges_new_input, max_cut_6_edges_new_input_double_loop
-from open_qbench.fidelities import normalized_fidelity, classical_fidelity, create_normalized_fidelity
+
+from open_qbench.apps.max_cut_orca import (
+    max_cut_6_edges_new_input,
+    max_cut_6_edges_new_input_double_loop,
+)
+from open_qbench.fidelities import (
+    create_normalized_fidelity,
+)
+from open_qbench.fidelity_benchmark import (
+    FidelityBenchmark,
+)
 from open_qbench.sampler.bosonic_sampler import BosonicSampler
-from open_qbench.fidelity_benchmark import BenchmarkSuite, FidelityBenchmark
 
 # Single loop experiment
 
@@ -17,9 +22,7 @@ n_loops = 1
 # Define samplers
 
 # ideal sampler
-ideal_tbi = create_tbi(
-    n_loops=1
-)
+ideal_tbi = create_tbi(n_loops=1)
 ideal_sampler = BosonicSampler(ideal_tbi, default_samples=n_samples)
 
 # ORCA sampler
@@ -35,12 +38,14 @@ orca_tbi = create_tbi(
     bs_loss=0.01,
     bs_noise=0.01,
     input_loss=0.01,
-    detector_efficiency=0.99
+    detector_efficiency=0.99,
 )
 orca_sampler = BosonicSampler(orca_tbi, default_samples=n_samples)
 
 # input_state and thetas
-input_state = max_cut_6_edges_new_input(return_graph=False, return_input_state=True)['input_state1']
+input_state = max_cut_6_edges_new_input(return_graph=False, return_input_state=True)[
+    "input_state1"
+]
 thetas = max_cut_6_edges_new_input(return_graph=False, return_input_state=False)
 
 print(input_state)
@@ -48,7 +53,12 @@ print(thetas)
 
 # Run the fidelity benchmark
 
-fb = FidelityBenchmark(orca_sampler, ideal_sampler, [input_state, thetas], "orca_test_n_loops_1")
+fb = FidelityBenchmark(
+    orca_sampler,
+    ideal_sampler,
+    [input_state, thetas],
+    "orca_test_n_loops_1",
+)
 fb.calculate_accuracy = create_normalized_fidelity(input_state)
 
 res = fb.run()
@@ -65,9 +75,7 @@ n_loops = 2
 # Define samplers
 
 # ideal sampler
-ideal_tbi = create_tbi(
-    n_loops=2
-)
+ideal_tbi = create_tbi(n_loops=2)
 ideal_sampler = BosonicSampler(ideal_tbi, default_samples=n_samples)
 
 # ORCA sampler
@@ -78,21 +86,28 @@ ideal_sampler = BosonicSampler(ideal_tbi, default_samples=n_samples)
 # )
 
 # simulator sampler (for testing)
-orca_tbi = create_tbi(
-    n_loops=2  # double-loop doesn't work with noise parameters
-)
+orca_tbi = create_tbi(n_loops=2)  # double-loop doesn't work with noise parameters
 orca_sampler = BosonicSampler(orca_tbi, default_samples=n_samples)
 
 # input_state and thetas
-input_state = max_cut_6_edges_new_input_double_loop(return_graph=False, return_input_state=True)['input_state1']
-thetas = max_cut_6_edges_new_input_double_loop(return_graph=False, return_input_state=False)
+input_state = max_cut_6_edges_new_input_double_loop(
+    return_graph=False, return_input_state=True
+)["input_state1"]
+thetas = max_cut_6_edges_new_input_double_loop(
+    return_graph=False, return_input_state=False
+)
 
 print(input_state)
 print(thetas)
 
 # Run the fidelity benchmark
 
-fb = FidelityBenchmark(orca_sampler, ideal_sampler, [input_state, thetas], "orca_test_n_loops_2")
+fb = FidelityBenchmark(
+    orca_sampler,
+    ideal_sampler,
+    [input_state, thetas],
+    "orca_test_n_loops_2",
+)
 fb.calculate_accuracy = create_normalized_fidelity(input_state)
 
 res = fb.run()

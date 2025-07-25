@@ -19,7 +19,7 @@ class CircuitSampler(BaseBenchmarkSampler):
     def run(self, sampler_input, num_samples=None) -> SamplerResult:
         if num_samples is None:
             num_samples = self.default_samples
-        if isinstance(sampler_input, (QuantumCircuit, Sequence)):
+        if isinstance(sampler_input, QuantumCircuit | Sequence):
             job = self.sampler.run([sampler_input], shots=num_samples)
         return job.result()[0].data.meas.get_counts()
 
@@ -27,7 +27,7 @@ class CircuitSampler(BaseBenchmarkSampler):
 if __name__ == "__main__":
     from qiskit_aer.primitives import Sampler
 
-    from ..apps.qaoa import jssp_7q_24d
+    from open_qbench.apps.qaoa import jssp_7q_24d
 
     qiskit_sampler = CircuitSampler(Sampler())
     print(qiskit_sampler.run(jssp_7q_24d()))

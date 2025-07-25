@@ -5,10 +5,16 @@ from qiskit_aer.primitives import SamplerV2 as AerSampler
 from qiskit_ibm_runtime.fake_provider.backends import FakeGeneva
 
 from open_qbench.apps import grover, qaoa, qft, qsvm, toffoli, vqe
-from open_qbench.fidelities import classical_fidelity, normalized_fidelity
-from open_qbench.fidelity_benchmark import BenchmarkSuite, FidelityBenchmark
+from open_qbench.fidelities import (
+    normalized_fidelity,
+)
+from open_qbench.fidelity_benchmark import (
+    BenchmarkSuite,
+)
 from open_qbench.sampler.circuit_sampler import CircuitSampler
-from open_qbench.utils import calculate_from_file, get_fake_backend_sampler
+from open_qbench.utils import (
+    get_fake_backend_sampler,
+)
 
 # calculate_from_file("aqt_results/benchmark_results/Grover_3q.json")
 ideal_sampler = CircuitSampler(AerSampler())

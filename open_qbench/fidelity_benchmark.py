@@ -1,15 +1,17 @@
 import json
 import os
 import time
-from dataclasses import asdict, dataclass
 from collections.abc import Callable, Sequence
+from dataclasses import asdict, dataclass
 
 from qiskit import qasm3, transpile
 from qiskit.primitives import BaseSamplerV2
 
 from examples.orca_sampler import OrcaSampler
-
-from open_qbench.base_benchmark import BaseQuantumBenchmark, BenchmarkResult
+from open_qbench.base_benchmark import (
+    BaseQuantumBenchmark,
+    BenchmarkResult,
+)
 from open_qbench.fidelities import normalized_fidelity
 from open_qbench.sampler import CircuitSampler
 from open_qbench.sampler.base_sampler import BaseBenchmarkSampler
@@ -34,7 +36,9 @@ class FidelityBenchmarkResult(BenchmarkResult):
         if not os.path.exists(path):
             os.makedirs(path)
         with open(
-            os.path.join(path, self.name + ".json"), "w", encoding="utf-8"
+            os.path.join(path, self.name + ".json"),
+            "w",
+            encoding="utf-8",
         ) as file:
             file.write(json.dumps(asdict(self), indent=4))
 
@@ -44,10 +48,27 @@ class FidelityBenchmark(BaseQuantumBenchmark):
     distributions as its accuracy measure.
     """
 
-    def __init__(self, backend_sampler, reference_state_sampler, benchmark_input, name=None, accuracy_measure: Callable[[dict, dict], float] | None = None):
-        super().__init__(backend_sampler, reference_state_sampler, benchmark_input, name)
-        self.accuracy_measure = accuracy_measure if accuracy_measure is not None else self.calculate_accuracy
-    basis_gates = {"rx", "ry", "rz", "cx"}
+    def __init__(
+        self,
+        backend_sampler,
+        reference_state_sampler,
+        benchmark_input,
+        name=None,
+        accuracy_measure: Callable[[dict, dict], float] | None = None,
+    ):
+        super().__init__(
+            backend_sampler,
+            reference_state_sampler,
+            benchmark_input,
+            name,
+        )
+        self.accuracy_measure = (
+            accuracy_measure
+            if accuracy_measure is not None
+            else self.calculate_accuracy
+        )
+
+    basis_gates = frozenset(("rx", "ry", "rz", "cx"))
 
     def run(self) -> FidelityBenchmarkResult:
         result = self.reference_state_sampler.run(self.benchmark_input)
@@ -55,7 +76,9 @@ class FidelityBenchmark(BaseQuantumBenchmark):
             dist_ideal = result.binary_probabilities()
         else:
             dist_ideal: dict = result.result()[0]
-            dist_ideal = {x: y/sum(dist_ideal.values()) for x, y in dist_ideal.items()}
+            dist_ideal = {
+                x: y / sum(dist_ideal.values()) for x, y in dist_ideal.items()
+            }
 
         start = time.time()
         result = self.backend_sampler.run(self.benchmark_input)
@@ -65,11 +88,16 @@ class FidelityBenchmark(BaseQuantumBenchmark):
             dist_backend = result.binary_probabilities()
         else:
             dist_backend: dict = result.result()[0]
-            dist_backend = {x: y/sum(dist_ideal.values()) for x, y in dist_ideal.items()}
+            dist_backend = {
+                x: y / sum(dist_ideal.values()) for x, y in dist_ideal.items()
+            }
 
         fidelity = self.accuracy_measure(dist_ideal, dist_backend)
 
-        input_properties = {"normalized_depth": None, "num_q_vars": None}
+        input_properties = {
+            "normalized_depth": None,
+            "num_q_vars": None,
+        }
         if isinstance(self.backend_sampler, CircuitSampler):
             input_properties["normalized_depth"] = self.normalized_depth()
             if isinstance(self.benchmark_input, Sequence):
@@ -106,7 +134,7 @@ class FidelityBenchmark(BaseQuantumBenchmark):
             else:
                 circuits = self.benchmark_input
             trans_circuits = transpile(circuits, basis_gates=list(self.basis_gates))
-            if "measure" in trans_circuits.count_ops().keys():
+            if "measure" in trans_circuits.count_ops():
                 return trans_circuits.depth() - 1
             return trans_circuits.depth()
         else:

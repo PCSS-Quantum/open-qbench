@@ -1,6 +1,6 @@
 from qiskit import QuantumCircuit
-from qiskit.quantum_info import SparsePauliOp
 from qiskit.circuit.library import QAOAAnsatz
+from qiskit.quantum_info import SparsePauliOp
 
 
 def jssp_7q_24d() -> tuple[QuantumCircuit, tuple[float, ...]]:

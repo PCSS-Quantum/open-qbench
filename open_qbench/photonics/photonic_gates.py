@@ -190,7 +190,14 @@ class BS(PhotonicGate):
         unit="dt",
     ):
         """Create new BS gate."""
-        super().__init__("bs", 2, [theta], label=label, duration=duration, unit=unit)
+        super().__init__(
+            "bs",
+            2,
+            [theta],
+            label=label,
+            duration=duration,
+            unit=unit,
+        )
 
     def __array__(self, dtype=None, copy=None):
         """Return a numpy.array for the Beamsplitter gate."""
@@ -203,11 +210,13 @@ class BS(PhotonicGate):
 
     def __eq__(self, other):
         if isinstance(other, BS):
-            return self._compare_parameters(other)  # TODO Fix: there is no such method in BS, define it as abstract or implement
+            return self._compare_parameters(
+                other
+            )  # TODO Fix: there is no such method in BS, define it as abstract or implement
         return False
-    
+
     def _compare_parameters(self, other):
-        return isinstance(other, BS) and self.params[0] == other.params[0]    
+        return isinstance(other, BS) and self.params[0] == other.params[0]
 
     def _define(self):
         # define decomposition, if needed

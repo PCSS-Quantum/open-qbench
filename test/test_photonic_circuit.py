@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from qiskit.circuit import CircuitError
 
 from open_qbench.photonics import PhotonicCircuit, PhotonicRegister
 from open_qbench.photonics.photonic_gates import BS, PhotonicGate
@@ -33,7 +34,7 @@ def test_incorrect_operation():
     pr = PhotonicRegister(2)
     pc = PhotonicCircuit(pr)
 
-    with pytest.raises(Exception):
+    with pytest.raises(CircuitError):
         pc.h(0)
 
 
@@ -55,9 +56,11 @@ def test_from_tbi_params():
     expected_qumodes = []
     for length in loop_lengths:
         for qumode in range(length, len(input_state)):
-            expected_qumodes.append((qumode-length, qumode))
-    thetas = [np.pi/4]*6
-    ph_circuit: PhotonicCircuit = PhotonicCircuit.from_tbi_params(input_state, loop_lengths, thetas)
+            expected_qumodes.append((qumode - length, qumode))
+    thetas = [np.pi / 4] * 6
+    ph_circuit: PhotonicCircuit = PhotonicCircuit.from_tbi_params(
+        input_state, loop_lengths, thetas
+    )
     for i, op in enumerate(ph_circuit):
         assert isinstance(op.operation, BS)
         assert isinstance(op.operation, PhotonicGate)
@@ -67,8 +70,8 @@ def test_from_tbi_params():
 
 
 def test_BS_compare():
-    bs1 = BS(np.pi/4)
-    bs2 = BS(np.pi/6)
-    bs3 = BS(np.pi/4)
-    assert not bs1 == bs2
+    bs1 = BS(np.pi / 4)
+    bs2 = BS(np.pi / 6)
+    bs3 = BS(np.pi / 4)
+    assert bs1 != bs2
     assert bs1 == bs3

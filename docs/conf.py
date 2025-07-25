@@ -6,9 +6,9 @@
 
 import os
 import sys
+import tomllib
 
 import better_apidoc
-import tomllib
 
 conf_path = os.path.dirname(os.path.abspath(__file__))
 project_path = os.path.dirname(conf_path)
@@ -45,8 +45,8 @@ name = parsed_pyproject["project"]["name"].replace("_", " ").title()
 version = parsed_pyproject["project"]["version"]
 
 project = name
-copyright = "2025, psnc-qcg"
-author = "psnc-qcg"
+project_copyright = "2025, psnc"
+author = "psnc"
 release = version
 
 # -- General configuration ---------------------------------------------------

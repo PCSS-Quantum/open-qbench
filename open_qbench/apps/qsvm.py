@@ -20,12 +20,9 @@ import os
 from importlib.resources import files
 
 import numpy as np
-
 import numpy.typing as npt
-
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.parametervector import ParameterVector
-
 from skimage.transform import resize
 
 
@@ -33,7 +30,9 @@ class FeatureMap:
     """Mapping data with the feature map."""
 
     def __init__(
-        self, feature_dimension: int, entangler_map: list[list] | None = None
+        self,
+        feature_dimension: int,
+        entangler_map: list[list] | None = None,
     ):
         """
         Args:
@@ -62,7 +61,10 @@ class FeatureMap:
             em3 = [[self._num_qubits - 1, 0]]
             em4 = [
                 [i, i + np.sqrt(feature_dimension) / 2]
-                for i in np.arange(0, self._num_qubits - np.sqrt(feature_dimension) / 2)
+                for i in np.arange(
+                    0,
+                    self._num_qubits - np.sqrt(feature_dimension) / 2,
+                )
             ]
 
             em = em1 + em2 + em3 + em4
@@ -96,7 +98,7 @@ class FeatureMap:
         """
 
         if isinstance(parameters, np.ndarray):
-            if isinstance(parameters, (int, float)):
+            if isinstance(parameters, int | float):
                 raise ValueError("Parameters must be a list.")
             if len(parameters) == 1:
                 parameters = parameters * np.ones(self._num_qubits)
@@ -151,14 +153,16 @@ def sort_2_arrays(list1, list2):
 
 def load_csv_data(path: str):
     data = []
-    with open(path, "r", encoding="UTF-8") as csvfile:
+    with open(path, encoding="UTF-8") as csvfile:
         reader_variable = csv.reader(csvfile, delimiter=",")
         for row in reader_variable:
             data.append(row)
     return np.array(data, dtype=np.int16)
 
 
-def load_prepared_mnist(file: str, train_size: int = 20, img_dim=3, seed: int = None):
+def load_prepared_mnist(
+    file: str, train_size: int = 20, img_dim=3, seed: int | None = None
+):
     data = load_csv_data(file)
     x_train = data[:, 1:]
     y_train = data[:, 0]

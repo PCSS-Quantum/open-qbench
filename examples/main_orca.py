@@ -1,13 +1,14 @@
 import os
-from open_qbench.photonics import PhotonicCircuit, photonic_circuit
-from examples.orca_sampler import OrcaSampler
-
-
-from ptseries.tbi import create_tbi
-from open_qbench.apps.max_cut_orca import max_cut_thetas_6_edges, max_cut_6_edges_new_input
-import matplotlib.pyplot as plt
 from collections import defaultdict
+
+import matplotlib.pyplot as plt
 import numpy as np
+
+from examples.orca_sampler import OrcaSampler
+from open_qbench.apps.max_cut_orca import (
+    max_cut_6_edges_new_input,
+)
+from open_qbench.photonics import PhotonicCircuit
 
 
 def merge_dicts(dicts):
@@ -65,7 +66,9 @@ ideal_sampler = OrcaSampler(default_shots=n_samples)
 # backend_sampler = OrcaSampler(default_options={"tbi_type": "PT-1", "url": "169.254.109.10"}, default_shots=n_samples)
 backend_sampler = OrcaSampler(default_shots=n_samples)
 
-input_state = max_cut_6_edges_new_input(return_graph=False, return_input_state=True)['input_state1']
+input_state = max_cut_6_edges_new_input(return_graph=False, return_input_state=True)[
+    "input_state1"
+]
 thetas = max_cut_6_edges_new_input(return_graph=False, return_input_state=False)
 
 print(input_state)
@@ -74,9 +77,23 @@ print(thetas)
 
 photonic_circuit = PhotonicCircuit().from_tbi_params(input_state, [1], thetas)
 
-ideal_job = ideal_sampler.run([(photonic_circuit, thetas),])
-orca_job = backend_sampler.run([(photonic_circuit, thetas),], options={
-                               "n_loops": 1, "bs_loss": 0.01, "bs_noise": 0.01, "input_loss": 0.01, "detector_efficiency": 0.99})
+ideal_job = ideal_sampler.run(
+    [
+        (photonic_circuit, thetas),
+    ]
+)
+orca_job = backend_sampler.run(
+    [
+        (photonic_circuit, thetas),
+    ],
+    options={
+        "n_loops": 1,
+        "bs_loss": 0.01,
+        "bs_noise": 0.01,
+        "input_loss": 0.01,
+        "detector_efficiency": 0.99,
+    },
+)
 
 ideal_samples = ideal_job.result()[0]
 orca_samples = orca_job.result()[0]
@@ -108,13 +125,13 @@ orca_values = list(orca_samples_sorted.values())
 print(ideal_samples)
 print(orca_samples)
 
-os.makedirs('open_qbench/results/ideal_samples', exist_ok=True)
-os.makedirs('open_qbench/results/orca_samples', exist_ok=True)
+os.makedirs("open_qbench/results/ideal_samples", exist_ok=True)
+os.makedirs("open_qbench/results/orca_samples", exist_ok=True)
 
-with open('open_qbench/results/ideal_samples' + str(n_loops) + '.txt', 'w') as file:
+with open("open_qbench/results/ideal_samples" + str(n_loops) + ".txt", "w") as file:
     file.write(str(ideal_samples))
 
-with open('open_qbench/results/orca_samples' + str(n_loops) + '.txt', 'w') as file:
+with open("open_qbench/results/orca_samples" + str(n_loops) + ".txt", "w") as file:
     file.write(str(orca_samples))
 
 
@@ -126,10 +143,7 @@ master_dict = {}
 for key in merged_dicts:
     samples = []
     for d in list_of_dicts:
-        if key in d.keys():
-            sample = d[key]
-        else:
-            sample = 0
+        sample = d.get(key, 0)
         samples.append(sample)
 
     master_dict[key] = [samples]
@@ -143,17 +157,17 @@ fig, axs = plt.subplots(2, 2)
 fig.set_size_inches(8, 8)
 
 axs[0, 0].bar(labels, values[:, 0], tick_label=labels, alpha=1)
-plt.setp(axs[0, 0].get_xticklabels(), rotation=45, ha='right')
+plt.setp(axs[0, 0].get_xticklabels(), rotation=45, ha="right")
 
 axs[0, 1].bar(labels, values[:, 1], tick_label=labels, alpha=1)
-plt.setp(axs[0, 1].get_xticklabels(), rotation=45, ha='right')
+plt.setp(axs[0, 1].get_xticklabels(), rotation=45, ha="right")
 
 axs[1, 0].bar(labels, values[:, 0] - values[:, 1], tick_label=labels, alpha=1)
-plt.setp(axs[1, 0].get_xticklabels(), rotation=45, ha='right')
+plt.setp(axs[1, 0].get_xticklabels(), rotation=45, ha="right")
 
 axs[1, 1].bar(labels, values[:, 0], tick_label=labels, alpha=0.5)
 axs[1, 1].bar(labels, values[:, 1], tick_label=labels, alpha=0.5)
-plt.setp(axs[1, 1].get_xticklabels(), rotation=45, ha='right')
+plt.setp(axs[1, 1].get_xticklabels(), rotation=45, ha="right")
 
 plt.tight_layout()
 plt.savefig("open_qbench/results/orca_benchmark_plots.pdf")

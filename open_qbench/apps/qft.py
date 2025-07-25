@@ -1,5 +1,6 @@
 import math
-from qiskit import QuantumRegister, QuantumCircuit
+
+from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.library import QFT
 
 

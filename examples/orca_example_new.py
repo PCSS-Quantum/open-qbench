@@ -2,13 +2,16 @@
 
 import dill
 
-from open_qbench.photonics import PhotonicCircuit
+from examples.orca_sampler import OrcaSampler
 from open_qbench.fidelities import create_normalized_fidelity
 from open_qbench.fidelity_benchmark import BenchmarkSuite
+from open_qbench.photonics import PhotonicCircuit
 
-from examples.orca_sampler import OrcaSampler
-
-ph_circuit1 = PhotonicCircuit.from_tbi_params([1, 0, 1, 0, 1, 0], [1], [0.8479, -0.0095, 0.2154, -1.3921, 0.0614])
+ph_circuit1 = PhotonicCircuit.from_tbi_params(
+    [1, 0, 1, 0, 1, 0],
+    [1],
+    [0.8479, -0.0095, 0.2154, -1.3921, 0.0614],
+)
 
 
 ideal_sampler = OrcaSampler(default_shots=1024)
@@ -24,7 +27,12 @@ suite = BenchmarkSuite(
 )
 suite.add_benchmarks(
     [
-        [(ph_circuit1, [0.8479, -0.0095, 0.2154, -1.3921, 0.0614]),],
+        [
+            (
+                ph_circuit1,
+                [0.8479, -0.0095, 0.2154, -1.3921, 0.0614],
+            ),
+        ],
     ]
 )
 suite.run_all()

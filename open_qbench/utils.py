@@ -4,7 +4,9 @@ from qiskit_aer.noise import NoiseModel
 from qiskit_aer.primitives import Sampler as AerSampler
 from qiskit_ibm_runtime import Options, QiskitRuntimeService
 from qiskit_ibm_runtime import Sampler as RuntimeSampler
-from qiskit_ibm_runtime.fake_provider.fake_backend import FakeBackendV2
+from qiskit_ibm_runtime.fake_provider.fake_backend import (
+    FakeBackendV2,
+)
 
 from .fidelities import normalized_fidelity
 

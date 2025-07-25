@@ -1,8 +1,8 @@
 import json
 import os
 from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass
 from collections.abc import Sequence
+from dataclasses import asdict, dataclass
 
 from qiskit.primitives import BaseSamplerV2
 from qiskit.primitives.containers.sampler_pub import SamplerPubLike
@@ -24,7 +24,9 @@ class BenchmarkResult:
         if not os.path.exists(path):
             os.makedirs(path)
         with open(
-            os.path.join(path, self.name + ".json"), "w", encoding="utf-8"
+            os.path.join(path, self.name + ".json"),
+            "w",
+            encoding="utf-8",
         ) as file:
             file.write(json.dumps(asdict(self), indent=4))
 
@@ -49,7 +51,10 @@ class BaseQuantumBenchmark(ABC):
         self,
         backend_sampler: BaseBenchmarkSampler,
         reference_state_sampler: BaseBenchmarkSampler,
-        benchmark_input: SamplerPubLike | tuple[Sequence[int], Sequence[float]],  # maybe create a custom class for input
+        benchmark_input: SamplerPubLike
+        | tuple[
+            Sequence[int], Sequence[float]
+        ],  # maybe create a custom class for input
         name: str | None = None,
     ):
         self.benchmark_input = benchmark_input

@@ -5,6 +5,7 @@ for use with the benchmarking suite.
 
 import itertools
 import math
+
 import numpy as np
 from ptseries.tbi import create_tbi
 
@@ -22,18 +23,23 @@ def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
 def create_normalized_fidelity(input_state):
     def normalized_fidelity_orca(dist_ideal: dict, dist_backend: dict) -> float:
         """Normalized fidelity modified for Boson Sampling"""
-        backend_fidelity = classical_fidelity_orca(dist_ideal, dist_backend, input_state)
-        uniform_fidelity = classical_fidelity_orca(dist_ideal, _uniform_dist_orca(input_state), input_state)
+        backend_fidelity = classical_fidelity_orca(
+            dist_ideal, dist_backend, input_state
+        )
+        uniform_fidelity = classical_fidelity_orca(
+            dist_ideal, _uniform_dist_orca(input_state), input_state
+        )
 
         raw_fidelity = (backend_fidelity - uniform_fidelity) / (1 - uniform_fidelity)
 
         fidelity = max([raw_fidelity, 0])
         return fidelity
+
     return normalized_fidelity_orca
 
 
 def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
-    """Compute classical fidelity of two probability distributions
+    r"""Compute classical fidelity of two probability distributions
 
     Args:
         dist_a (dict): Distribution of experiment A
@@ -43,7 +49,7 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
         float: Classical fidelity given by:
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
     """
-    num_qubits = len(list(dist_a.keys())[0])
+    num_qubits = len(next(iter(dist_a.keys())))
     bitstrings = ("".join(i) for i in itertools.product("01", repeat=num_qubits))
     fidelity = 0
     for b in bitstrings:
@@ -54,8 +60,10 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
     return fidelity
 
 
-def classical_fidelity_orca(dist_a: dict, dist_b: dict, input_state: list[int]) -> float:
-    """Compute classical fidelity of two probability distributions
+def classical_fidelity_orca(
+    dist_a: dict, dist_b: dict, input_state: list[int]
+) -> float:
+    r"""Compute classical fidelity of two probability distributions
 
     Args:
         dist_a (dict): Distribution of experiment A
@@ -76,7 +84,7 @@ def classical_fidelity_orca(dist_a: dict, dist_b: dict, input_state: list[int]) 
 
 
 def fidelity_with_uniform(dist: dict) -> float:
-    """Compute classical fidelity of a probability distribution with a same-sized uniform distribution
+    r"""Compute classical fidelity of a probability distribution with a same-sized uniform distribution
 
     Args:
         dist (dict): Probability distribution
@@ -85,7 +93,7 @@ def fidelity_with_uniform(dist: dict) -> float:
         float: Classical fidelity given by:
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
     """
-    num_qubits = len(list(dist.keys())[0])
+    num_qubits = len(next(iter(dist.keys())))
     fidelity = 0
     uniform_prob = 1 / 2**num_qubits
     for prob in dist.values():
@@ -111,8 +119,9 @@ def generate_all_samples_orca(input_state):
     time_bin_interferometer = create_tbi()
     samples = time_bin_interferometer.sample(
         input_state=input_state,
-        theta_list=[np.pi/4] * (len(input_state) - 1),  # 50/50 beam splitters
-        n_samples=100000)
+        theta_list=[np.pi / 4] * (len(input_state) - 1),  # 50/50 beam splitters
+        n_samples=100000,
+    )
     samples_sorted = dict(sorted(samples.items(), key=lambda state: -state[1]))
     labels = list(samples_sorted.keys())
     return labels
@@ -132,7 +141,6 @@ def generate_all_possible_outputs_orca(input_state):
 
 
 def per(mtx, column, selected, prod, output=False):
-
     if column == mtx.shape[1]:
         if output:
             print(selected, prod)
@@ -140,9 +148,13 @@ def per(mtx, column, selected, prod, output=False):
     else:
         result = 0
         for row in range(mtx.shape[0]):
-            if not row in selected:
-                result = result \
-                    + per(mtx, column+1, selected+[row], prod*mtx[row, column])
+            if row not in selected:
+                result = result + per(
+                    mtx,
+                    column + 1,
+                    [*selected, row],
+                    prod * mtx[row, column],
+                )
         return result
 
 
@@ -191,8 +203,10 @@ def output_probabilities(input_bitstring, U):
     for output_indices in possible_outputs:
         U_submatrix = generate_submatrix(U, input_bitstring, output_indices)
         PQT = np.abs(compute_permanent(U_submatrix)) ** 2
-        probabilities[tuple(output_indices)] = PQT/(np.prod([math.factorial(s)
-                                                             for s in input_bitstring]) * np.prod([math.factorial(t) for t in output_indices]))
+        probabilities[tuple(output_indices)] = PQT / (
+            np.prod([math.factorial(s) for s in input_bitstring])
+            * np.prod([math.factorial(t) for t in output_indices])
+        )
 
     total_prob = sum(probabilities.values())
     for key in probabilities:
@@ -203,10 +217,16 @@ def output_probabilities(input_bitstring, U):
 
 def generate_analitically(input_bitstring):
     input_bitstring = input_bitstring[::-1]
-    theta_list = [np.pi/4] * (len(input_bitstring) - 1)
+    theta_list = [np.pi / 4] * (len(input_bitstring) - 1)
     U = construct_unitary(theta_list)
     probabilities = output_probabilities(input_bitstring, U)
-    return sorted([(key[::-1]) for key, value in probabilities.items() if value > 1e-30 and sum(key) == sum(input_string)])
+    return sorted(
+        [
+            (key[::-1])
+            for key, value in probabilities.items()
+            if value > 1e-30 and sum(key) == sum(input_string)
+        ]
+    )
 
 
 if __name__ == "__main__":

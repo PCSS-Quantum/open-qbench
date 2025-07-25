@@ -1,4 +1,9 @@
-# Application Performance Benchmarks for Quantum Computers
+![logo](./docs/_static/logo.svg)
+# Open QBench
+
+
+Open QBench
+
 This repository contains a series of quantum application benchmarks meant to be run on different physical quantum devices to measure their performance and fidelity of the results [1].
 
 We identify a set of quantum algorithms, which exemplify the common approaches to performing quantum computations in different application areas. These include both the currently most commonly used near-term variational algorithms and routines used in the fault-tolerant QC.
@@ -34,5 +39,5 @@ pip install .[VQE,QSVM]
 ```
 
 ## References
-[1]: [Application Performance Benchmarks for Quantum Computers](https://arxiv.org/abs/2310.13637)
+[1]: [Application Performance Benchmarks for Quantum Computers](https://arxiv.org/abs/2310.13637) \
 [2]: [Application-Oriented Performance Benchmarks for Quantum Computing](https://arxiv.org/abs/2110.03137)
