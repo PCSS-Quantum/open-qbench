@@ -25,9 +25,9 @@ class CircuitSampler(BaseBenchmarkSampler):
 
 
 if __name__ == "__main__":
-    from qiskit_aer.primitives import Sampler
+    from qiskit_aer.primitives import SamplerV2
 
     from open_qbench.apps.qaoa import jssp_7q_24d
 
-    qiskit_sampler = CircuitSampler(Sampler())
+    qiskit_sampler = CircuitSampler(SamplerV2())
     print(qiskit_sampler.run(jssp_7q_24d()))
