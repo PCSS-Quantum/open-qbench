@@ -3,7 +3,7 @@ import math
 from qiskit import QuantumCircuit, QuantumRegister
 
 
-def ghz_direct_aqt(num_qubits: int) -> QuantumCircuit:
+def ghz_direct(num_qubits: int) -> QuantumCircuit:
     reg = QuantumRegister(size=num_qubits)
     circuit = QuantumCircuit(reg)
 
@@ -15,7 +15,7 @@ def ghz_direct_aqt(num_qubits: int) -> QuantumCircuit:
     return circuit
 
 
-def ghz_decoherence_free_aqt(num_qubits: int) -> QuantumCircuit:
+def ghz_decoherence_free(num_qubits: int) -> QuantumCircuit:
     reg = QuantumRegister(size=num_qubits)
     circuit = QuantumCircuit(reg)
     circuit.sx(0)
@@ -36,11 +36,3 @@ def ghz_decoherence_free_aqt(num_qubits: int) -> QuantumCircuit:
     circuit.barrier(list(range(num_qubits)))
     circuit.measure_all()
     return circuit
-
-
-if __name__ == "__main__":
-    qc = ghz_direct_aqt(3)
-    print(qc)
-
-    qc = ghz_decoherence_free_aqt(4)
-    print(qc)

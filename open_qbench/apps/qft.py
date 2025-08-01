@@ -26,12 +26,3 @@ def prepare_QFT(encoded_number: int):
     circuit.name = f"QFT_{n_qubits}q"
 
     return circuit
-
-
-if __name__ == "__main__":
-    qc = prepare_QFT(24)
-
-    from qiskit.primitives import Sampler
-
-    res = Sampler().run(qc).result().quasi_dists[0]
-    print(res)

@@ -16,7 +16,6 @@
 """The FeatureMap class adapted from qiskit-runtime supplemented with code for preparing MNIST data for QSVM"""
 
 import csv
-import os
 from importlib.resources import files
 
 import numpy as np
@@ -140,9 +139,7 @@ def prepare_qsvm_circuit(train_data):
     fm = FeatureMap(feature_dimension=d)
 
     circuit = fm.construct_circuit(data=train_data[0])
-
     circuit.measure_all()
-
     return circuit
 
 
@@ -161,9 +158,9 @@ def load_csv_data(path: str):
 
 
 def load_prepared_mnist(
-    file: str, train_size: int = 20, img_dim=3, seed: int | None = None
+    path: str, train_size: int = 20, img_dim=3, seed: int | None = None
 ):
-    data = load_csv_data(file)
+    data = load_csv_data(path)
     x_train = data[:, 1:]
     y_train = data[:, 0]
     np.random.seed(seed)
@@ -176,20 +173,17 @@ def load_prepared_mnist(
         [resize(img, (img_dim, img_dim), anti_aliasing=True) for img in x_train]
     )
     x_train = x_train.reshape(-1, img_dim * img_dim)
-
     y_train, x_train = sort_2_arrays(y_train, x_train)
-
     y_train = (y_train * 2) - 1
-
     return x_train, y_train
 
 
 def trained_qsvm_8q() -> tuple[QuantumCircuit, tuple[float, ...]]:
-    datafile = files("open_qbench.data").joinpath("mnist_train100.csv")
+    datafile = str(files("open_qbench.data").joinpath("mnist_train100.csv"))
     train_data_x, _ = load_prepared_mnist(datafile, 20, 4, seed=123)
     circuit = prepare_qsvm_circuit(train_data_x)
     circuit.name = "QSVM_MNIST_8q"
-    parameters = [
+    parameters = (
         0.61069116,
         1.99988148,
         1.05376726,
@@ -198,15 +192,5 @@ def trained_qsvm_8q() -> tuple[QuantumCircuit, tuple[float, ...]]:
         1.38195184,
         2.43730072,
         0.21604097,
-    ]
+    )
     return circuit, parameters
-
-
-if __name__ == "__main__":
-    dirname = os.path.dirname(__file__)
-    qc, params = trained_qsvm_8q()
-
-    from qiskit.primitives import Sampler
-
-    res = Sampler().run(qc, params).result().quasi_dists
-    print(res)

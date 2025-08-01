@@ -1,10 +1,12 @@
-![logo](./docs/_static/logo.svg)
+<p align="center">
+  <img src="./docs/_static/logo-dark.svg" />
+</p>
+
 # Open QBench
 
+Open QBench is a software framework for defining and executing benchmarks on different levels of the quantum-classical stack.
 
-Open QBench
-
-This repository contains a series of quantum application benchmarks meant to be run on different physical quantum devices to measure their performance and fidelity of the results [1].
+This repository also contains a series of quantum application benchmarks meant to be executed on different physical quantum devices to measure their performance and fidelity of the results [1].
 
 We identify a set of quantum algorithms, which exemplify the common approaches to performing quantum computations in different application areas. These include both the currently most commonly used near-term variational algorithms and routines used in the fault-tolerant QC.
 

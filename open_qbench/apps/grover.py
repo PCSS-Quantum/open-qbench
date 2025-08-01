@@ -16,7 +16,7 @@ def grover_nq(num_qubits: int, marked_state: int | str) -> QuantumCircuit:
         if int(q) == 0:
             marking_circ.x(i)
 
-    circuit = QuantumCircuit(num_qubits, num_qubits)
+    circuit = QuantumCircuit(num_qubits)
     circuit.h(range(num_qubits))
     circuit &= marking_circ
     circuit.mcp(math.pi, list(range(num_qubits - 1)), num_qubits - 1)
@@ -26,17 +26,7 @@ def grover_nq(num_qubits: int, marked_state: int | str) -> QuantumCircuit:
     circuit.mcp(math.pi, list(range(num_qubits - 1)), num_qubits - 1)
     circuit.x(range(num_qubits))
     circuit.h(range(num_qubits))
-    circuit.measure(range(num_qubits), range(num_qubits))
+    circuit.measure_all()
 
     circuit.name = f"Grover_{num_qubits}q"
     return circuit
-
-
-if __name__ == "__main__":
-    qc = grover_nq(4, 10)
-    print(qc.draw())
-    from qiskit.primitives import Sampler
-
-    res = Sampler().run(qc).result().quasi_dists[0]
-    sorted_probs = dict(sorted(res.items(), key=lambda item: item[1]))
-    print(sorted_probs)

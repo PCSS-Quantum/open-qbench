@@ -28,7 +28,7 @@ def jssp_7q_24d() -> tuple[QuantumCircuit, tuple[float, ...]]:
     )
     qc = QAOAAnsatz(hamiltonian, reps=1)
     qc.measure_all()
-    params = [0.388917, 5.44861221]
+    params = (0.388917, 5.44861221)
     qc.name = "QAOA_JSSP_7q"
 
     return qc, params
