@@ -21,14 +21,13 @@ The following main metrics based on best practices discussed in [2] have been id
 
 The following benchmarks are currently implemented:
 
-| Benchmark   | Number of Qubits |
-|-------------|------------------|
-| VQE (UCCSD) | 3                |
-| QAOA (JSSP) | 7                |
-| QSVM        | 8                |
-| QFT         | arbitrary        |
-| Grover      | arbitrary        |
-| Toffoli     | 5                |
+- VQE (UCCSD)
+- QAOA (JSSP)
+- QSVM
+- QFT
+- Grover
+- Toffoli
+- BBS (JSSP)
 
 ## Installation
 To install this package with minimal requirements use `pip`:

@@ -22,7 +22,6 @@ def prepare_QFT(encoded_number: int):
         insert_barriers=True,
         name="qft",
     )
-    circuit.measure_all()
     circuit.name = f"QFT_{n_qubits}q"
 
     return circuit

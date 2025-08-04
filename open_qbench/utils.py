@@ -16,7 +16,7 @@ def get_fake_backend_sampler(
     shots: int | None = None,
     seed: int | None = None,
 ) -> AerSampler:
-    """Creates a sampler from qiskit_aer based on a noise model supplied by a Qiskit fake backend
+    """Create a sampler from qiskit_aer based on a noise model supplied by a Qiskit fake backend.
 
     Args:
         fake_backend (FakeBackendV2): an object representing a Qiskit fake backend
@@ -26,6 +26,7 @@ def get_fake_backend_sampler(
 
     Returns:
         AerSampler: _description_
+
     """
     coupling_map = fake_backend.coupling_map
     noise_model = NoiseModel.from_backend(fake_backend)
@@ -60,6 +61,7 @@ def calculate_from_file(file: str) -> float:
 
     Returns:
         float: Normalized fidelity of the provided distributions
+
     """
     with open(file, "rb") as f:
         result = json.load(f)

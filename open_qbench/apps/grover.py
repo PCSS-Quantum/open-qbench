@@ -26,7 +26,6 @@ def grover_nq(num_qubits: int, marked_state: int | str) -> QuantumCircuit:
     circuit.mcp(math.pi, list(range(num_qubits - 1)), num_qubits - 1)
     circuit.x(range(num_qubits))
     circuit.h(range(num_qubits))
-    circuit.measure_all()
 
     circuit.name = f"Grover_{num_qubits}q"
     return circuit

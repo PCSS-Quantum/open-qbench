@@ -43,6 +43,9 @@ line-length = 88
 select = ["E", "F", "W", "I", "UP", "B", "A", "TID", "ISC", "SIM", "RUF"]
 ignore = ["E501"]
 
+[tool.ruff.format]
+docstring-code-format = true
+
 [tool.mypy]
 python_version = "3.12"
 exclude = ["docs/"]

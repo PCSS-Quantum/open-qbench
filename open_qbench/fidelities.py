@@ -1,7 +1,4 @@
-"""
-This file collects different measures of fidelity between two probability distributions
-for use with the benchmarking suite.
-"""
+"""A file collecting different measures of fidelity between two probability distributions for use with the benchmarking suite."""
 
 import itertools
 import math
@@ -11,7 +8,7 @@ from ptseries.tbi import create_tbi
 
 
 def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
-    """Normalized fidelity of Lubinski et al."""
+    """Compute normalized fidelity of Lubinski et al."""
     backend_fidelity = classical_fidelity(dist_ideal, dist_backend)
     uniform_fidelity = fidelity_with_uniform(dist_ideal)
 
@@ -22,7 +19,7 @@ def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
 
 def create_normalized_fidelity(input_state):
     def normalized_fidelity_orca(dist_ideal: dict, dist_backend: dict) -> float:
-        """Normalized fidelity modified for Boson Sampling"""
+        """Compute normalized fidelity modified for Boson Sampling."""
         backend_fidelity = classical_fidelity_orca(
             dist_ideal, dist_backend, input_state
         )
@@ -39,7 +36,7 @@ def create_normalized_fidelity(input_state):
 
 
 def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
-    r"""Compute classical fidelity of two probability distributions
+    r"""Compute classical fidelity of two probability distributions.
 
     Args:
         dist_a (dict): Distribution of experiment A
@@ -48,10 +45,11 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
     Returns:
         float: Classical fidelity given by:
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
+
     """
     num_qubits = len(next(iter(dist_a.keys())))
     bitstrings = ("".join(i) for i in itertools.product("01", repeat=num_qubits))
-    fidelity = 0
+    fidelity = 0.0
     for b in bitstrings:
         p_a = dist_a.get(b, 0)
         p_b = dist_b.get(b, 0)
@@ -63,7 +61,7 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
 def classical_fidelity_orca(
     dist_a: dict, dist_b: dict, input_state: list[int]
 ) -> float:
-    r"""Compute classical fidelity of two probability distributions
+    r"""Compute classical fidelity of two probability distributions.
 
     Args:
         dist_a (dict): Distribution of experiment A
@@ -72,9 +70,10 @@ def classical_fidelity_orca(
     Returns:
         float: Classical fidelity given by:
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
+
     """
     bitstrings = generate_all_possible_outputs_orca(input_state)
-    fidelity = 0
+    fidelity = 0.0
     for b in bitstrings:
         p_a = dist_a.get(b, 0)
         p_b = dist_b.get(b, 0)
@@ -84,7 +83,7 @@ def classical_fidelity_orca(
 
 
 def fidelity_with_uniform(dist: dict) -> float:
-    r"""Compute classical fidelity of a probability distribution with a same-sized uniform distribution
+    r"""Compute classical fidelity of a probability distribution with a same-sized uniform distribution.
 
     Args:
         dist (dict): Probability distribution
@@ -92,9 +91,10 @@ def fidelity_with_uniform(dist: dict) -> float:
     Returns:
         float: Classical fidelity given by:
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
+
     """
     num_qubits = len(next(iter(dist.keys())))
-    fidelity = 0
+    fidelity = 0.0
     uniform_prob = 1 / 2**num_qubits
     for prob in dist.values():
         fidelity += math.sqrt(prob * uniform_prob)

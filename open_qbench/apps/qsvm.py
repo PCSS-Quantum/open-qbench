@@ -33,17 +33,17 @@ class FeatureMap:
         feature_dimension: int,
         entangler_map: list[list] | None = None,
     ):
-        """
-        Args:
+        """Args:
             feature_dimension (int): number of features, twice the number
                                      of qubits for this encoding
             entangler_map (list[list]): connectivity of qubits with a list of [source, target],
                                         or None for full entanglement. Note that the order in
                                         the list is the order of applying the two-qubit gate.
+
         Raises:
             ValueError: If the value of ``feature_dimension`` is not an even integer.
-        """
 
+        """
         if isinstance(feature_dimension, int):
             if feature_dimension % 2 == 0:
                 self._feature_dimension = feature_dimension
@@ -94,8 +94,8 @@ class FeatureMap:
             QuantumCircuit: a quantum circuit transforming data x
         Raises:
             ValueError: If the input parameters or vector are invalid
-        """
 
+        """
         if isinstance(parameters, np.ndarray):
             if isinstance(parameters, int | float):
                 raise ValueError("Parameters must be a list.")
@@ -139,7 +139,6 @@ def prepare_qsvm_circuit(train_data):
     fm = FeatureMap(feature_dimension=d)
 
     circuit = fm.construct_circuit(data=train_data[0])
-    circuit.measure_all()
     return circuit
 
 

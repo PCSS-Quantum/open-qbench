@@ -34,5 +34,4 @@ def ghz_decoherence_free(num_qubits: int) -> QuantumCircuit:
         if qubit % 2 == 1:
             circuit.x(qubit)
     circuit.barrier(list(range(num_qubits)))
-    circuit.measure_all()
     return circuit

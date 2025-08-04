@@ -19,8 +19,8 @@ from qiskit_nature.second_q.transformers import (
 def uccsd_3q_56d() -> tuple[QuantumCircuit, tuple[float, ...]]:
     """Returns a 3-qubit UCCSD circuit with normalized depth 56, as in the document.
     Returned parameters are chosen arbitrarily, so that the final distribution is
-    not uniform."""
-
+    not uniform.
+    """
     mol = MoleculeInfo(["Li", "H"], [(0.0, 0.0, 0.0), (0.0, 0.0, 1.55)])
     driver = PySCFDriver.from_molecule(mol, basis="sto-3g")
 
@@ -43,7 +43,6 @@ def uccsd_3q_56d() -> tuple[QuantumCircuit, tuple[float, ...]]:
         generalized=False,
         reps=1,
     )
-    ansatz.measure_all()
     ansatz.name = "VQE_UCCSD_LiH_3q"
     params = (0.08670186, 0.41080424, 0.96417694, 0.17362798)
 
