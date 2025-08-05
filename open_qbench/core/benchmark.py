@@ -9,7 +9,7 @@ from qiskit.providers import Backend
 
 from open_qbench.photonics import PhotonicCircuit
 
-type QuantumProgram = (
+QuantumProgram = (
     QuantumCircuit
     | tuple[QuantumCircuit, Iterable[float]]
     | PhotonicCircuit
