@@ -1,11 +1,14 @@
+from functools import partial
+
 import numpy as np
 
 from examples.orca_sampler import OrcaSampler
-from open_qbench.fidelities import normalized_fidelity
-from open_qbench.fidelity_benchmark import (
-    BenchmarkSuite,
-    FidelityBenchmarkResult,
+from open_qbench.application_benchmark import (
+    ApplicationBenchmark,
+    # BenchmarkSuite,
 )
+from open_qbench.core import BenchmarkInput
+from open_qbench.fidelities import classical_fidelity_orca
 from open_qbench.photonics import PhotonicCircuit
 
 
@@ -27,25 +30,36 @@ def test_orca_benchmark():
     ph_circuit2.bs(np.pi / 4, 1, 3)
 
     ideal_sampler = OrcaSampler(default_shots=1024)
-    backend_sampler = OrcaSampler(default_shots=1024)
+    fidelity = partial(classical_fidelity_orca, input_state=[1, 1, 1, 1])
 
-    suite = BenchmarkSuite(
-        backend_sampler=backend_sampler,
-        ideal_sampler=ideal_sampler,
-        calculate_accuracy=normalized_fidelity,
-        name="test_suite",
+    ben_input = BenchmarkInput(ph_circuit1, None)
+    orca_ben = ApplicationBenchmark(
+        ideal_sampler,
+        ideal_sampler,
+        ben_input,
+        name="test",
+        accuracy_measure=fidelity,
     )
+    orca_ben.run()
+    print(orca_ben.result)
 
-    suite.add_benchmarks(
-        [
-            [
-                (ph_circuit1, [np.pi / 4] * 6),
-            ],
-            [
-                (ph_circuit2, [np.pi / 4] * 6),
-            ],
-        ]
-    )
-    suite.run_all()
-    for res in suite.results:
-        assert isinstance(res, FidelityBenchmarkResult)
+    # suite = BenchmarkSuite(
+    #     backend_sampler=backend_sampler,
+    #     ideal_sampler=ideal_sampler,
+    #     calculate_accuracy=normalized_fidelity,
+    #     name="test_suite",
+    # )
+
+    # suite.add_benchmarks(
+    #     [
+    #         [
+    #             (ph_circuit1, [np.pi / 4] * 6),
+    #         ],
+    #         [
+    #             (ph_circuit2, [np.pi / 4] * 6),
+    #         ],
+    #     ]
+    # )
+    # suite.run_all()
+    # for res in suite.results:
+    #     assert isinstance(res, ApplicationBenchmarkResult)

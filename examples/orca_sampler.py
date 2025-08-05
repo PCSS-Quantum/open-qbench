@@ -15,7 +15,7 @@ from open_qbench.photonics.photonic_gates import (
     BS,
     PhotonicCircuitInstruction,
 )
-from open_qbench.sampler import BosonicSampler
+from open_qbench.sampler.bosonic_sampler import BosonicSampler, PubLike
 
 
 class OrcaJob(PrimitiveJob):
@@ -75,7 +75,8 @@ class OrcaResult(PrimitiveResult):
 
 class OrcaSampler(BosonicSampler):
     """This class is separate from the library as the ptseries SDK
-    is not public and we want to avoid adding it as dependency."""
+    is not public and we want to avoid adding it as dependency.
+    """
 
     def __init__(
         self,
@@ -92,7 +93,7 @@ class OrcaSampler(BosonicSampler):
 
     def run(
         self,
-        pubs: Iterable[tuple[PhotonicCircuit, Iterable[float]]],
+        pubs: Iterable[PubLike],
         *,
         shots: int | None = None,
         options: dict | None = None,
@@ -105,7 +106,8 @@ class OrcaSampler(BosonicSampler):
             options = default_copy
         if shots is None:
             shots = self._default_shots
-        validated_pubs = [self._extract_lengths(pub) for pub in pubs]
+        coerced_pubs = [self._coerce_pubs(pub) for pub in pubs]
+        validated_pubs = [self._extract_lengths(pub) for pub in coerced_pubs]
         if "tbi_type" in options and "url" in options and options["tbi_type"] == "PT-1":
             job = OrcaJob(self._run_orca, validated_pubs, options, shots)
         else:
@@ -134,6 +136,18 @@ class OrcaSampler(BosonicSampler):
             sim_results = tbi.sample(input_state, thetas, shots)
             results.append(sim_results)
         return PrimitiveResult(results)
+
+    def _coerce_pubs(self, pub):
+        if isinstance(pub, PhotonicCircuit):
+            # get thetas
+            thetas = []
+            for ins in pub:
+                thetas.append(ins.params[0])
+            coerced_pub = (pub, thetas)
+        else:
+            coerced_pub = pub
+
+        return coerced_pub
 
     def _extract_lengths(
         self, pub: tuple[PhotonicCircuit, Iterable[float]]

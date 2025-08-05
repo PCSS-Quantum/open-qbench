@@ -1,12 +1,22 @@
 import json
 import os
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
 
 from qiskit import QuantumCircuit
 from qiskit.providers import Backend
 
 from open_qbench.photonics import PhotonicCircuit
+
+type QuantumProgram = (
+    QuantumCircuit
+    | tuple[QuantumCircuit, Iterable[float]]
+    | PhotonicCircuit
+    | tuple[PhotonicCircuit, Iterable[float]]
+)
+"""A QuantumProgram defines what can be used as BenchmarkInput for executing benchmarks.
+"""
 
 
 class BenchmarkError(Exception):
@@ -19,21 +29,27 @@ class BenchmarkInput:
     It can be one of several things:
 
     * a workflow desribing a complete computational problem,
-    * quantum circuit*,
-    * photonic circuit*,
-    * QUBO matrix*,
+    * quantum circuit\\*,
+    * photonic circuit\\*,
+    * QUBO matrix,
     * pulse schedule.
 
-    * - currently implemented
+    \\* - currently implemented
     """
 
     def __init__(
         self,
-        program: QuantumCircuit | PhotonicCircuit,
-        backend: Backend | None,
+        program: QuantumProgram,
+        backend: Backend | None = None,
     ) -> None:
-        self.program = program
+        # self.program = program
         self.backend = backend
+
+        if isinstance(program, tuple):
+            self.program = program[0]
+            self.params = program[1]
+        else:
+            self.program = program
 
     def __repr__(self):
         return f"Program: {self.program.name}, Backend: {self.backend}"

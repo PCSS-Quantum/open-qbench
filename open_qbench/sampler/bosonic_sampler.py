@@ -5,12 +5,18 @@ from qiskit.primitives import BasePrimitiveJob, BaseSamplerV2
 
 from open_qbench.photonics import PhotonicCircuit
 
+type PubLike = (
+    PhotonicCircuit
+    | Iterable[PhotonicCircuit]
+    | tuple[PhotonicCircuit, Iterable[float]]
+)
+
 
 class BosonicSampler(BaseSamplerV2):
     @abstractmethod
     def run(
         self,
-        pubs: Iterable[tuple[PhotonicCircuit, Iterable[float]]],
+        pubs: Iterable[PubLike],
         *,
         shots: int | None = None,
     ) -> BasePrimitiveJob:
@@ -23,4 +29,5 @@ class BosonicSampler(BaseSamplerV2):
 
         Returns:
             Job object of BosonicSampler's result
+
         """

@@ -11,7 +11,6 @@ def create_bs_circuit(size: int, qm1: int, qm2: int):
     pc = PhotonicCircuit(pr)
 
     pc.bs(theta=1.5, qumode1=qm1, qumode2=qm2)
-    return pc
 
 
 def test_circuit_creation():

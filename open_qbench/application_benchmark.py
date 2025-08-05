@@ -12,6 +12,7 @@ from open_qbench.core import (
     BenchmarkResult,
     HighLevelBenchmark,
 )
+from open_qbench.photonics import PhotonicCircuit
 
 # @dataclass
 # class ApplicationBenchmarkResult(BenchmarkResult):
@@ -115,30 +116,46 @@ class ApplicationBenchmark(HighLevelBenchmark):
         """
         self._prepare_input()
         # run compiled or logical circuit?
-        ideal_sampler_counts = (
-            self.reference_state_sampler.run([self.compiled_input])
-            .result()[0]
-            .data.meas.get_counts()
-        )
+        if isinstance(self.benchmark_input.program, PhotonicCircuit):
+            ideal_sampler_counts = self.reference_state_sampler.run(
+                [self.compiled_input]
+            ).result()[0]
+        elif isinstance(self.benchmark_input.program, QuantumCircuit):
+            ideal_sampler_counts = (
+                self.reference_state_sampler.run([self.compiled_input])
+                .result()[0]
+                .data.meas.get_counts()
+            )
+
+        else:
+            raise NotImplementedError
+
         self.result.execution_data["dist_ideal"] = ideal_sampler_counts
 
         start = time.time()
-        backend_sampler_counts = (
-            self.backend_sampler.run([self.compiled_input])
-            .result()[0]
-            .data.meas.get_counts()
-        )
+        if isinstance(self.benchmark_input.program, PhotonicCircuit):
+            backend_sampler_counts = self.backend_sampler.run(
+                [self.compiled_input]
+            ).result()[0]
+        elif isinstance(self.benchmark_input.program, QuantumCircuit):
+            backend_sampler_counts = (
+                self.backend_sampler.run([self.compiled_input])
+                .result()[0]
+                .data.meas.get_counts()
+            )
+            executed_circuit = qasm3.dumps(self.compiled_input)
+            self.result.execution_data["width"] = self.benchmark_input.width
+            self.result.execution_data["normalized_depth"] = self._normalized_depth(
+                self.benchmark_input
+            )
+            self.result.execution_data["depth_transpiled"] = self.compiled_input.depth()
+            self.result.execution_data["executed_circuit"] = executed_circuit
+        else:
+            raise NotImplementedError
+
         execution_time = time.time() - start
         self.result.execution_data["dist_backend"] = backend_sampler_counts
-
-        executed_circuit = qasm3.dumps(self.compiled_input)
-        self.result.execution_data["executed_circuit"] = executed_circuit
         self.result.metrics["execution_time"] = execution_time
-        self.result.execution_data["width"] = self.benchmark_input.width
-        self.result.execution_data["normalized_depth"] = self._normalized_depth(
-            self.benchmark_input
-        )
-        self.result.execution_data["depth_transpiled"] = self.compiled_input.depth()
 
         self.result = self.analysis.run(self.result)
 
@@ -159,7 +176,8 @@ class ApplicationBenchmark(HighLevelBenchmark):
                 return trans_circuits.depth() - 1
             return trans_circuits.depth()
         else:
-            raise NotImplementedError
+            return 0
+            # TODO: implement for photonics
 
     def measure_creation_time(self):
         pass

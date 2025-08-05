@@ -4,7 +4,7 @@ import itertools
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
-from qiskit.circuit import Bit, ParameterExpression, Register
+from qiskit.circuit import Bit, Register
 
 
 class Qumode(Bit):
@@ -28,8 +28,7 @@ class PhotonicRegister(Register):
 
 
 class PhotonicOperation(ABC):
-    """
-    This interface mirrors qiskit.circuit.operation.Operation, but instead of num_qubits,
+    """This interface mirrors qiskit.circuit.operation.Operation, but instead of num_qubits,
     we have num_qumodes and instead of num_clbits, we have num_clints, which are used
     to count the photons.
 
@@ -183,7 +182,7 @@ class BS(PhotonicGate):
 
     def __init__(
         self,
-        theta: ParameterExpression,
+        theta: float,
         label: str | None = None,
         *,
         duration=None,

@@ -2,7 +2,7 @@ from collections.abc import Sequence
 
 import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.circuit import CircuitError, ParameterExpression
+from qiskit.circuit import CircuitError
 
 from open_qbench.photonics.photonic_gates import (
     BS,
@@ -20,12 +20,11 @@ try:
 except ModuleNotFoundError:
     PRINTING_ENABLED = False
 
-QumodeSpecifier = Qumode | PhotonicRegister | int | slice | Sequence[Qumode | int]
+type QumodeSpecifier = Qumode | PhotonicRegister | int | slice | Sequence[Qumode | int]
 
 
 class PhotonicCircuit(QuantumCircuit):
-    """This class was created to provide a Qiskit-like interface for creating photonic
-    quantum circuits.
+    """A class created to provide a Qiskit-like interface for creating photonic quantum circuits.
 
     Thanks to the PhotonicCircuit type, the :class:'BenchmarkSampler' can recognize
     the type of the circuit and call an appropriate sampler internally, eliminating the
@@ -54,17 +53,17 @@ class PhotonicCircuit(QuantumCircuit):
             self.pregs.append(PhotonicRegister(len(input_state)))
 
     def append(self, operation: PhotonicCircuitInstruction, qargs):
-        """Perform validation and broadcasting before calling _append"""
+        """Perform validation and broadcasting before calling _append."""
         # TODO Implement safe append
-        self._check_dups()
-        operation.broadcast_arguments()
+        # self._check_dups()
+        # operation.broadcast_arguments()
 
     def _append(
         self,
         instruction: PhotonicOperation,
         qargs: Sequence[Qumode],
     ) -> PhotonicOperation:
-        """Append to circuit directly, without any validation
+        """Append to circuit directly, without any validation.
 
         Args:
             instruction (PhotonicOperation): The instruction to be appended to the circuit
@@ -75,6 +74,7 @@ class PhotonicCircuit(QuantumCircuit):
 
         Returns:
             Operation: The appended instruction
+
         """
         if not isinstance(instruction, PhotonicGate):
             raise CircuitError("Expected a PhotonicGate")
@@ -90,7 +90,7 @@ class PhotonicCircuit(QuantumCircuit):
 
     def bs(
         self,
-        theta: ParameterExpression,  # float for now, later extend to Parameter
+        theta: float,  # float for now, later extend to Parameter
         qumode1: int | Qumode,
         qumode2: int | Qumode,
         label: str | None = None,
@@ -116,6 +116,7 @@ class PhotonicCircuit(QuantumCircuit):
 
         Raises:
             ModuleNotFoundError: If optional dependencies are not installed properly this exception is raised.
+
         """
         if PRINTING_ENABLED is False:
             raise ModuleNotFoundError(
@@ -152,8 +153,9 @@ class PhotonicCircuit(QuantumCircuit):
             representation.draw(structure, input_state, padding=padding)
             plt.show()  # type: ignore
 
-    @staticmethod
+    @classmethod
     def from_tbi_params(
+        cls,
         input_state: list[int],
         loop_lengths: list[int],
         thetas: list[float],
