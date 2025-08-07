@@ -7,23 +7,15 @@
 [![License](https://img.shields.io/github/license/PCSS-quantum/open-qbench)](https://github.com/PCSS-Quantum/open-qbench/blob/qbench_v2/LICENSE)
 
 
-Open QBench is a software framework for defining and executing benchmarks on different levels of the quantum-classical stack:
+Open QBench is an open-source software framework for defining and executing benchmarks across the quantum-classical stack. It offers support for benchmarks on the:
 
-- hybrid (complete workflows)
-- high-level (algorithms)
-- low-level (compiled quantum programs)
+- hybrid level (quantum-classical workflows)
+- high level (quantum algorithms)
+- low level (compiled quantum programs)
 
-This repository also contains a series of high-level quantum application benchmarks meant to be executed on different physical quantum devices to measure their performance and fidelity of the results
+The framework is supports gate-based quantum computers, photonic systems (boson samplers), and quantum annealers.
 
-The following high-level application benchmarks are currently implemented:
-
-- VQE (UCCSD)
-- QAOA (JSSP)
-- QSVM
-- QFT
-- Grover
-- Toffoli
-- BBS (JSSP)
+Beyond the framework, this package also includes a suite of pre-implemented, high-level quantum application benchmarks. These are specifically crafted to evaluate the performance and fidelity of results on diverse physical quantum devices.
 
 ## Installation
 ### Using uv (Recommended)
@@ -40,14 +32,17 @@ We provide a number of optional dependencies (referred to as "extras") for execu
 
 Available extras include:
 
-- Benchmarks: VQE, QSVM
-- Providers: IBM, AQT, ORCA
+- Benchmarks: `VQE`, `QSVM`
+- Providers: `IBM`, `AQT`, `ORCA`
 
 To install specific optional dependencies, use the `--extra` flag. You can specify multiple extras in a single command. For example, to run the VQE benchmark on an IBM Quantum machine, you would run:
 ```
 uv sync --extra VQE --extra IBM
 ```
 You can combine any of the available extras as needed.
+
+> [!NOTE]
+> To install the ORCA extra, you'll first need to add your SSH key to the ORCA Computing SDK website at https://sdk.orcacomputing.com/.
 
 ### Using pip
 The package can also be installed with pip.
@@ -62,7 +57,7 @@ pip install ".[VQE,IBM]"
 
 ## Usage
 ### How to run a benchmark
-This example shows how to execute a simple application benchmark using a Grover circuit on simulated IBM Quantum hardware (see *Installation* to see how to enable IBM support).
+This example shows how to execute a simple application benchmark using a Grover circuit on simulated IBM Quantum hardware (see [Installation](#installation) to see how to enable IBM support).
 
 First define samplers used for collecting distributions.
 
