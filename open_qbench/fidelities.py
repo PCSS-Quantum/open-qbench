@@ -4,7 +4,6 @@ import itertools
 import math
 
 import numpy as np
-from ptseries.tbi import create_tbi
 
 
 def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
@@ -116,6 +115,8 @@ def counts_to_dist(counts: dict) -> dict:
 
 
 def generate_all_samples_orca(input_state):
+    from ptseries.tbi import create_tbi
+
     time_bin_interferometer = create_tbi()
     samples = time_bin_interferometer.sample(
         input_state=input_state,

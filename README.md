@@ -2,24 +2,20 @@
   <img src="./docs/_static/logo-dark.svg" />
 </p>
 
+
 # Open QBench
+[![License](https://img.shields.io/github/license/PCSS-quantum/open-qbench)](https://github.com/PCSS-Quantum/open-qbench/blob/qbench_v2/LICENSE)
 
-Open QBench is a software framework for defining and executing benchmarks on different levels of the quantum-classical stack.
 
-This repository also contains a series of quantum application benchmarks meant to be executed on different physical quantum devices to measure their performance and fidelity of the results [1].
+Open QBench is a software framework for defining and executing benchmarks on different levels of the quantum-classical stack:
 
-We identify a set of quantum algorithms, which exemplify the common approaches to performing quantum computations in different application areas. These include both the currently most commonly used near-term variational algorithms and routines used in the fault-tolerant QC.
+- hybrid (complete workflows)
+- high-level (algorithms)
+- low-level (compiled quantum programs)
 
-In order to evaluate a given quantum system’s ability to execute an algorithm, we choose a single quantum circuit, which by design is meant to represent the most typical single execution, either hybrid or purely quantum. This is especially worth noting in the case of variational algorithms, where we do not intend to perform a full run, optimizing the parameters, but rather fix the parameters in place and estimate the fidelity on a single non-parameterized circuit. This is done carefully, in order to avoid cases where the ideal distribution is close to uniform.
+This repository also contains a series of high-level quantum application benchmarks meant to be executed on different physical quantum devices to measure their performance and fidelity of the results
 
-The logical quantum circuits for each benchmark are compiled into OpenQASM 2.0/3.0 assuming all-to-all connectivity and {Rx, Ry, Rz, CNOT} as the basis gate set. For execution on real quantum backends, these circuits can be freely recompiled and optimized, as long as they remain logically equivalent to the ones delivered within the described suite. This also means that while error mitigation is not meant to be a part of these benchmarks, error suppression techniques like dynamic decoupling can be used.
-
-The following main metrics based on best practices discussed in [2] have been identified:
-- Execution Time: time spent on quantum simulator or hardware backend running the circuit;
-- Circuit Depth: depth of the circuit after transpiling it to the basis gates set defined as {Rx, Ry, Rz, CNOT}
-- Fidelity: a measure of how well the simulator or hardware runs a particular benchmark;
-
-The following benchmarks are currently implemented:
+The following high-level application benchmarks are currently implemented:
 
 - VQE (UCCSD)
 - QAOA (JSSP)
@@ -30,15 +26,82 @@ The following benchmarks are currently implemented:
 - BBS (JSSP)
 
 ## Installation
-To install this package with minimal requirements use `pip`:
+### Using uv (Recommended)
+First, create and activate a virtual environment:
+```
+uv venv
+```
+To install the core dependencies of the package, run:
+```
+uv sync
+```
+### Optional dependencies (Extras)
+We provide a number of optional dependencies (referred to as "extras") for executing specific benchmarks or for enabling support for various quantum hardware providers.
+
+Available extras include:
+
+- Benchmarks: VQE, QSVM
+- Providers: IBM, AQT, ORCA
+
+To install specific optional dependencies, use the `--extra` flag. You can specify multiple extras in a single command. For example, to run the VQE benchmark on an IBM Quantum machine, you would run:
+```
+uv sync --extra VQE --extra IBM
+```
+You can combine any of the available extras as needed.
+
+### Using pip
+The package can also be installed with pip.
+To install the core dependencies run:
 ```
 pip install .
 ```
-The VQE and QSVM benchmarks require some additional dependencies, so in order to run these, install with:
+To install with specific optional dependencies (e.g., VQE and IBM):
 ```
-pip install .[VQE,QSVM]
+pip install ".[VQE,IBM]"
 ```
 
-## References
-[1]: [Application Performance Benchmarks for Quantum Computers](https://arxiv.org/abs/2310.13637) \
-[2]: [Application-Oriented Performance Benchmarks for Quantum Computing](https://arxiv.org/abs/2110.03137)
+## Usage
+### How to run a benchmark
+This example shows how to execute a simple application benchmark using a Grover circuit on simulated IBM Quantum hardware (see *Installation* to see how to enable IBM support).
+
+First define samplers used for collecting distributions.
+
+```python
+from qiskit_aer.primitives import SamplerV2 as AerSampler
+from qiskit_ibm_runtime import Sampler
+from qiskit_ibm_runtime.fake_provider import FakeGeneva
+
+ideal_sampler = AerSampler(default_shots=1000)
+backend_sampler = Sampler(FakeGeneva())
+```
+
+Then use Open QBench to generate a quantum circuit and create your benchmark by defining input and a function used to calculate fidelity.
+
+```python
+from open_qbench import ApplicationBenchmark
+from open_qbench.apps import grover
+from open_qbench.core import BenchmarkInput
+from open_qbench.fidelities import normalized_fidelity
+
+qc = grover.grover_nq(3, 6)
+backend = backend_sampler.backend()
+benchmark_input = BenchmarkInput(qc, backend)
+
+ab = ApplicationBenchmark(
+    backend_sampler,
+    ideal_sampler,
+    benchmark_input,
+    name="Grover_benchmark",
+    accuracy_measure=normalized_fidelity,
+)
+
+ab.run()
+print(ab.result)
+
+```
+
+## Contributing
+We welcome contributions from the community! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed guide.
+
+## License
+[Apache License 2.0](https://github.com/PCSS-Quantum/open-qbench/blob/qbench_v2/LICENSE)
