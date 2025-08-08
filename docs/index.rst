@@ -116,7 +116,9 @@ Then use Open QBench to generate a quantum circuit and create your benchmark by 
    ab.run()
    print(ab.result)
 
-The contents of this documentation is as follows
+Contents
+--------
+
 .. toctree::
    :maxdepth: 1
 
