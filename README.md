@@ -42,7 +42,7 @@ uv sync --extra VQE --extra IBM
 You can combine any of the available extras as needed.
 
 > [!NOTE]
-> To install the ORCA extra, you'll first need to add your SSH key to the ORCA Computing SDK website at https://sdk.orcacomputing.com/.
+> To install the `ORCA` extra, you'll first need to add your SSH key to the ORCA Computing SDK website at https://sdk.orcacomputing.com/.
 
 ### Using pip
 The package can also be installed with pip.
@@ -50,14 +50,14 @@ To install the core dependencies run:
 ```
 pip install .
 ```
-To install with specific optional dependencies (e.g., VQE and IBM):
+To install with specific optional dependencies (e.g., `VQE` and `IBM`):
 ```
 pip install ".[VQE,IBM]"
 ```
 
 ## Usage
 ### How to run a benchmark
-This example shows how to execute a simple application benchmark using a Grover circuit on simulated IBM Quantum hardware (see [Installation](#installation) to see how to enable IBM support).
+This example shows how to execute a simple application benchmark using a Grover circuit on simulated IBM Quantum hardware (check [Installation](#installation) to see how to enable IBM support).
 
 First define samplers used for collecting distributions.
 

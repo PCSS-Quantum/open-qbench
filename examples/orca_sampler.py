@@ -75,8 +75,7 @@ class OrcaResult(PrimitiveResult):
 
 class OrcaSampler(BosonicSampler):
     """This class is separate from the library as the ptseries SDK
-    is not public and we want to avoid adding it as dependency.
-    """
+    is not public and we want to avoid adding it as dependency."""
 
     def __init__(
         self,
