@@ -1,5 +1,3 @@
-from functools import partial
-
 import numpy as np
 
 from examples.orca_sampler import OrcaSampler

@@ -1,6 +1,5 @@
 """A file collecting different measures of fidelity between two probability distributions for use with the benchmarking suite."""
 
-import itertools
 import math
 
 import numpy as np
@@ -20,13 +19,18 @@ def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
 
 def create_normalized_fidelity(input_state: tuple):
     """Create a normalized fidelity function for a given input state -> ORCA PT"""
-    def normalized_fidelity_orca(dist_ideal: dict[tuple, float], dist_backend: dict[tuple, float]) -> float:
+
+    def normalized_fidelity_orca(
+        dist_ideal: dict[tuple, float], dist_backend: dict[tuple, float]
+    ) -> float:
         """Normalized fidelity modified for Boson Sampling"""
         total_photons = sum(input_state)
         num_possible = num_possible_samples(input_state)
         # filter out only 'correct' samples
         dist_ideal = {k: v for k, v in dist_ideal.items() if np.sum(k) <= total_photons}
-        dist_backend = {k: v for k, v in dist_backend.items() if np.sum(k) <= total_photons}
+        dist_backend = {
+            k: v for k, v in dist_backend.items() if np.sum(k) <= total_photons
+        }
 
         backend_fidelity = classical_fidelity(dist_ideal, dist_backend)
         uniform_fidelity = fidelity_with_uniform(dist_backend, num_possible)

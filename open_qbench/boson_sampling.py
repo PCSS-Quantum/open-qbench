@@ -1,4 +1,5 @@
 """Functions related to analytical generation of boson sampling results"""
+
 import itertools
 import math
 
@@ -56,6 +57,7 @@ def compute_permanent(mat):
 
 def construct_unitary(thetas):
     """Construct a unitary of a TBI with given beam splitter angles"""
+
     def beamsplitter_matrix(theta, n, i, j):
         U = np.eye(n, dtype=complex)
         cos_theta = np.cos(theta)

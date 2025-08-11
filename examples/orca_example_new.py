@@ -1,7 +1,5 @@
 """Running this example requires adding your SSH key to https://sdk.orcacomputing.com/ and installing with pip install .[ORCA]"""
 
-from functools import partial
-
 from orca_sampler import OrcaSampler
 
 from open_qbench.application_benchmark import ApplicationBenchmark

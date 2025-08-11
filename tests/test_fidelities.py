@@ -10,19 +10,24 @@ import time
 import numpy as np
 from ptseries.tbi import create_tbi
 
+from open_qbench.boson_sampling import num_possible_samples
 from open_qbench.fidelities import (
-    normalized_fidelity as normalized_fidelity_dev,
-    create_normalized_fidelity as create_normalized_fidelity_dev,
     classical_fidelity as classical_fidelity_dev,
+)
+from open_qbench.fidelities import (
+    create_normalized_fidelity as create_normalized_fidelity_dev,
+)
+from open_qbench.fidelities import (
     fidelity_with_uniform as fidelity_with_uniform_dev,
 )
-
-from open_qbench.boson_sampling import num_possible_samples
-
+from open_qbench.fidelities import (
+    normalized_fidelity as normalized_fidelity_dev,
+)
 
 # -------------------------------------------
 # Old functions from fidelities.py
 # -------------------------------------------
+
 
 def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
     """Normalized fidelity of Lubinski et al."""
@@ -153,6 +158,7 @@ def generate_all_possible_outputs_orca(input_state):
             all_possible_outputs.append(el)
     return all_possible_outputs
 
+
 # -------------------------------------------
 # / Old functions from fidelities.py
 # -------------------------------------------
@@ -164,17 +170,18 @@ def generate_all_possible_outputs_orca(input_state):
 
 def generate_random_dist_bits(n_qubits=4):
     bitstrings = ("".join(i) for i in itertools.product("01", repeat=n_qubits))
-    dist = np.random.randint(0, 100+1, size=(2**n_qubits,))
-    dist = dist/np.sum(dist)
-    return dict(zip(bitstrings, dist))
+    dist = np.random.randint(0, 100 + 1, size=(2**n_qubits,))
+    dist = dist / np.sum(dist)
+    return dict(zip(bitstrings, dist, strict=False))
 
 
 def generate_random_dist_orca(input_state):
     outputs = generate_all_samples_orca(input_state)
 
     dist = np.random.random_integers(0, 100, size=(len(outputs),))
-    dist = dist/np.sum(dist)
-    return dict(zip(outputs, dist))
+    dist = dist / np.sum(dist)
+    return dict(zip(outputs, dist, strict=False))
+
 
 # -------------------------------------------
 # / helpers
@@ -191,7 +198,9 @@ def test_classical_fidelity_orca():
     """Test if classical fidelity results match for orca distributions"""
     istate = [1, 0, 1, 0, 1, 0]
     d1, d2 = generate_random_dist_orca(istate), generate_random_dist_orca(istate)
-    assert np.allclose(classical_fidelity_dev(d1, d2), classical_fidelity_orca(d1, d2, istate))
+    assert np.allclose(
+        classical_fidelity_dev(d1, d2), classical_fidelity_orca(d1, d2, istate)
+    )
 
 
 def test_uniform_fidelity():
@@ -205,8 +214,10 @@ def test_uniform_fidelity_orca():
     istate = [1, 0, 1, 0, 1, 0]
     dist = generate_random_dist_orca(istate)
     assert np.allclose(
-        fidelity_with_uniform_dev(dist, num_possible_samples=num_possible_samples(istate)),
-        classical_fidelity_orca(dist, _uniform_dist_orca(istate), istate)
+        fidelity_with_uniform_dev(
+            dist, num_possible_samples=num_possible_samples(istate)
+        ),
+        classical_fidelity_orca(dist, _uniform_dist_orca(istate), istate),
     )
 
 
@@ -220,13 +231,16 @@ def test_normalized_fidelity_orca():
     """Test if normalized fidelity results match for orca distributions"""
     istate = [1, 0, 1, 0, 1, 0]
     d1, d2 = generate_random_dist_orca(istate), generate_random_dist_orca(istate)
-    old, new = create_normalized_fidelity(istate)(d1, d2), create_normalized_fidelity_dev(istate)(d1, d2)
+    old, new = (
+        create_normalized_fidelity(istate)(d1, d2),
+        create_normalized_fidelity_dev(istate)(d1, d2),
+    )
     assert np.allclose(old, new)
 
 
 def test_samples():
     """
-    Test if calculation of the number of possible samples matches 
+    Test if calculation of the number of possible samples matches
     between the ptseries tbi approach and our analytical approach
     """
     istate = [1, 0, 1, 0, 1, 0]
