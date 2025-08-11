@@ -8,7 +8,7 @@ from ptseries.tbi import create_tbi
 
 
 def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
-    """Compute normalized fidelity of Lubinski et al."""
+    """Normalized fidelity of Lubinski et al."""
     backend_fidelity = classical_fidelity(dist_ideal, dist_backend)
     uniform_fidelity = fidelity_with_uniform(dist_ideal)
 
@@ -19,13 +19,19 @@ def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
 
 def create_normalized_fidelity(input_state):
     def normalized_fidelity_orca(dist_ideal: dict, dist_backend: dict) -> float:
-        """Compute normalized fidelity modified for Boson Sampling."""
-        backend_fidelity = classical_fidelity_orca(
-            dist_ideal, dist_backend, input_state
-        )
-        uniform_fidelity = classical_fidelity_orca(
-            dist_ideal, _uniform_dist_orca(input_state), input_state
-        )
+        """Normalized fidelity modified for Boson Sampling"""
+        total_photons = np.sum(input_state)
+        num_bins = len(input_state)
+        num_possible = 0
+        for tp in range(total_photons+1):
+            num_possible += math.comb(tp+num_bins-1, num_bins-1)  # num of possible correct outputs
+
+        # filter out only 'correct' samples
+        dist_ideal = {k: v for k, v in dist_ideal.items() if np.sum(k) <= total_photons}
+        dist_backend = {k: v for k, v in dist_backend.items() if np.sum(k) <= total_photons}
+
+        backend_fidelity = classical_fidelity(dist_ideal, dist_backend)
+        uniform_fidelity = fidelity_with_uniform(dist_backend, num_possible)
 
         raw_fidelity = (backend_fidelity - uniform_fidelity) / (1 - uniform_fidelity)
 
@@ -36,7 +42,7 @@ def create_normalized_fidelity(input_state):
 
 
 def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
-    r"""Compute classical fidelity of two probability distributions.
+    r"""Compute classical fidelity of two probability distributions
 
     Args:
         dist_a (dict): Distribution of experiment A
@@ -45,11 +51,9 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
     Returns:
         float: Classical fidelity given by:
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
-
     """
-    num_qubits = len(next(iter(dist_a.keys())))
-    bitstrings = ("".join(i) for i in itertools.product("01", repeat=num_qubits))
-    fidelity = 0.0
+    bitstrings = dist_a.keys() | dist_b.keys()
+    fidelity = 0
     for b in bitstrings:
         p_a = dist_a.get(b, 0)
         p_b = dist_b.get(b, 0)
@@ -58,32 +62,8 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
     return fidelity
 
 
-def classical_fidelity_orca(
-    dist_a: dict, dist_b: dict, input_state: list[int]
-) -> float:
-    r"""Compute classical fidelity of two probability distributions.
-
-    Args:
-        dist_a (dict): Distribution of experiment A
-        dist_b (dict): Distribution of experiment B
-
-    Returns:
-        float: Classical fidelity given by:
-        F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
-
-    """
-    bitstrings = generate_all_possible_outputs_orca(input_state)
-    fidelity = 0.0
-    for b in bitstrings:
-        p_a = dist_a.get(b, 0)
-        p_b = dist_b.get(b, 0)
-        fidelity += math.sqrt(p_a * p_b)
-    fidelity = fidelity**2
-    return fidelity
-
-
-def fidelity_with_uniform(dist: dict) -> float:
-    r"""Compute classical fidelity of a probability distribution with a same-sized uniform distribution.
+def fidelity_with_uniform(dist: dict, num_possible_samples: int | None = None) -> float:
+    r"""Compute classical fidelity of a probability distribution with a same-sized uniform distribution
 
     Args:
         dist (dict): Probability distribution
@@ -91,28 +71,16 @@ def fidelity_with_uniform(dist: dict) -> float:
     Returns:
         float: Classical fidelity given by:
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
-
     """
     num_qubits = len(next(iter(dist.keys())))
-    fidelity = 0.0
-    uniform_prob = 1 / 2**num_qubits
+    fidelity = 0
+    if num_possible_samples is None:
+        num_possible_samples = 2**num_qubits
+    uniform_prob = 1 / num_possible_samples
     for prob in dist.values():
         fidelity += math.sqrt(prob * uniform_prob)
     fidelity = fidelity**2
     return fidelity
-
-
-def _uniform_dist_orca(input_state) -> dict:
-    samples = generate_all_samples_orca(input_state)
-    prob = 1 / len(samples)
-    dist = {s: prob for s in samples}
-    return dist
-
-
-def counts_to_dist(counts: dict) -> dict:
-    shots = sum(counts.values())
-    dist = {x: y / shots for x, y in counts.items()}
-    return dist
 
 
 def generate_all_samples_orca(input_state):
