@@ -8,7 +8,7 @@ from open_qbench.application_benchmark import (
     # BenchmarkSuite,
 )
 from open_qbench.core import BenchmarkInput
-from open_qbench.fidelities import classical_fidelity_orca
+from open_qbench.fidelities import classical_fidelity
 from open_qbench.photonics import PhotonicCircuit
 
 
@@ -30,7 +30,6 @@ def test_orca_benchmark():
     ph_circuit2.bs(np.pi / 4, 1, 3)
 
     ideal_sampler = OrcaSampler(default_shots=1024)
-    fidelity = partial(classical_fidelity_orca, input_state=[1, 1, 1, 1])
 
     ben_input = BenchmarkInput(ph_circuit1, None)
     orca_ben = ApplicationBenchmark(
@@ -38,7 +37,7 @@ def test_orca_benchmark():
         ideal_sampler,
         ben_input,
         name="test",
-        accuracy_measure=fidelity,
+        accuracy_measure=classical_fidelity,
     )
     orca_ben.run()
     print(orca_ben.result)
