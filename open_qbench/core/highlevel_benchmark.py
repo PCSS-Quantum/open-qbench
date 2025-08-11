@@ -1,8 +1,14 @@
-from open_qbench.core.benchmark import BaseAnalysis, BaseBenchmark, BenchmarkInput, BenchmarkResult
-from open_qbench.photonics import PhotonicCircuit
 from abc import abstractmethod
 
 from qiskit import QuantumCircuit, transpile
+
+from open_qbench.core.benchmark import (
+    BaseAnalysis,
+    BaseBenchmark,
+    BenchmarkInput,
+    BenchmarkResult,
+)
+from open_qbench.photonics import PhotonicCircuit
 
 
 class HighLevelBenchmark(BaseBenchmark):
