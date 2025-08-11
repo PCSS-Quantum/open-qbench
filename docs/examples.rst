@@ -4,91 +4,64 @@ Examples
 IBM Fidelity
 --------------
 
-::
+.. code-block:: python
 
     from qiskit_aer.primitives import SamplerV2 as AerSampler
+    from qiskit_ibm_runtime import Sampler
+    from qiskit_ibm_runtime.fake_provider import FakeGeneva
 
-    from qiskit_ibm_runtime.fake_provider.backends import FakeGeneva
+    from open_qbench import ApplicationBenchmark
+    from open_qbench.apps import grover
+    from open_qbench.core import BenchmarkInput
+    from open_qbench.fidelities import normalized_fidelity
 
-    from qc_app_benchmarks.apps import grover, qaoa, qft, qsvm, toffoli, vqe
-    from qc_app_benchmarks.fidelities import classical_fidelity, normalized_fidelity
-    from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite, FidelityBenchmark
-    from qc_app_benchmarks.sampler.circuit_sampler import CircuitSampler
-    from qc_app_benchmarks.utils import calculate_from_file, get_fake_backend_sampler
+    ideal_sampler = AerSampler(default_shots=1000)
+    backend_sampler = Sampler(FakeGeneva())
 
-    ideal_sampler = CircuitSampler(AerSampler())
-
-    backend_sampler = CircuitSampler(
-        get_fake_backend_sampler(FakeGeneva()), default_samples=1000
+    ab = ApplicationBenchmark(
+        backend_sampler,
+        ideal_sampler,
+        BenchmarkInput(grover.grover_nq(3, 6), backend_sampler.backend()),
+        name="Grover_benchmark",
+        accuracy_measure=normalized_fidelity,
     )
 
-    suite = BenchmarkSuite(
-        backend_sampler=backend_sampler,
-        ideal_sampler=ideal_sampler,
-        calculate_accuracy=normalized_fidelity,
-        name="test_suite",
-    )
-
-    suite.add_benchmarks(
-        [
-            qaoa.jssp_7q_24d(),
-            vqe.uccsd_3q_56d(),
-            qsvm.trained_qsvm_8q(),
-            qft.prepare_QFT(encoded_number=13),
-            grover.grover_nq(3, marked_state="111"),
-            toffoli.toffoli_circuit(5, input_state="11111"),
-        ]
-    )
-    suite.run_all()
-    print("Results:")
-    for res in suite.results:
-        print(
-            f"{res.name:>15}: depth = {res.input_properties['normalized_depth']}, fidelity = {res.average_fidelity}"
-        )
-
-    suite.save_results("test_res")
-    suite.export_qasm("qasm_circuits", ver=3)
+    ab.run()
+    print(ab.result)
 
 
 ORCA Fidelity
 --------------
 
-::
+.. code-block:: python
 
-    """Running this example requires adding your SSH key to https://sdk.orcacomputing.com/ and installing with pip install .[ORCA]"""
+    from functools import partial
 
-    from qc_app_benchmarks.photonics import PhotonicCircuit
-    from examples.orca_sampler import OrcaSampler
-    from qc_app_benchmarks.fidelities import create_normalized_fidelity, normalized_fidelity
-    from qc_app_benchmarks.fidelity_benchmark import BenchmarkSuite
-    import dill
+    from orca_sampler import OrcaSampler
 
-    ph_circuit1 = PhotonicCircuit.from_tbi_params([1,0,1,0,1,0],[1],[0.8479, -0.0095, 0.2154, -1.3921, 0.0614])
+    from open_qbench.application_benchmark import ApplicationBenchmark
+    from open_qbench.core import BenchmarkInput
+    from open_qbench.fidelities import classical_fidelity_orca
+    from open_qbench.photonics import PhotonicCircuit
 
+    input_state = [1, 0, 1, 0, 1, 0]
+    ph_circuit1 = PhotonicCircuit.from_tbi_params(
+        input_state=input_state,
+        loop_lengths=[1],
+        thetas=[0.8479, -0.0095, 0.2154, -1.3921, 0.0614],
+    )
+    fidelity = partial(classical_fidelity_orca, input_state=input_state)
 
     ideal_sampler = OrcaSampler(default_shots=1024)
-    backend_sampler = OrcaSampler(default_shots=1024)
 
-    normalized_fidelity_orca = create_normalized_fidelity(input_state=[1,0,1,0,1,0])
-
-    suite = BenchmarkSuite(
-        backend_sampler=backend_sampler,
-        ideal_sampler=ideal_sampler,
-        calculate_accuracy=normalized_fidelity_orca,
-        name="test_suite",
+    ben_input = BenchmarkInput(ph_circuit1)
+    orca_ben = ApplicationBenchmark(
+        ideal_sampler,
+        ideal_sampler,
+        ben_input,
+        name="ORCA_fidelity",
+        accuracy_measure=fidelity,
     )
-    suite.add_benchmarks(
-        [
-            [(ph_circuit1, [0.8479, -0.0095, 0.2154, -1.3921, 0.0614]),],
-        ]
-    )
-    suite.run_all()
-    print("Results:")
-    for res in suite.results:
-        print(
-            f"{res.name:>15}: depth = {res.input_properties['normalized_depth']}, fidelity = {res.average_fidelity}"
-        )
-    suite.save_results("test_res")
-
-    with open("object_dump","wb") as f:
-        dill.dump(suite, f)
+    print(orca_ben.benchmark_input)
+    orca_ben.run()
+    print(orca_ben.result)
