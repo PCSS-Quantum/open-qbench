@@ -28,7 +28,7 @@ def run_apidoc(app):
             "--separate",
             "-o",
             os.path.join(".", "API"),
-            lib_path,  # Generate docs only for quantum_launcher/
+            lib_path,
         ]
     )
 
@@ -45,8 +45,8 @@ name = parsed_pyproject["project"]["name"].replace("_", " ").title()
 version = parsed_pyproject["project"]["version"]
 
 project = name
-project_copyright = "2025, psnc"
-author = "psnc"
+project_copyright = "2025, PCSS"
+author = "PCSS"
 release = version
 
 # -- General configuration ---------------------------------------------------

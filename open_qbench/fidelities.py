@@ -4,7 +4,6 @@ import itertools
 import math
 
 import numpy as np
-from ptseries.tbi import create_tbi
 
 from .boson_sampling import num_possible_samples
 
