@@ -164,7 +164,7 @@ def generate_all_possible_outputs_orca(input_state):
 
 def generate_random_dist_bits(n_qubits=4):
     bitstrings = ("".join(i) for i in itertools.product("01", repeat=n_qubits))
-    dist = np.random.random_integers(0, 100, size=(2**n_qubits,))
+    dist = np.random.randint(0, 100+1, size=(2**n_qubits,))
     dist = dist/np.sum(dist)
     return dict(zip(bitstrings, dist))
 
@@ -187,12 +187,6 @@ def test_classical_fidelity():
     assert np.allclose(classical_fidelity(d1, d2), classical_fidelity_dev(d1, d2))
 
 
-def test_normalized_fidelity():
-    """Test if normalized fidelity results match"""
-    d1, d2 = generate_random_dist_bits(), generate_random_dist_bits()
-    assert np.allclose(normalized_fidelity(d1, d2), normalized_fidelity(d1, d2))
-
-
 def test_classical_fidelity_orca():
     """Test if classical fidelity results match for orca distributions"""
     istate = [1, 0, 1, 0, 1, 0]
@@ -200,7 +194,13 @@ def test_classical_fidelity_orca():
     assert np.allclose(classical_fidelity_dev(d1, d2), classical_fidelity_orca(d1, d2, istate))
 
 
-def test_uniform_orca():
+def test_uniform_fidelity():
+    """Test if fidelity with uniform results match"""
+    d = generate_random_dist_bits()
+    assert np.allclose(fidelity_with_uniform(d), fidelity_with_uniform_dev(d))
+
+
+def test_uniform_fidelity_orca():
     """Test if fidelity with uniform results match for orca distributions"""
     istate = [1, 0, 1, 0, 1, 0]
     dist = generate_random_dist_orca(istate)
@@ -208,6 +208,20 @@ def test_uniform_orca():
         fidelity_with_uniform_dev(dist, num_possible_samples=num_possible_samples(istate)),
         classical_fidelity_orca(dist, _uniform_dist_orca(istate), istate)
     )
+
+
+def test_normalized_fidelity():
+    """Test if normalized fidelity results match"""
+    d1, d2 = generate_random_dist_bits(), generate_random_dist_bits()
+    assert np.allclose(normalized_fidelity(d1, d2), normalized_fidelity_dev(d1, d2))
+
+
+def test_normalized_fidelity_orca():
+    """Test if normalized fidelity results match for orca distributions"""
+    istate = [1, 0, 1, 0, 1, 0]
+    d1, d2 = generate_random_dist_orca(istate), generate_random_dist_orca(istate)
+    old, new = create_normalized_fidelity(istate)(d1, d2), create_normalized_fidelity_dev(istate)(d1, d2)
+    assert np.allclose(old, new)
 
 
 def test_samples():
@@ -226,11 +240,3 @@ def test_samples():
 
     assert l1 <= l2
     assert old == new
-
-
-def test_normalized_fidelity_orca():
-    """Test if normalized fidelity results match for orca distributions"""
-    istate = [1, 0, 1, 0, 1, 0]
-    d1, d2 = generate_random_dist_orca(istate), generate_random_dist_orca(istate)
-    old, new = create_normalized_fidelity(istate)(d1, d2), create_normalized_fidelity_dev(istate)(d1, d2)
-    assert np.allclose(old, new)
