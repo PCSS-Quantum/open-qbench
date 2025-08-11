@@ -3,11 +3,14 @@ Benchmark manager for running multiple benchmarks together
 """
 
 import asyncio
+import inspect
 import os
 from open_qbench.core.benchmark import BaseBenchmark, BenchmarkResult
 
 
 async def _as_coro(fn):
+    if inspect.iscoroutinefunction(fn):
+        return await fn()
     return fn()
 
 

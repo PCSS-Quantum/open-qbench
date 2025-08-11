@@ -41,10 +41,26 @@ def test_manager_sync():
 
 
 def test_manager_async():
-
     bm = BenchmarkManager()
     for i in range(10):
         bm.add_benchmarks(RetBench(BenchmarkInput(i), analysis=None))
 
     bm.run_all_async()
     assert [r.metrics['out'] for r in bm.results] == list(range(10))
+
+
+def test_manager_async_time():
+    class RetBench(BaseBenchmark):
+        async def run(self) -> BenchmarkResult:
+            start = time.time()
+            await asyncio.sleep(self.benchmark_input.program)
+            return BenchmarkResult('b', self.benchmark_input, {}, {'out': time.time() - start})
+    bm = BenchmarkManager()
+    n = 10
+    for i in range(n):
+        bm.add_benchmarks(RetBench(BenchmarkInput(i), analysis=None))
+
+    start = time.time()
+    bm.run_all_async()
+    assert round(time.time() - start, 0) == n-1
+    assert [round(r.metrics['out'], 0) for r in bm.results] == list(range(10))
