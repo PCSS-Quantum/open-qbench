@@ -1,5 +1,5 @@
 [project]
-name = "open_qbench"
+name = "open-qbench"
 version = "0.2.0"
 description = "Package for developing and executing quantum computing benchmarks"
 readme = "README.md"
@@ -11,7 +11,6 @@ VQE = ["qiskit-nature[pyscf]>=0.7.2"]
 QSVM = ["scikit-image>=0.25.1"]
 IBM = ["qiskit-ibm-runtime>=0.36.1"]
 AQT = ["qiskit-aqt-provider>=1.10.0"]
-ORCA = ["ptseries @ git+ssh://git@sdk.orcacomputing.com/orca/ptseries.git"]
 
 [dependency-groups]
 dev = [
