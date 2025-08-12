@@ -4,11 +4,11 @@ import math
 
 import numpy as np
 
-from .boson_sampling import num_possible_samples
+from open_qbench.boson_sampling import num_possible_samples
 
 
 def normalized_fidelity(dist_ideal: dict, dist_backend: dict) -> float:
-    """Normalized fidelity of Lubinski et al."""
+    """Compute normalized fidelity of Lubinski et al."""
     backend_fidelity = classical_fidelity(dist_ideal, dist_backend)
     uniform_fidelity = fidelity_with_uniform(dist_ideal)
 
@@ -44,7 +44,7 @@ def create_normalized_fidelity(input_state: tuple):
 
 
 def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
-    r"""Compute classical fidelity of two probability distributions
+    r"""Compute classical fidelity of two probability distributions.
 
     Args:
         dist_a (dict): Distribution of experiment A
@@ -65,7 +65,7 @@ def classical_fidelity(dist_a: dict, dist_b: dict) -> float:
 
 
 def fidelity_with_uniform(dist: dict, num_possible_samples: int | None = None) -> float:
-    r"""Compute classical fidelity of a probability distribution with a same-sized uniform distribution
+    r"""Compute classical fidelity of a probability distribution with a same-sized uniform distribution.
 
     Args:
         dist (dict): Probability distribution
@@ -75,7 +75,7 @@ def fidelity_with_uniform(dist: dict, num_possible_samples: int | None = None) -
         F(X,Y) = (\sum _i \sqrt{p_i q_i})^2
     """
 
-    fidelity = 0
+    fidelity = 0.0
     if num_possible_samples is None:
         num_qubits = len(next(iter(dist.keys())))
         num_possible_samples = 2**num_qubits

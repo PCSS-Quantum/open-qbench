@@ -4,20 +4,6 @@ import itertools
 import math
 
 import numpy as np
-from ptseries.tbi import create_tbi
-
-
-def generate_all_samples_orca(input_state):
-    """Generate all possible samples via ptseries tbi sampling"""
-    time_bin_interferometer = create_tbi()
-    samples = time_bin_interferometer.sample(
-        input_state=input_state,
-        theta_list=[np.pi / 4] * (len(input_state) - 1),  # 50/50 beam splitters
-        n_samples=100000,
-    )
-    samples_sorted = dict(sorted(samples.items(), key=lambda state: -state[1]))
-    labels = list(samples_sorted.keys())
-    return labels
 
 
 def generate_all_possible_outputs_orca(input_state):
@@ -127,16 +113,3 @@ def generate_analytically(input_state: tuple) -> list[tuple]:
 def num_possible_samples(input_state: tuple) -> int:
     """Number of possible samples for a given input state"""
     return len(generate_analytically(input_state))
-
-
-if __name__ == "__main__":
-    input_string = (1, 1, 2)
-    ans0 = generate_analytically(input_string)
-    ans1 = generate_all_samples_orca(input_string)
-    ans2 = generate_all_possible_outputs_orca(input_string)
-    print(ans0)
-    print(len(ans0))
-    print(ans1)
-    print(len(ans1))
-    print(ans2)
-    print(len(ans2))
