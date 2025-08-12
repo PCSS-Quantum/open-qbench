@@ -3,6 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
+from typing import Any
 
 from qiskit import QuantumCircuit
 from qiskit.providers import Backend
@@ -50,6 +51,7 @@ class BenchmarkInput:
             self.params = program[1]
         else:
             self.program = program
+            self.params = None
 
     def __repr__(self):
         return f"Program: {self.program.name}, Backend: {self.backend}"
@@ -71,15 +73,30 @@ class BenchmarkResult:
     execution_data: dict = field(default_factory=dict)
     metrics: dict[str, int | float] = field(default_factory=dict)
 
-    def save_to_file(self, path: str = "./results"):
-        if not os.path.exists(path):
-            os.makedirs(path)
+    def to_dict(self) -> dict[str, Any]:
+        self_dict = asdict(self)
+        self_dict.pop("input")
+        self_dict["input"] = {
+            "program": self.input.program,
+            "params": self.input.params,
+        }
+        return self_dict
+
+    def save_to_file(self, save_dir: str = "./results"):
+        """
+        Save result to a json file in the provided directory.
+
+        Args:
+            save_dir (str, optional): Folder to save the result to. Defaults to "./results".
+        """
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
         with open(
-            os.path.join(path, self.name + ".json"),
+            os.path.join(save_dir, self.name + ".json"),
             "w",
             encoding="utf-8",
         ) as file:
-            file.write(json.dumps(asdict(self), indent=4))
+            file.write(json.dumps(self.to_dict(), indent=4))
 
 
 class BaseAnalysis:
@@ -101,7 +118,7 @@ class BaseBenchmark(ABC):
     is executed and how performance metrics are extracted. This class takes in
     the input and defines the protocol in the `run()` method.
 
-    The method for extracting metrics out of collected `BenchmarkReult`s is defined
+    The method for extracting metrics out of collected `BenchmarkResult`s is defined
     by the `analysis` attribute.
     """
 
@@ -128,7 +145,7 @@ class BaseBenchmark(ABC):
         """Execute the benchmark according to the defined protocol.
 
         Returns:
-            BenchmarkResult: An object conatining all the data obtained from benchmark execution.
+            BenchmarkResult: An object containing all the data obtained from benchmark execution.
 
         """
         raise NotImplementedError
