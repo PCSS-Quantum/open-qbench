@@ -4,10 +4,10 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 
-from examples.orca_sampler import OrcaSampler
-from open_qbench.apps.max_cut_orca import (
+from open_qbench.apps.circuits.max_cut_orca import (
     max_cut_6_edges_new_input,
 )
+from open_qbench.orca.sampler import OrcaSampler
 from open_qbench.photonics import PhotonicCircuit
 
 
