@@ -4,7 +4,11 @@ version = "0.2.1"
 description = "Package for developing and executing quantum computing benchmarks"
 readme = "README.md"
 requires-python = "==3.12.*"
-dependencies = ["qiskit-aer~=0.17", "qiskit~=1.0"]
+dependencies = [
+    "qiskit-aer~=0.17",
+ "qiskit~=1.0",
+ "qlauncher[dwave]>=2.0.5",
+]
 
 [project.optional-dependencies]
 VQE = ["qiskit-nature[pyscf]>=0.7.2"]

@@ -4,9 +4,10 @@ from examples.orca_sampler import OrcaSampler
 from open_qbench.application_benchmark import (
     ApplicationBenchmark,
     # BenchmarkSuite,
+    FidelityAnalysis,
 )
 from open_qbench.core import BenchmarkInput
-from open_qbench.fidelities import classical_fidelity
+from open_qbench.metrics.fidelities import classical_fidelity
 from open_qbench.photonics import PhotonicCircuit
 
 
@@ -31,11 +32,11 @@ def test_orca_benchmark():
 
     ben_input = BenchmarkInput(ph_circuit1, None)
     orca_ben = ApplicationBenchmark(
-        ideal_sampler,
-        ideal_sampler,
         ben_input,
+        ideal_sampler,
+        FidelityAnalysis(classical_fidelity),
+        reference_state_sampler=ideal_sampler,
         name="test",
-        accuracy_measure=classical_fidelity,
     )
     orca_ben.run()
     print(orca_ben.result)
