@@ -1,13 +1,10 @@
 import numpy as np
 
-from examples.orca_sampler import OrcaSampler
-from open_qbench.application_benchmark import (
-    ApplicationBenchmark,
-    # BenchmarkSuite,
-    FidelityAnalysis,
-)
+from open_qbench.analysis import FidelityAnalysis
+from open_qbench.application_benchmark import ApplicationBenchmark
 from open_qbench.core import BenchmarkInput
 from open_qbench.metrics.fidelities import classical_fidelity
+from open_qbench.orca.sampler import OrcaSampler
 from open_qbench.photonics import PhotonicCircuit
 
 

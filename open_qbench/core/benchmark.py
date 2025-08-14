@@ -7,6 +7,7 @@ from typing import Any
 
 from qiskit import QuantumCircuit
 from qiskit.providers import Backend
+from qlauncher.base import Problem
 
 from open_qbench.photonics import PhotonicCircuit
 
@@ -15,6 +16,7 @@ type QuantumProgram = (
     | tuple[QuantumCircuit, Iterable[float]]
     | PhotonicCircuit
     | tuple[PhotonicCircuit, Iterable[float]]
+    | Problem
 )
 """A QuantumProgram defines what can be used as BenchmarkInput for executing benchmarks.
 """
