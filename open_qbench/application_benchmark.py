@@ -1,81 +1,16 @@
 import time
-from collections.abc import Callable
 
 import dimod
 from qiskit import QuantumCircuit, qasm3, transpile
 from qiskit.primitives import BaseSamplerV2
-from qlauncher.base import Problem
 
 from open_qbench.core import (
     BaseAnalysis,
-    BenchmarkError,
     BenchmarkInput,
     BenchmarkResult,
     HighLevelBenchmark,
 )
 from open_qbench.sampler.benchmark_sampler import BenchmarkSampler
-
-
-class FidelityAnalysis(BaseAnalysis):
-    def __init__(self, fidelity_callable: Callable[[dict, dict], float]) -> None:
-        self.fidelity_callable = fidelity_callable
-
-    def run(self, execution_results: BenchmarkResult) -> BenchmarkResult:
-        try:
-            dist_backend: dict = execution_results.execution_data["dist_backend"]
-            dist_ideal: dict = execution_results.execution_data["dist_ideal"]
-            if isinstance(next(iter(dist_backend.values())), int):
-                dist_backend = self.counts_to_probs(dist_backend)
-            if isinstance(next(iter(dist_ideal.values())), int):
-                dist_ideal = self.counts_to_probs(dist_ideal)
-        except KeyError as e:
-            raise BenchmarkError(
-                "BenchmarkResult not populated with distributions"
-            ) from e
-
-        fidelity = self.fidelity_callable(dist_backend, dist_ideal)
-        execution_results.metrics["fidelity"] = fidelity
-
-        return execution_results
-
-    @staticmethod
-    def counts_to_probs(counts: dict[str, int]) -> dict[str, float]:
-        """Convert get_counts() output to probability distributions.
-
-        Args:
-            counts (dict[str, int]): _description_
-
-        Returns:
-            dict[str, float]: _description_
-
-        """
-        sum_vals = sum(counts.values())
-        return {bits: count / sum_vals for bits, count in counts.items()}
-
-
-class FeasibilityRatioAnalysis(BaseAnalysis):
-    def __init__(self, feasibility_analysis: Callable[[str, Problem], bool]) -> None:
-        super().__init__()
-        self.feasibility_analysis = feasibility_analysis
-
-    def run(self, execution_results: BenchmarkResult) -> BenchmarkResult:
-        try:
-            counts_backend: dict = execution_results.execution_data["dist_backend"]
-        except KeyError as e:
-            raise BenchmarkError(
-                "BenchmarkResult not populated with distributions"
-            ) from e
-
-        bench_in: Problem = execution_results.input.program
-
-        total_count, feasible_count = 0, 0
-        for sample, count in counts_backend.items():
-            total_count += count
-            if self.feasibility_analysis(sample, bench_in):
-                feasible_count += count
-
-        execution_results.metrics["feasibility_ratio"] = feasible_count / total_count
-        return execution_results
 
 
 class ApplicationBenchmark(HighLevelBenchmark):

@@ -2,14 +2,18 @@ from collections import Counter
 
 from qiskit.primitives import StatevectorSampler as Sampler
 
-from open_qbench.application_benchmark import ApplicationBenchmark, FidelityAnalysis
-from open_qbench.apps.circuits.ghz import ghz_decoherence_free, ghz_direct
-from open_qbench.apps.circuits.grover import grover_nq
-from open_qbench.apps.circuits.qaoa import jssp_7q_24d
-from open_qbench.apps.circuits.qft import prepare_QFT
-from open_qbench.apps.circuits.qsvm import trained_qsvm_8q
-from open_qbench.apps.circuits.toffoli import toffoli_circuit
-from open_qbench.apps.circuits.vqe import uccsd_3q_56d
+from open_qbench.analysis import FidelityAnalysis
+from open_qbench.application_benchmark import ApplicationBenchmark
+from open_qbench.apps.circuits import (
+    ghz_decoherence_free,
+    ghz_direct,
+    grover_nq,
+    jssp_7q_24d,
+    prepare_QFT,
+    toffoli_circuit,
+    trained_qsvm_8q,
+    uccsd_3q_56d,
+)
 from open_qbench.core import BenchmarkInput, BenchmarkResult
 from open_qbench.metrics.fidelities import normalized_fidelity
 
@@ -114,7 +118,7 @@ def test_run_app_benchmark():
     from qiskit.providers.fake_provider import GenericBackendV2
     from qiskit_ibm_runtime import Sampler as RSampler
 
-    from open_qbench.application_benchmark import FidelityAnalysis
+    from open_qbench.analysis import FidelityAnalysis
     from open_qbench.apps.circuits.ghz import ghz_decoherence_free
     from open_qbench.metrics.fidelities import normalized_fidelity
 
@@ -141,7 +145,7 @@ def test_jssp():
         SimulatedAnnealingSampler,
     )
 
-    from open_qbench.application_benchmark import FeasibilityRatioAnalysis
+    from open_qbench.analysis import FeasibilityRatioAnalysis
     from open_qbench.apps.optimization.jssp import easy_jssp
     from open_qbench.metrics.feasibilities import JSSPFeasibility
 
