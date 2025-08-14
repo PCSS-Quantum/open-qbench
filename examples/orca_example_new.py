@@ -1,10 +1,9 @@
 """Running this example requires adding your SSH key to https://sdk.orcacomputing.com/ and installing with pip install .[ORCA]"""
 
-from orca_sampler import OrcaSampler
-
 from open_qbench.application_benchmark import ApplicationBenchmark
 from open_qbench.core import BenchmarkInput
-from open_qbench.fidelities import classical_fidelity
+from open_qbench.metrics.fidelities import classical_fidelity
+from open_qbench.orca.sampler import OrcaSampler
 from open_qbench.photonics import PhotonicCircuit
 
 ph_circuit1 = PhotonicCircuit.from_tbi_params(
