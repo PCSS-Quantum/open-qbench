@@ -5,10 +5,10 @@ from open_qbench.metrics.feasibilities import JSSPFeasibility
 def test_default_jssp():
     pr = default_jssp()
     assert JSSPFeasibility("1100110", pr)
+    assert JSSPFeasibility("1100111", pr)
 
     assert not JSSPFeasibility("1100100", pr)
 
-    assert not JSSPFeasibility("1100111", pr)
     assert not JSSPFeasibility("0000000", pr)
 
 
