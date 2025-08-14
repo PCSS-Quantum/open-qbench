@@ -1,10 +1,11 @@
 import time
 from collections.abc import Callable
 
+import dimod
 from qiskit import QuantumCircuit, qasm3, transpile
 from qiskit.primitives import BaseSamplerV2
+from qlauncher.base import Problem
 
-# from examples.orca_sampler import OrcaSampler
 from open_qbench.core import (
     BaseAnalysis,
     BenchmarkError,
@@ -12,29 +13,7 @@ from open_qbench.core import (
     BenchmarkResult,
     HighLevelBenchmark,
 )
-from open_qbench.photonics import PhotonicCircuit
-
-# @dataclass
-# class ApplicationBenchmarkResult(BenchmarkResult):
-#     """Dataclass for storing the results of running a fidelity benchmark."""
-
-#     input_properties: dict
-#     dist_backend: dict
-#     dist_ideal: dict
-
-#     def save_to_file(self, path: str = "./results"):
-#         for key in list(self.dist_backend.keys()).copy():
-#             self.dist_backend["".join(str(x) for x in key)] = self.dist_backend.pop(key)
-#         for key in list(self.dist_ideal.keys()).copy():
-#             self.dist_ideal["".join(str(x) for x in key)] = self.dist_ideal.pop(key)
-#         if not os.path.exists(path):
-#             os.makedirs(path)
-#         with open(
-#             os.path.join(path, self.name + ".json"),
-#             "w",
-#             encoding="utf-8",
-#         ) as file:
-#             file.write(json.dumps(asdict(self), indent=4))
+from open_qbench.sampler.benchmark_sampler import BenchmarkSampler
 
 
 class FidelityAnalysis(BaseAnalysis):
@@ -70,8 +49,33 @@ class FidelityAnalysis(BaseAnalysis):
             dict[str, float]: _description_
 
         """
-        # TODO: check if Qiskit provides this.
-        return {bits: count / sum(counts.values()) for bits, count in counts.items()}
+        sum_vals = sum(counts.values())
+        return {bits: count / sum_vals for bits, count in counts.items()}
+
+
+class FeasibilityRatioAnalysis(BaseAnalysis):
+    def __init__(self, feasibility_analysis: Callable[[str, Problem], bool]) -> None:
+        super().__init__()
+        self.feasibility_analysis = feasibility_analysis
+
+    def run(self, execution_results: BenchmarkResult) -> BenchmarkResult:
+        try:
+            counts_backend: dict = execution_results.execution_data["dist_backend"]
+        except KeyError as e:
+            raise BenchmarkError(
+                "BenchmarkResult not populated with distributions"
+            ) from e
+
+        bench_in: Problem = execution_results.input.program
+
+        total_count, feasible_count = 0, 0
+        for sample, count in counts_backend.items():
+            total_count += count
+            if self.feasibility_analysis(sample, bench_in):
+                feasible_count += count
+
+        execution_results.metrics["feasibility_ratio"] = feasible_count / total_count
+        return execution_results
 
 
 class ApplicationBenchmark(HighLevelBenchmark):
@@ -79,28 +83,32 @@ class ApplicationBenchmark(HighLevelBenchmark):
 
     def __init__(
         self,
-        backend_sampler,
-        reference_state_sampler: BaseSamplerV2,
         benchmark_input: BenchmarkInput,
+        backend_sampler: BaseSamplerV2 | dimod.Sampler | BenchmarkSampler,
+        analysis: BaseAnalysis,
+        reference_state_sampler: BaseSamplerV2 | dimod.Sampler | None = None,
         name: str | None = None,
-        analysis: BaseAnalysis | None = None,
-        accuracy_measure: Callable[[dict, dict], float] | None = None,
     ):
         super().__init__(
             benchmark_input,
             analysis,
             name,
         )
-        self.backend_sampler = backend_sampler
-        self.reference_state_sampler = reference_state_sampler
-        if analysis is not None:
-            self.analysis = analysis
-        elif accuracy_measure is not None:
-            self.analysis = FidelityAnalysis(accuracy_measure)
+        self.backend_sampler = (
+            BenchmarkSampler(backend_sampler)
+            if not isinstance(backend_sampler, BenchmarkSampler)
+            else backend_sampler
+        )
+        if reference_state_sampler is None:
+            self.reference_state_sampler = None
         else:
-            raise BenchmarkError(
-                "Analysis has to be defined either directly or by the accuracy_measure argument"
+            self.reference_state_sampler = (
+                BenchmarkSampler(reference_state_sampler)
+                if not isinstance(reference_state_sampler, BenchmarkSampler)
+                else reference_state_sampler
             )
+
+        self.analysis = analysis
         self.result = BenchmarkResult(self.name, self.benchmark_input)
 
     basis_gates = frozenset(
@@ -116,33 +124,13 @@ class ApplicationBenchmark(HighLevelBenchmark):
         """
         self._prepare_input()
         # run compiled or logical circuit?
-        if isinstance(self.benchmark_input.program, PhotonicCircuit):
-            ideal_sampler_counts = self.reference_state_sampler.run(
-                [self.compiled_input]
-            ).result()[0]
-        elif isinstance(self.benchmark_input.program, QuantumCircuit):
-            ideal_sampler_counts = (
-                self.reference_state_sampler.run([self.compiled_input])
-                .result()[0]
-                .data.meas.get_counts()
+        if self.reference_state_sampler is not None:
+            self.result.execution_data["dist_ideal"] = (
+                self.reference_state_sampler.get_counts(self.compiled_input)
             )
 
-        else:
-            raise NotImplementedError
-
-        self.result.execution_data["dist_ideal"] = ideal_sampler_counts
-
-        start = time.time()
-        if isinstance(self.benchmark_input.program, PhotonicCircuit):
-            backend_sampler_counts = self.backend_sampler.run(
-                [self.compiled_input]
-            ).result()[0]
-        elif isinstance(self.benchmark_input.program, QuantumCircuit):
-            backend_sampler_counts = (
-                self.backend_sampler.run([self.compiled_input])
-                .result()[0]
-                .data.meas.get_counts()
-            )
+        # Not using isinstance() because PhotonicCircuit isinstance of QuantumCircuit and it breaks
+        if self.benchmark_input.program.__class__ is QuantumCircuit:
             executed_circuit = qasm3.dumps(self.compiled_input)
             self.result.execution_data["width"] = self.benchmark_input.width
             self.result.execution_data["normalized_depth"] = self._normalized_depth(
@@ -150,11 +138,12 @@ class ApplicationBenchmark(HighLevelBenchmark):
             )
             self.result.execution_data["depth_transpiled"] = self.compiled_input.depth()
             self.result.execution_data["executed_circuit"] = executed_circuit
-        else:
-            raise NotImplementedError
 
+        start = time.time()
+        self.result.execution_data["dist_backend"] = self.backend_sampler.get_counts(
+            self.compiled_input
+        )
         execution_time = time.time() - start
-        self.result.execution_data["dist_backend"] = backend_sampler_counts
         self.result.metrics["execution_time"] = execution_time
 
         self.result = self.analysis.run(self.result)

@@ -157,10 +157,7 @@ class PhotonicGate(PhotonicInstruction):
             str: A representation of the PhotonicGate instance with the name,
                  number of qumodes, classical bits and params( if any )
         """
-        return (
-            f"PhotonicGate(name='{self.name}', num_qumodes={self.num_qumodes}, "
-            f"params={self.params})"
-        )
+        return f"PhotonicGate(name='{self.name}', num_qumodes={self.num_qumodes}, params={self.params})"
 
     @property
     def num_qumodes(self):
