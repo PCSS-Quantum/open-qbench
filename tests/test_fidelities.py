@@ -11,16 +11,16 @@ import numpy as np
 from ptseries.tbi import create_tbi
 
 from open_qbench.boson_sampling import num_possible_samples
-from open_qbench.fidelities import (
+from open_qbench.metrics.fidelities import (
     classical_fidelity as classical_fidelity_dev,
 )
-from open_qbench.fidelities import (
+from open_qbench.metrics.fidelities import (
     create_normalized_fidelity as create_normalized_fidelity_dev,
 )
-from open_qbench.fidelities import (
+from open_qbench.metrics.fidelities import (
     fidelity_with_uniform as fidelity_with_uniform_dev,
 )
-from open_qbench.fidelities import (
+from open_qbench.metrics.fidelities import (
     normalized_fidelity as normalized_fidelity_dev,
 )
 
