@@ -3,15 +3,15 @@ from collections import Counter
 from qiskit.primitives import StatevectorSampler as Sampler
 
 from open_qbench.application_benchmark import ApplicationBenchmark, FidelityAnalysis
-from open_qbench.apps.ghz import ghz_decoherence_free, ghz_direct
-from open_qbench.apps.grover import grover_nq
-from open_qbench.apps.qaoa import jssp_7q_24d
-from open_qbench.apps.qft import prepare_QFT
-from open_qbench.apps.qsvm import trained_qsvm_8q
-from open_qbench.apps.toffoli import toffoli_circuit
-from open_qbench.apps.vqe import uccsd_3q_56d
+from open_qbench.apps.circuits.ghz import ghz_decoherence_free, ghz_direct
+from open_qbench.apps.circuits.grover import grover_nq
+from open_qbench.apps.circuits.qaoa import jssp_7q_24d
+from open_qbench.apps.circuits.qft import prepare_QFT
+from open_qbench.apps.circuits.qsvm import trained_qsvm_8q
+from open_qbench.apps.circuits.toffoli import toffoli_circuit
+from open_qbench.apps.circuits.vqe import uccsd_3q_56d
 from open_qbench.core import BenchmarkInput, BenchmarkResult
-from open_qbench.fidelities import normalized_fidelity
+from open_qbench.metrics.fidelities import normalized_fidelity
 
 
 def test_qsvm__generation():
@@ -114,8 +114,8 @@ def test_run_app_benchmark():
     from qiskit.providers.fake_provider import GenericBackendV2
     from qiskit_ibm_runtime import Sampler as RSampler
 
-    from open_qbench.apps.ghz import ghz_decoherence_free
-    from open_qbench.fidelities import normalized_fidelity
+    from open_qbench.apps.circuits.ghz import ghz_decoherence_free
+    from open_qbench.metrics.fidelities import normalized_fidelity
 
     backend = GenericBackendV2(num_qubits=8)
     s = RSampler(backend)

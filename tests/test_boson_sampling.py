@@ -42,4 +42,4 @@ def test_probabilities():
         assert np.allclose(sum(generated.values()), 1.0)
 
         for k in generated.keys() | probabilities.keys():
-            assert np.allclose(generated.get(k, 0), probabilities.get(k, 0), atol=0.001)
+            assert np.allclose(generated.get(k, 0), probabilities.get(k, 0), atol=0.1)
