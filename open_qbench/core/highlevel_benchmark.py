@@ -16,7 +16,7 @@ class HighLevelBenchmark(BaseBenchmark):
         self,
         benchmark_input: BenchmarkInput,
         analysis: BaseAnalysis | None = None,
-        name: str | None = None,
+        name: str = "High Level Benchmark",
         transpiler=None,
     ):
         super().__init__(benchmark_input, analysis, name)

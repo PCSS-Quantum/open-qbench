@@ -9,6 +9,8 @@ def test_default_jssp():
 
     assert not JSSPFeasibility("1100100", pr)
 
+    assert not JSSPFeasibility("1110100", pr)
+
     assert not JSSPFeasibility("0000000", pr)
 
 

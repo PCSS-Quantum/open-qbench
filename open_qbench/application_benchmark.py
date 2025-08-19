@@ -22,7 +22,7 @@ class ApplicationBenchmark(HighLevelBenchmark):
         backend_sampler: BaseSamplerV2 | dimod.Sampler | BenchmarkSampler,
         analysis: BaseAnalysis,
         reference_state_sampler: BaseSamplerV2 | dimod.Sampler | None = None,
-        name: str | None = None,
+        name: str = "Application Benchmark",
     ):
         super().__init__(
             benchmark_input,

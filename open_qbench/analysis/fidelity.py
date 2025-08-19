@@ -4,6 +4,10 @@ from open_qbench.core.benchmark import BaseAnalysis, BenchmarkError, BenchmarkRe
 
 
 class FidelityAnalysis(BaseAnalysis):
+    """
+    Calculate the fidelity between two distributions provided by execution results using the provided fidelity function.
+    """
+
     def __init__(self, fidelity_callable: Callable[[dict, dict], float]) -> None:
         self.fidelity_callable = fidelity_callable
 

@@ -3,6 +3,7 @@ from typing import Any
 import dimod
 from qiskit import QuantumCircuit
 from qiskit.primitives import BaseSamplerV2  # , SamplerPubLike
+from qlauncher import QLauncher
 from qlauncher.base import Algorithm, Backend, Problem
 from qlauncher.base.adapter_structure import get_formatter
 
@@ -49,6 +50,15 @@ class BenchmarkSampler:
             ):
                 bitstring = "".join(map(str, value))
                 counts[bitstring] = counts.get(bitstring, 0) + occ
+        elif isinstance(sampler_input, Problem) and isinstance(self.sampler, tuple):
+            alg, backend = self.sampler
+            launcher = QLauncher(sampler_input, alg, backend)
+            res = launcher.run()
+            counts = {
+                k: int(round(v * res.num_of_samples, 0))
+                for k, v in res.distribution.items()
+            }
+            print(counts)
         else:
             raise NotImplementedError
 
