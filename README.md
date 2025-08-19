@@ -74,7 +74,7 @@ Then use Open QBench to generate a quantum circuit and create your benchmark by 
 
 ```python
 from open_qbench import ApplicationBenchmark
-from open_qbench.apps import grover
+from open_qbench.apps.circuits import grover
 from open_qbench.core import BenchmarkInput
 from open_qbench.fidelities import normalized_fidelity
 
