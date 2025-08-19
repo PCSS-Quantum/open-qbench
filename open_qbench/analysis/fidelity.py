@@ -13,12 +13,10 @@ class FidelityAnalysis(BaseAnalysis):
 
     def run(self, execution_results: BenchmarkResult) -> BenchmarkResult:
         try:
-            dist_backend: dict = execution_results.execution_data["dist_backend"]
-            dist_ideal: dict = execution_results.execution_data["dist_ideal"]
-            if isinstance(next(iter(dist_backend.values())), int):
-                dist_backend = self.counts_to_probs(dist_backend)
-            if isinstance(next(iter(dist_ideal.values())), int):
-                dist_ideal = self.counts_to_probs(dist_ideal)
+            counts_backend: dict = execution_results.execution_data["counts_backend"]
+            counts_ideal: dict = execution_results.execution_data["counts_ideal"]
+            dist_backend = self.counts_to_probs(counts_backend)
+            dist_ideal = self.counts_to_probs(counts_ideal)
         except KeyError as e:
             raise BenchmarkError(
                 "BenchmarkResult not populated with distributions"

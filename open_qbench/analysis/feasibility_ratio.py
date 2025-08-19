@@ -17,7 +17,7 @@ class FeasibilityRatioAnalysis(BaseAnalysis):
 
     def run(self, execution_results: BenchmarkResult) -> BenchmarkResult:
         try:
-            counts_backend: dict = execution_results.execution_data["dist_backend"]
+            counts_backend: dict = execution_results.execution_data["counts_backend"]
         except KeyError as e:
             raise BenchmarkError(
                 "BenchmarkResult not populated with distributions"

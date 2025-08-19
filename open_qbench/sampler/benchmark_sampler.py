@@ -58,7 +58,6 @@ class BenchmarkSampler:
                 k: int(round(v * res.num_of_samples, 0))
                 for k, v in res.distribution.items()
             }
-            print(counts)
         else:
             raise NotImplementedError
 

@@ -60,7 +60,7 @@ class ApplicationBenchmark(HighLevelBenchmark):
         self._prepare_input()
         # run compiled or logical circuit?
         if self.reference_state_sampler is not None:
-            self.result.execution_data["dist_ideal"] = (
+            self.result.execution_data["counts_ideal"] = (
                 self.reference_state_sampler.get_counts(self.compiled_input)
             )
 
@@ -75,7 +75,7 @@ class ApplicationBenchmark(HighLevelBenchmark):
             self.result.execution_data["executed_circuit"] = executed_circuit
 
         start = time.time()
-        self.result.execution_data["dist_backend"] = self.backend_sampler.get_counts(
+        self.result.execution_data["counts_backend"] = self.backend_sampler.get_counts(
             self.compiled_input
         )
         execution_time = time.time() - start
