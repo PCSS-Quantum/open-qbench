@@ -1,14 +1,14 @@
 from ptseries.tbi import create_tbi
 
-from open_qbench.apps.max_cut_orca import (
+from open_qbench.apps.circuits.max_cut_orca import (
     max_cut_6_edges_new_input,
     max_cut_6_edges_new_input_double_loop,
 )
-from open_qbench.fidelities import (
-    create_normalized_fidelity,
-)
 from open_qbench.fidelity_benchmark import (
     FidelityBenchmark,
+)
+from open_qbench.metrics.fidelities import (
+    create_normalized_fidelity,
 )
 from open_qbench.sampler.bosonic_sampler import BosonicSampler
 

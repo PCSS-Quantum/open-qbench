@@ -11,7 +11,7 @@ IBM Fidelity
     from qiskit_ibm_runtime.fake_provider import FakeGeneva
 
     from open_qbench import ApplicationBenchmark
-    from open_qbench.apps import grover
+    from open_qbench.apps.circuits import grover
     from open_qbench.core import BenchmarkInput
     from open_qbench.fidelities import normalized_fidelity
 

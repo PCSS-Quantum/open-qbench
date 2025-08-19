@@ -8,7 +8,7 @@ from qiskit_ibm_runtime.fake_provider.fake_backend import (
     FakeBackendV2,
 )
 
-from .fidelities import normalized_fidelity
+from .metrics.fidelities import normalized_fidelity
 
 
 def get_fake_backend_sampler(
