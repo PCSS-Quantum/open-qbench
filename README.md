@@ -4,6 +4,7 @@
 
 
 # Open QBench
+[![PyPI - Version](https://img.shields.io/pypi/v/open-qbench.svg?color=blue)](https://pypi.org/project/open-qbench/)
 [![License](https://img.shields.io/github/license/PCSS-quantum/open-qbench)](https://github.com/PCSS-Quantum/open-qbench/blob/qbench_v2/LICENSE)
 
 
@@ -25,7 +26,7 @@ uv venv
 ```
 To install the core dependencies of the package, run:
 ```
-uv sync
+uv pip install open-qbench
 ```
 ### Optional dependencies (Extras)
 We provide a number of optional dependencies (referred to as "extras") for executing specific benchmarks or for enabling support for various quantum hardware providers.
@@ -33,26 +34,26 @@ We provide a number of optional dependencies (referred to as "extras") for execu
 Available extras include:
 
 - Benchmarks: `VQE`, `QSVM`
-- Providers: `IBM`, `AQT`, `ORCA`
+- Providers: `IBM`, `AQT`
 
-To install specific optional dependencies, use the `--extra` flag. You can specify multiple extras in a single command. For example, to run the VQE benchmark on an IBM Quantum machine, you would run:
+To install specific optional dependencies, specify them in your command. You can specify multiple optionals in a single command. For example, to run the VQE benchmark on an IBM Quantum machine, you would run:
 ```
-uv sync --extra VQE --extra IBM
+uv pip install "open-qbench[VQE, IBM]"
 ```
 You can combine any of the available extras as needed.
 
 > [!NOTE]
-> To install the `ORCA` extra, you'll first need to add your SSH key to the ORCA Computing SDK website at https://sdk.orcacomputing.com/.
+> To install the PT-Series SDK used for running experiments on the ORCA Computing systems, you will need to get access to it through the website at https://sdk.orcacomputing.com/ and install it separately.
 
 ### Using pip
 The package can also be installed with pip.
 To install the core dependencies run:
 ```
-pip install .
+pip install open-qbench
 ```
 To install with specific optional dependencies (e.g., `VQE` and `IBM`):
 ```
-pip install ".[VQE,IBM]"
+pip install "open-qbench[VQE,IBM]"
 ```
 
 ## Usage
