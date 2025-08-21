@@ -1,7 +1,7 @@
 """Running this example requires adding your SSH key to https://sdk.orcacomputing.com/ and installing with pip install .[ORCA]"""
 
 from open_qbench.analysis import FidelityAnalysis
-from open_qbench.application_benchmark import ApplicationBenchmark
+from open_qbench.benchmarks import ApplicationBenchmark
 from open_qbench.core import BenchmarkInput
 from open_qbench.metrics.fidelities import classical_fidelity
 from open_qbench.orca.sampler import OrcaSampler
@@ -17,10 +17,10 @@ backend_sampler = OrcaSampler(default_shots=1024)
 
 ben_input = BenchmarkInput(ph_circuit1)
 orca_ben = ApplicationBenchmark(
-    ben_input,
     ideal_sampler,
+    ideal_sampler,
+    ben_input,
     analysis=FidelityAnalysis(classical_fidelity),
-    reference_state_sampler=ideal_sampler,
     name="test",
 )
 print(orca_ben.benchmark_input)

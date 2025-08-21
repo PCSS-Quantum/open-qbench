@@ -3,7 +3,6 @@ from collections import Counter
 from qiskit.primitives import StatevectorSampler as Sampler
 
 from open_qbench.analysis import FidelityAnalysis
-from open_qbench.application_benchmark import ApplicationBenchmark
 from open_qbench.apps.circuits import (
     ghz_decoherence_free,
     ghz_direct,
@@ -14,6 +13,7 @@ from open_qbench.apps.circuits import (
     trained_qsvm_8q,
     uccsd_3q_56d,
 )
+from open_qbench.benchmarks import ApplicationBenchmark, OptimizationBenchmark
 from open_qbench.core import BenchmarkInput
 from open_qbench.metrics.fidelities import normalized_fidelity
 
@@ -80,10 +80,10 @@ def test_run_app_benchmark():
     ben_input = BenchmarkInput(qc, s.backend())
 
     app_ben = ApplicationBenchmark(
-        ben_input,
         s,
-        FidelityAnalysis(normalized_fidelity),
-        reference_state_sampler=ss,
+        ss,
+        ben_input,
+        analysis=FidelityAnalysis(normalized_fidelity),
         name="GHZ",
     )
     print(app_ben)
@@ -100,10 +100,10 @@ def test_jssp():
     from open_qbench.apps.optimization.jssp import easy_jssp
     from open_qbench.metrics.feasibilities import JSSPFeasibility
 
-    app_ben = ApplicationBenchmark(
-        BenchmarkInput(easy_jssp()),
+    app_ben = OptimizationBenchmark(
         SimulatedAnnealingSampler(),
-        FeasibilityRatioAnalysis(JSSPFeasibility),
+        BenchmarkInput(easy_jssp()),
+        analysis=FeasibilityRatioAnalysis(JSSPFeasibility),
         name="jssp",
     )
     app_ben.run()

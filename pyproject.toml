@@ -8,6 +8,7 @@ dependencies = [
     "qiskit-aer~=0.17",
     "qiskit~=1.0",
     "qlauncher[dwave]>=2.0.5",
+    "dimod>=0.12.20",
 ]
 
 [project.optional-dependencies]

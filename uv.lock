@@ -1665,6 +1665,7 @@ name = "open-qbench"
 version = "0.2.1"
 source = { editable = "." }
 dependencies = [
+    { name = "dimod" },
     { name = "qiskit" },
     { name = "qiskit-aer" },
     { name = "qlauncher", extra = ["dwave"] },
@@ -1702,6 +1703,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "dimod", specifier = ">=0.12.20" },
     { name = "qiskit", specifier = "~=1.0" },
     { name = "qiskit-aer", specifier = "~=0.17" },
     { name = "qiskit-aqt-provider", marker = "extra == 'aqt'", specifier = ">=1.10.0" },

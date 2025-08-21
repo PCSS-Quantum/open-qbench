@@ -12,10 +12,10 @@ ideal_sampler = AerSampler(default_shots=1000)
 backend_sampler = Sampler(FakeGeneva())
 
 ab = ApplicationBenchmark(
-    BenchmarkInput(grover.grover_nq(3, 6), backend_sampler.backend()),
     backend_sampler,
+    ideal_sampler,
+    BenchmarkInput(grover.grover_nq(3, 6), backend_sampler.backend()),
     analysis=FidelityAnalysis(normalized_fidelity),
-    reference_state_sampler=ideal_sampler,
     name="Grover_benchmark",
 )
 

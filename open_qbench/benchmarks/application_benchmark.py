@@ -1,15 +1,18 @@
 import time
+from collections.abc import Callable
 
 import dimod
 from qiskit import QuantumCircuit, qasm3, transpile
 from qiskit.primitives import BaseSamplerV2
 
+from open_qbench.analysis.fidelity import FidelityAnalysis
 from open_qbench.core import (
     BaseAnalysis,
     BenchmarkInput,
     BenchmarkResult,
     HighLevelBenchmark,
 )
+from open_qbench.core.benchmark import BenchmarkError
 from open_qbench.sampler.benchmark_sampler import BenchmarkSampler
 
 
@@ -18,11 +21,12 @@ class ApplicationBenchmark(HighLevelBenchmark):
 
     def __init__(
         self,
-        benchmark_input: BenchmarkInput,
         backend_sampler: BaseSamplerV2 | dimod.Sampler | BenchmarkSampler,
-        analysis: BaseAnalysis,
-        reference_state_sampler: BaseSamplerV2 | dimod.Sampler | None = None,
+        reference_state_sampler: BaseSamplerV2 | dimod.Sampler | BenchmarkSampler,
+        benchmark_input: BenchmarkInput,
         name: str = "Application Benchmark",
+        analysis: BaseAnalysis | None = None,
+        accuracy_measure: Callable[[dict, dict], float] | None = None,
     ):
         super().__init__(
             benchmark_input,
@@ -34,23 +38,27 @@ class ApplicationBenchmark(HighLevelBenchmark):
             if not isinstance(backend_sampler, BenchmarkSampler)
             else backend_sampler
         )
-        if reference_state_sampler is None:
-            self.reference_state_sampler = None
-        else:
-            self.reference_state_sampler = (
-                BenchmarkSampler(reference_state_sampler)
-                if not isinstance(reference_state_sampler, BenchmarkSampler)
-                else reference_state_sampler
-            )
+        self.reference_state_sampler = (
+            BenchmarkSampler(reference_state_sampler)
+            if not isinstance(reference_state_sampler, BenchmarkSampler)
+            else reference_state_sampler
+        )
 
-        self.analysis = analysis
+        if analysis is not None:
+            self.analysis = analysis
+        elif accuracy_measure is not None:
+            self.analysis = FidelityAnalysis(accuracy_measure)
+        else:
+            raise BenchmarkError(
+                "Analysis has to be defined either directly or by the accuracy_measure argument"
+            )
         self.result = BenchmarkResult(self.name, self.benchmark_input)
 
     basis_gates = frozenset(
         ("rx", "ry", "rz", "cx")
     )  # Gate set used for calculating the normalized circuit depth
 
-    def run(self):
+    def run(self) -> BenchmarkResult:
         """Run the Application Benchmark protocol.
 
         Returns:
@@ -58,11 +66,6 @@ class ApplicationBenchmark(HighLevelBenchmark):
 
         """
         self._prepare_input()
-        # run compiled or logical circuit?
-        if self.reference_state_sampler is not None:
-            self.result.execution_data["counts_ideal"] = (
-                self.reference_state_sampler.get_counts(self.compiled_input)
-            )
 
         # Not using isinstance() because PhotonicCircuit isinstance of QuantumCircuit and it breaks
         if self.benchmark_input.program.__class__ is QuantumCircuit:
@@ -74,14 +77,21 @@ class ApplicationBenchmark(HighLevelBenchmark):
             self.result.execution_data["depth_transpiled"] = self.compiled_input.depth()
             self.result.execution_data["executed_circuit"] = executed_circuit
 
+        self.result.execution_data["counts_ideal"] = (
+            self.reference_state_sampler.get_counts(self.compiled_input)
+        )
+
         start = time.time()
         self.result.execution_data["counts_backend"] = self.backend_sampler.get_counts(
             self.compiled_input
         )
         execution_time = time.time() - start
+
         self.result.metrics["execution_time"] = execution_time
 
         self.result = self.analysis.run(self.result)
+
+        return self.result
 
     @staticmethod
     def _normalized_depth(benchmark_input: BenchmarkInput) -> int:

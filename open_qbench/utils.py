@@ -1,4 +1,5 @@
 import json
+from collections.abc import Sequence
 
 from qiskit_aer.noise import NoiseModel
 from qiskit_aer.primitives import SamplerV2 as AerSampler
@@ -74,3 +75,44 @@ def calculate_from_file(file: str) -> float:
     with open(file, "rb") as f:
         result = json.load(f)
     return normalized_fidelity(result["dist_ideal"], result["dist_backend"])
+
+
+def check_tuple_types(
+    var: tuple, types: Sequence[type | Sequence[type]], recursive: bool = False
+) -> bool:
+    """
+
+    Check if tuple contains declared types.
+    Think isinstance(tup, tuple[Type1,Type2])
+
+    Args:
+        var (tuple): Tuple to be checked
+        types (list[type]): Desired types, in order.
+        recursive (bool, optional):
+            If element i in tuple is a tuple and element i in types is a list, decide whether to check it as well. Defaults to False.
+
+    Returns:
+        bool: Whether the check is successful
+    """
+
+    if not isinstance(var, tuple):
+        return False
+
+    if len(var) != len(types):
+        return False
+
+    for t_val, val_type in zip(var, types, strict=False):
+        if not isinstance(val_type, Sequence):
+            if not isinstance(t_val, val_type):
+                return False
+        else:
+            if (
+                isinstance(t_val, tuple)
+                and recursive
+                and not check_tuple_types(t_val, val_type)
+            ):
+                return False
+
+            if not isinstance(t_val, tuple):
+                return False
+    return True
