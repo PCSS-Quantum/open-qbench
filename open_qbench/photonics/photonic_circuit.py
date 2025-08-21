@@ -9,6 +9,7 @@ from open_qbench.photonics.photonic_gates import (
     BS,
     PhotonicCircuitInstruction,
     PhotonicGate,
+    PhotonicInstruction,
     PhotonicOperation,
     PhotonicRegister,
     Qumode,
@@ -53,11 +54,25 @@ class PhotonicCircuit(QuantumCircuit):
         if len(regs) == 0 and input_state is not None:
             self.pregs.append(PhotonicRegister(len(input_state)))
 
-    def append(self, operation: PhotonicCircuitInstruction, qargs):
+    def append(
+        self, instruction: PhotonicInstruction, qargs: list[QumodeSpecifier]
+    ) -> PhotonicOperation | list[PhotonicOperation]:
         """Perform validation and broadcasting before calling _append."""
-        # TODO Implement safe append
-        # self._check_dups()
-        # operation.broadcast_arguments()
+        if len(qargs) == 1:
+            combs = [(x,) for x in self._get_qumodes(qargs[0])]
+        elif len(qargs) == 2:
+            left, right = self._get_qumodes(qargs[0]), self._get_qumodes(qargs[1])
+            combs = self._broadcast_qumodes(left, right)
+        else:
+            raise ValueError(
+                "Only operations on one or two qumodes are supported right now."
+            )
+
+        ops: list[PhotonicOperation] = []
+        for comb in combs:
+            self._check_dups(comb)
+            ops.append(self._append(instruction, comb))
+        return ops[0] if len(ops) == 1 else ops
 
     def _append(
         self,
@@ -89,25 +104,45 @@ class PhotonicCircuit(QuantumCircuit):
         if len(squbits) != len(qubits):
             raise CircuitError("duplicate qubit arguments")
 
+    def _get_qumodes(self, qumode_specifier: QumodeSpecifier) -> list[Qumode]:
+        if isinstance(qumode_specifier, Qumode):
+            return [qumode_specifier]
+        elif isinstance(qumode_specifier, PhotonicRegister):
+            return [x for x in qumode_specifier]
+        elif isinstance(qumode_specifier, int):
+            return [self.pregs[0][qumode_specifier]]
+        elif isinstance(qumode_specifier, slice):
+            return self.pregs[0][qumode_specifier]
+        elif isinstance(qumode_specifier, Sequence):
+            qumodes = [self._get_qumodes(qm) for qm in qumode_specifier]
+            ret = []
+            for qm in qumodes:
+                ret += qm
+            return ret
+
+    def _broadcast_qumodes(
+        self, left: list[Qumode], right: list[Qumode]
+    ) -> list[tuple[Qumode, Qumode]]:
+        if len(left) == len(right):
+            return list(zip(left, right, strict=False))
+        elif len(left) == 1:
+            return [(left[0], right_qm) for right_qm in right]
+        elif len(right) == 1:
+            return [(left_qm, right[0]) for left_qm in left]
+        else:
+            raise CircuitError(
+                f"Not sure how to broadcast these qumodes {[left, right]}"
+            )
+
     def bs(
         self,
         theta: float,  # float for now, later extend to Parameter
-        qumode1: int | Qumode,
-        qumode2: int | Qumode,
+        qumode1: QumodeSpecifier,
+        qumode2: QumodeSpecifier,
         label: str | None = None,
-    ) -> PhotonicOperation:
+    ) -> PhotonicOperation | list[PhotonicOperation]:
         """Apply BS gate."""
-        # this whole thing should go into the safe append()
-        if all(isinstance(qm, int) for qm in [qumode1, qumode2]):
-            # for now we only consider a singular preg
-            qumodes = [
-                self.pregs[0][qumode1],
-                self.pregs[0][qumode2],
-            ]
-        else:
-            # args are already Qumodes
-            qumodes = [qumode1, qumode2]
-        return self._append(BS(theta, label), qumodes)
+        return self.append(BS(theta, label), [qumode1, qumode2])
 
     @property
     def qubits(self) -> list[Qubit]:
