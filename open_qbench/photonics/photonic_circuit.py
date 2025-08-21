@@ -3,6 +3,7 @@ from collections.abc import Sequence
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitError
+from qiskit.circuit.quantumregister import Qubit
 
 from open_qbench.photonics.photonic_gates import (
     BS,
@@ -107,6 +108,10 @@ class PhotonicCircuit(QuantumCircuit):
             # args are already Qumodes
             qumodes = [qumode1, qumode2]
         return self._append(BS(theta, label), qumodes)
+
+    @property
+    def qubits(self) -> list[Qubit]:
+        raise CircuitError("This circuit does not have qubits.")
 
     def draw(self, padding: int = 1, draw: bool = True):
         """Draw function for Photonic Circuits, currently only Orca circuits supported (because of loop lengths).

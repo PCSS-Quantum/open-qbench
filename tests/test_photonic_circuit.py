@@ -36,6 +36,20 @@ def test_incorrect_operation():
     with pytest.raises(CircuitError):
         pc.h(0)
 
+    with pytest.raises(CircuitError):
+        pc.x(0)
+
+    with pytest.raises(CircuitError):
+        pc.cx(0, 1)
+
+    with pytest.raises(CircuitError):
+        pc.z(0)
+
+    with pytest.raises(CircuitError):
+        pc.rx(np.pi, 0)
+
+    pc.bs(np.pi, 0, 1)
+
 
 def test_drawing():
     pr = PhotonicRegister(2)
