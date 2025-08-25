@@ -58,6 +58,32 @@ class ApplicationBenchmark(HighLevelBenchmark):
         ("rx", "ry", "rz", "cx")
     )  # Gate set used for calculating the normalized circuit depth
 
+    @staticmethod
+    def _normalized_depth(benchmark_input: BenchmarkInput) -> int:
+        """Return depth of the circuit after transpiling to the normalized basis gate set.
+
+        Returns:
+            int: circuit depth
+
+        """
+        if benchmark_input.program.__class__ is QuantumCircuit:
+            trans_circuits = transpile(
+                benchmark_input.program,
+                basis_gates=list(ApplicationBenchmark.basis_gates),
+            )
+            if "measure" in trans_circuits.count_ops():
+                return trans_circuits.depth() - 1
+            return trans_circuits.depth()
+        else:
+            return 0
+            # TODO: implement for photonics
+
+    @staticmethod
+    def _dumps_circuit(circuit: QuantumCircuit) -> str:
+        if circuit.__class__ is QuantumCircuit:
+            return qasm3.dumps(circuit)
+        return "TODO"
+
     def run(self) -> BenchmarkResult:
         """Run the Application Benchmark protocol.
 
@@ -67,10 +93,11 @@ class ApplicationBenchmark(HighLevelBenchmark):
         """
         self._prepare_input()
 
-        # Not using isinstance() because PhotonicCircuit isinstance of QuantumCircuit and it breaks
-        if self.benchmark_input.program.__class__ is QuantumCircuit:
-            executed_circuit = qasm3.dumps(self.compiled_input)
-            self.result.execution_data["width"] = self.benchmark_input.width
+        if isinstance(self.benchmark_input.program, QuantumCircuit) and isinstance(
+            self.compiled_input, QuantumCircuit
+        ):
+            executed_circuit = self._dumps_circuit(self.compiled_input)
+            self.result.execution_data["width"] = self.benchmark_input.program.width
             self.result.execution_data["normalized_depth"] = self._normalized_depth(
                 self.benchmark_input
             )
@@ -92,26 +119,6 @@ class ApplicationBenchmark(HighLevelBenchmark):
         self.result = self.analysis.run(self.result)
 
         return self.result
-
-    @staticmethod
-    def _normalized_depth(benchmark_input: BenchmarkInput) -> int:
-        """Return depth of the circuit after transpiling to the normalized basis gate set.
-
-        Returns:
-            int: circuit depth
-
-        """
-        if isinstance(benchmark_input.program, QuantumCircuit):
-            trans_circuits = transpile(
-                benchmark_input.program,
-                basis_gates=list(ApplicationBenchmark.basis_gates),
-            )
-            if "measure" in trans_circuits.count_ops():
-                return trans_circuits.depth() - 1
-            return trans_circuits.depth()
-        else:
-            return 0
-            # TODO: implement for photonics
 
     def measure_creation_time(self):
         pass

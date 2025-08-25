@@ -1,6 +1,6 @@
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
+from itertools import chain
 
-import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitError
 from qiskit.circuit.quantumregister import Qubit
@@ -110,9 +110,9 @@ class PhotonicCircuit(QuantumCircuit):
         elif isinstance(qumode_specifier, PhotonicRegister):
             return [x for x in qumode_specifier]
         elif isinstance(qumode_specifier, int):
-            return [self.pregs[0][qumode_specifier]]
+            return [self.qumodes[qumode_specifier]]
         elif isinstance(qumode_specifier, slice):
-            return self.pregs[0][qumode_specifier]
+            return self.qumodes[qumode_specifier]
         elif isinstance(qumode_specifier, Sequence):
             qumodes = [self._get_qumodes(qm) for qm in qumode_specifier]
             ret = []
@@ -148,6 +148,29 @@ class PhotonicCircuit(QuantumCircuit):
     def qubits(self) -> list[Qubit]:
         raise CircuitError("This circuit does not have qubits.")
 
+    @property
+    def qumodes(self) -> list[Qumode]:
+        """Photonic circuit equivalent of circuit.qubits"""
+        return list(chain(*self.pregs))
+
+    def depth(
+        self,
+        filter_function: Callable[
+            [PhotonicCircuitInstruction], bool
+        ] = lambda instruction: True,
+    ) -> int:
+        qumode_depths = {qm: 0 for qm in self.qumodes}
+        for instruction in self._data:
+            if not filter_function(instruction):
+                continue
+            max_qumodes_depth = max(
+                qumode_depths[qumode] for qumode in instruction.qumodes
+            )
+            for qumode in instruction.qumodes:
+                qumode_depths[qumode] = max_qumodes_depth + 1
+
+        return max(qumode_depths.values())
+
     def draw(self, padding: int = 1, draw: bool = True):
         """Draw function for Photonic Circuits, currently only Orca circuits supported (because of loop lengths).
 
@@ -179,11 +202,7 @@ class PhotonicCircuit(QuantumCircuit):
             loop_lengths.append(loop_length)
             current_loop_length = loop_length
             last_position = first
-        input_state = (
-            self.input_state
-            if self.input_state
-            else [0] * int(sum(len(preg) for preg in self.pregs))
-        )
+        input_state = self.input_state if self.input_state else [0] * len(self.qumodes)
         n_modes = len(input_state)
         representation = Drawer()  # type: ignore
         structure = representation.get_structure(
@@ -213,22 +232,3 @@ class PhotonicCircuit(QuantumCircuit):
 
     def __str__(self):
         return self.__class__.__name__ + "_" + "".join(str(x) for x in self.input_state)
-
-
-if __name__ == "__main__":
-    input_state = [1, 1, 1, 1]
-    loop_lengths = [1, 2, 3]
-    expected_qumodes = []
-    for length in loop_lengths:
-        for qumode in range(length, len(input_state)):
-            expected_qumodes.append((qumode - length, qumode))
-    thetas = [np.pi / 4] * 6
-    ph_circuit: PhotonicCircuit = PhotonicCircuit.from_tbi_params(
-        input_state, loop_lengths, thetas
-    )
-    for i, op in enumerate(ph_circuit):
-        assert isinstance(op.operation, BS)
-        assert isinstance(op.operation, PhotonicGate)
-        assert op.qumodes[0]._index == expected_qumodes[i][0]
-        assert op.qumodes[1]._index == expected_qumodes[i][1]
-        assert op.params[0] == thetas[i]
