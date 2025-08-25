@@ -16,7 +16,7 @@ class HighLevelBenchmark(BaseBenchmark):
         self,
         benchmark_input: BenchmarkInput,
         analysis: BaseAnalysis | None = None,
-        name: str | None = None,
+        name: str = "High Level Benchmark",
         transpiler=None,
     ):
         super().__init__(benchmark_input, analysis, name)
@@ -32,6 +32,8 @@ class HighLevelBenchmark(BaseBenchmark):
                 self.benchmark_input.program, self.benchmark_input.backend
             )
             # TODO: more advanced, customizable transpilation with transpilation barriers
+        else:
+            self.compiled_input = self.benchmark_input.program
 
     @abstractmethod
     def run(self) -> BenchmarkResult:

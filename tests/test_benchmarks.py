@@ -1,9 +1,21 @@
 import asyncio
 import json
 import time
+from typing import Any
 
+from dwave.samplers import TabuSampler
+from qiskit import QuantumCircuit
+from qlauncher.base import Problem
+
+from open_qbench.analysis import FeasibilityRatioAnalysis
+from open_qbench.apps.optimization import easy_jssp
+from open_qbench.benchmarks import ApplicationBenchmark, OptimizationBenchmark
 from open_qbench.core.benchmark import BaseBenchmark, BenchmarkInput, BenchmarkResult
 from open_qbench.core.manager import BenchmarkManager
+from open_qbench.metrics.feasibilities import JSSPFeasibility
+from open_qbench.metrics.fidelities import normalized_fidelity
+from open_qbench.photonics.photonic_circuit import PhotonicCircuit
+from open_qbench.sampler.benchmark_sampler import BenchmarkSampler
 
 
 class RetBench(BaseBenchmark):
@@ -14,6 +26,43 @@ class RetBench(BaseBenchmark):
             {},
             {"out": self.benchmark_input.program},
         )
+
+
+class TestSampler(BenchmarkSampler):
+    def __init__(self, output: dict) -> None:
+        super().__init__(TabuSampler(), shots=1024)
+        self.output = output
+
+    def get_counts(
+        self, sampler_input: QuantumCircuit | PhotonicCircuit | Problem
+    ) -> dict[Any, int]:
+        return self.output
+
+
+def test_application_benchmark():
+    bench = ApplicationBenchmark(
+        TestSampler({"0": 51, "1": 49}),
+        TestSampler({"0": 50, "1": 50}),
+        BenchmarkInput(QuantumCircuit(1)),
+        accuracy_measure=normalized_fidelity,
+    )
+
+    res = bench.run()
+    assert isinstance(res, BenchmarkResult)
+    assert res.metrics["fidelity"] == normalized_fidelity(
+        {"0": 0.51, "1": 0.49}, {"0": 0.5, "1": 0.5}
+    )
+
+
+def test_optimization_benchmark():
+    bench = OptimizationBenchmark(
+        TestSampler({"1111": 99, "0101": 1}),
+        BenchmarkInput(easy_jssp()),
+        analysis=FeasibilityRatioAnalysis(JSSPFeasibility),
+    )
+    res = bench.run()
+    assert isinstance(res, BenchmarkResult)
+    assert res.metrics["feasibility_ratio"] == 0.99
 
 
 def test_add_benchmark():

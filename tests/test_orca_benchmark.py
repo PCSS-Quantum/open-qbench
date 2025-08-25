@@ -1,9 +1,7 @@
 import numpy as np
 
-from open_qbench.application_benchmark import (
-    ApplicationBenchmark,
-    # BenchmarkSuite,
-)
+from open_qbench.analysis import FidelityAnalysis
+from open_qbench.benchmarks import ApplicationBenchmark
 from open_qbench.core import BenchmarkInput
 from open_qbench.metrics.fidelities import classical_fidelity
 from open_qbench.orca.sampler import OrcaSampler
@@ -34,8 +32,8 @@ def test_orca_benchmark():
         ideal_sampler,
         ideal_sampler,
         ben_input,
+        analysis=FidelityAnalysis(classical_fidelity),
         name="test",
-        accuracy_measure=classical_fidelity,
     )
     orca_ben.run()
     print(orca_ben.result)
