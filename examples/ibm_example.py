@@ -3,6 +3,7 @@ from qiskit_ibm_runtime import Sampler
 from qiskit_ibm_runtime.fake_provider import FakeGeneva
 
 from open_qbench import ApplicationBenchmark
+from open_qbench.analysis import FidelityAnalysis
 from open_qbench.apps.circuits import grover
 from open_qbench.core import BenchmarkInput
 from open_qbench.metrics.fidelities import normalized_fidelity
@@ -14,8 +15,8 @@ ab = ApplicationBenchmark(
     backend_sampler,
     ideal_sampler,
     BenchmarkInput(grover.grover_nq(3, 6), backend_sampler.backend()),
+    analysis=FidelityAnalysis(normalized_fidelity),
     name="Grover_benchmark",
-    accuracy_measure=normalized_fidelity,
 )
 
 ab.run()

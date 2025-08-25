@@ -39,7 +39,7 @@ ORCA Fidelity
 
     from orca_sampler import OrcaSampler
 
-    from open_qbench.application_benchmark import ApplicationBenchmark
+    from open_qbench.benchmarks import ApplicationBenchmark
     from open_qbench.core import BenchmarkInput
     from open_qbench.fidelities import classical_fidelity_orca
     from open_qbench.photonics import PhotonicCircuit

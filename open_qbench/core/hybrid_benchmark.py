@@ -1,12 +1,5 @@
-from abc import abstractmethod
-
-from .benchmark import BaseBenchmark, BenchmarkResult
+from .benchmark import BaseBenchmark
 
 
 class HybridBenchmark(BaseBenchmark):
-    def __init__(self):
-        pass
-
-    @abstractmethod
-    def run(self) -> BenchmarkResult:
-        raise NotImplementedError
+    pass
