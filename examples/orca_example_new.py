@@ -1,17 +1,13 @@
 """Running this example requires adding your SSH key to https://sdk.orcacomputing.com/ and installing with pip install .[ORCA]"""
 
 from open_qbench.analysis import FidelityAnalysis
+from open_qbench.apps.circuits.max_cut_orca import max_cut_4_nodes
 from open_qbench.benchmarks import ApplicationBenchmark
 from open_qbench.core import BenchmarkInput
 from open_qbench.metrics.fidelities import classical_fidelity
 from open_qbench.orca.sampler import OrcaSampler
-from open_qbench.photonics import PhotonicCircuit
 
-ph_circuit1 = PhotonicCircuit.from_tbi_params(
-    input_state=[1, 0, 1, 0, 1, 0],
-    loop_lengths=[1],
-    thetas=[0.8479, -0.0095, 0.2154, -1.3921, 0.0614],
-)
+ph_circuit1 = max_cut_4_nodes()
 ideal_sampler = OrcaSampler(default_shots=1024)
 backend_sampler = OrcaSampler(default_shots=1024)
 

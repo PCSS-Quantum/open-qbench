@@ -1,13 +1,15 @@
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
+from itertools import chain
 
-import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitError
+from qiskit.circuit.quantumregister import Qubit
 
 from open_qbench.photonics.photonic_gates import (
     BS,
     PhotonicCircuitInstruction,
     PhotonicGate,
+    PhotonicInstruction,
     PhotonicOperation,
     PhotonicRegister,
     Qumode,
@@ -52,11 +54,25 @@ class PhotonicCircuit(QuantumCircuit):
         if len(regs) == 0 and input_state is not None:
             self.pregs.append(PhotonicRegister(len(input_state)))
 
-    def append(self, operation: PhotonicCircuitInstruction, qargs):
+    def append(
+        self, instruction: PhotonicInstruction, qargs: list[QumodeSpecifier]
+    ) -> PhotonicOperation | list[PhotonicOperation]:
         """Perform validation and broadcasting before calling _append."""
-        # TODO Implement safe append
-        # self._check_dups()
-        # operation.broadcast_arguments()
+        if len(qargs) == 1:
+            combs = [(x,) for x in self._get_qumodes(qargs[0])]
+        elif len(qargs) == 2:
+            left, right = self._get_qumodes(qargs[0]), self._get_qumodes(qargs[1])
+            combs = self._broadcast_qumodes(left, right)
+        else:
+            raise ValueError(
+                "Only operations on one or two qumodes are supported right now."
+            )
+
+        ops: list[PhotonicOperation] = []
+        for comb in combs:
+            self._check_dups(comb)
+            ops.append(self._append(instruction, comb))
+        return ops[0] if len(ops) == 1 else ops
 
     def _append(
         self,
@@ -88,25 +104,72 @@ class PhotonicCircuit(QuantumCircuit):
         if len(squbits) != len(qubits):
             raise CircuitError("duplicate qubit arguments")
 
+    def _get_qumodes(self, qumode_specifier: QumodeSpecifier) -> list[Qumode]:
+        if isinstance(qumode_specifier, Qumode):
+            return [qumode_specifier]
+        elif isinstance(qumode_specifier, PhotonicRegister):
+            return [x for x in qumode_specifier]
+        elif isinstance(qumode_specifier, int):
+            return [self.qumodes[qumode_specifier]]
+        elif isinstance(qumode_specifier, slice):
+            return self.qumodes[qumode_specifier]
+        elif isinstance(qumode_specifier, Sequence):
+            qumodes = [self._get_qumodes(qm) for qm in qumode_specifier]
+            ret = []
+            for qm in qumodes:
+                ret += qm
+            return ret
+
+    def _broadcast_qumodes(
+        self, left: list[Qumode], right: list[Qumode]
+    ) -> list[tuple[Qumode, Qumode]]:
+        if len(left) == len(right):
+            return list(zip(left, right, strict=False))
+        elif len(left) == 1:
+            return [(left[0], right_qm) for right_qm in right]
+        elif len(right) == 1:
+            return [(left_qm, right[0]) for left_qm in left]
+        else:
+            raise CircuitError(
+                f"Not sure how to broadcast these qumodes {[left, right]}"
+            )
+
     def bs(
         self,
         theta: float,  # float for now, later extend to Parameter
-        qumode1: int | Qumode,
-        qumode2: int | Qumode,
+        qumode1: QumodeSpecifier,
+        qumode2: QumodeSpecifier,
         label: str | None = None,
-    ) -> PhotonicOperation:
+    ) -> PhotonicOperation | list[PhotonicOperation]:
         """Apply BS gate."""
-        # this whole thing should go into the safe append()
-        if all(isinstance(qm, int) for qm in [qumode1, qumode2]):
-            # for now we only consider a singular preg
-            qumodes = [
-                self.pregs[0][qumode1],
-                self.pregs[0][qumode2],
-            ]
-        else:
-            # args are already Qumodes
-            qumodes = [qumode1, qumode2]
-        return self._append(BS(theta, label), qumodes)
+        return self.append(BS(theta, label), [qumode1, qumode2])
+
+    @property
+    def qubits(self) -> list[Qubit]:
+        raise CircuitError("This circuit does not have qubits.")
+
+    @property
+    def qumodes(self) -> list[Qumode]:
+        """Photonic circuit equivalent of circuit.qubits"""
+        return list(chain(*self.pregs))
+
+    def depth(
+        self,
+        filter_function: Callable[
+            [PhotonicCircuitInstruction], bool
+        ] = lambda instruction: True,
+    ) -> int:
+        qumode_depths = {qm: 0 for qm in self.qumodes}
+        for instruction in self._data:
+            if not filter_function(instruction):
+                continue
+            max_qumodes_depth = max(
+                qumode_depths[qumode] for qumode in instruction.qumodes
+            )
+            for qumode in instruction.qumodes:
+                qumode_depths[qumode] = max_qumodes_depth + 1
+
+        return max(qumode_depths.values())
 
     def draw(self, padding: int = 1, draw: bool = True):
         """Draw function for Photonic Circuits, currently only Orca circuits supported (because of loop lengths).
@@ -139,11 +202,7 @@ class PhotonicCircuit(QuantumCircuit):
             loop_lengths.append(loop_length)
             current_loop_length = loop_length
             last_position = first
-        input_state = (
-            self.input_state
-            if self.input_state
-            else [0] * int(sum(len(preg) for preg in self.pregs))
-        )
+        input_state = self.input_state if self.input_state else [0] * len(self.qumodes)
         n_modes = len(input_state)
         representation = Drawer()  # type: ignore
         structure = representation.get_structure(
@@ -173,22 +232,3 @@ class PhotonicCircuit(QuantumCircuit):
 
     def __str__(self):
         return self.__class__.__name__ + "_" + "".join(str(x) for x in self.input_state)
-
-
-if __name__ == "__main__":
-    input_state = [1, 1, 1, 1]
-    loop_lengths = [1, 2, 3]
-    expected_qumodes = []
-    for length in loop_lengths:
-        for qumode in range(length, len(input_state)):
-            expected_qumodes.append((qumode - length, qumode))
-    thetas = [np.pi / 4] * 6
-    ph_circuit: PhotonicCircuit = PhotonicCircuit.from_tbi_params(
-        input_state, loop_lengths, thetas
-    )
-    for i, op in enumerate(ph_circuit):
-        assert isinstance(op.operation, BS)
-        assert isinstance(op.operation, PhotonicGate)
-        assert op.qumodes[0]._index == expected_qumodes[i][0]
-        assert op.qumodes[1]._index == expected_qumodes[i][1]
-        assert op.params[0] == thetas[i]

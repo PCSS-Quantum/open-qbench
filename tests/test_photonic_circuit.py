@@ -3,7 +3,18 @@ import pytest
 from qiskit.circuit import CircuitError
 
 from open_qbench.photonics import PhotonicCircuit, PhotonicRegister
-from open_qbench.photonics.photonic_gates import BS, PhotonicGate
+from open_qbench.photonics.photonic_gates import BS, PhotonicGate, Qumode
+
+
+def _lists_match(l1: list, l2: list, exact_is: bool = False) -> bool:
+    def comp(e1, e2):
+        if exact_is:
+            return e1 is e2
+        return e1 == e2
+
+    if len(l1) != len(l2):
+        return False
+    return all(comp(e1, e2) for e1, e2 in zip(l1, l2, strict=False))
 
 
 def create_bs_circuit(size: int, qm1: int, qm2: int):
@@ -29,12 +40,67 @@ def test_qumodes_binding():
     assert qm0 is qm1
 
 
+def test_qumodes_assignment():
+    pr1 = PhotonicRegister(2)
+    pr2 = PhotonicRegister(2)
+    pc = PhotonicCircuit(pr1, pr2)
+
+    qms: list[Qumode] = [pr1[0], pr2[0]]
+
+    pc.bs(theta=1.5, qumode1=0, qumode2=2)
+    pc.bs(theta=1.5, qumode1=[0], qumode2=[2])
+    pc.bs(theta=1.5, qumode1=slice(0, 1), qumode2=slice(2, 3))
+    pc.bs(theta=1.5, qumode1=qms[0], qumode2=qms[1])
+    pc.bs(theta=1.5, qumode1=[qms[0]], qumode2=[qms[1]])
+
+    for inst in pc._data:
+        assert _lists_match(list(inst.qumodes), qms, exact_is=True)
+
+
+def test_qumode_broadcast_expand_right():
+    """Test if broadcasting correctly expands a longer right side, also test whole register assignment"""
+    pr1 = PhotonicRegister(2)
+    pr2 = PhotonicRegister(2)
+    pc = PhotonicCircuit(pr1, pr2)
+
+    pc.bs(theta=1.5, qumode1=0, qumode2=pr2)
+
+    assert _lists_match(list(pc._data[0].qumodes), [pr1[0], pr2[0]], exact_is=True)
+    assert _lists_match(list(pc._data[1].qumodes), [pr1[0], pr2[1]], exact_is=True)
+
+
+def test_qumode_broadcast_expand_left():
+    """Test if broadcasting correctly expands a longer left side, also test whole register assignment"""
+    pr1 = PhotonicRegister(2)
+    pr2 = PhotonicRegister(2)
+    pc = PhotonicCircuit(pr1, pr2)
+
+    pc.bs(theta=1.5, qumode1=pr1, qumode2=2)
+
+    assert _lists_match(list(pc._data[0].qumodes), [pr1[0], pr2[0]], exact_is=True)
+    assert _lists_match(list(pc._data[1].qumodes), [pr1[1], pr2[0]], exact_is=True)
+
+
 def test_incorrect_operation():
     pr = PhotonicRegister(2)
     pc = PhotonicCircuit(pr)
 
     with pytest.raises(CircuitError):
         pc.h(0)
+
+    with pytest.raises(CircuitError):
+        pc.x(0)
+
+    with pytest.raises(CircuitError):
+        pc.cx(0, 1)
+
+    with pytest.raises(CircuitError):
+        pc.z(0)
+
+    with pytest.raises(CircuitError):
+        pc.rx(np.pi, 0)
+
+    pc.bs(np.pi, 0, 1)
 
 
 def test_drawing():
