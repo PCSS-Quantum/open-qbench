@@ -2,7 +2,7 @@ from typing import Any
 
 import dimod
 from qiskit import QuantumCircuit
-from qiskit.primitives import BaseSamplerV2  # , SamplerPubLike
+from qiskit.primitives import BaseSamplerV2, BitArray  # , SamplerPubLike
 from qlauncher import QLauncher
 from qlauncher.base import Algorithm, Backend, Problem
 from qlauncher.base.adapter_structure import get_formatter
@@ -34,11 +34,12 @@ class BenchmarkSampler:
         elif isinstance(sampler_input, QuantumCircuit) and isinstance(
             self.sampler, BaseSamplerV2
         ):
-            counts = (
+            sampler_data = (
                 self.sampler.run([sampler_input], shots=self.shots, **self.kwargs)
                 .result()[0]
-                .data.meas.get_counts()
+                .data
             )
+            counts = BitArray.concatenate_bits(list(sampler_data.values())).get_counts()
         elif isinstance(sampler_input, Problem) and isinstance(
             self.sampler, dimod.Sampler
         ):

@@ -19,7 +19,7 @@ class OptimizationBenchmark(HybridBenchmark):
         sampler: dimod.Sampler | tuple[Algorithm, Backend] | BenchmarkSampler,
         benchmark_input: BenchmarkInput,
         analysis: BaseAnalysis,
-        name: str = "Application Benchmark",
+        name: str = "Optimization Benchmark",
     ) -> None:
         super().__init__(benchmark_input=benchmark_input, analysis=analysis, name=name)
         sampler = (
