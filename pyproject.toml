@@ -10,7 +10,6 @@ dependencies = [
     "qlauncher[dwave]>=2.0.5",
     "dimod>=0.12.20",
 ]
-
 [project.optional-dependencies]
 VQE = ["qiskit-nature[pyscf]>=0.7.2"]
 QSVM = ["scikit-image>=0.25.1"]
