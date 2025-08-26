@@ -123,5 +123,5 @@ Contents
    :maxdepth: 1
 
    examples
-
+   tutorials
    API Reference <API/open_qbench>
