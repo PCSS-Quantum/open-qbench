@@ -1,5 +1,7 @@
+import re
 from collections.abc import Callable, Sequence
 from itertools import chain
+from typing import Any
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitError
@@ -212,13 +214,12 @@ class PhotonicCircuit(QuantumCircuit):
             representation.draw(structure, input_state, padding=padding)
             plt.show()  # type: ignore
 
-    @classmethod
+    @staticmethod
     def from_tbi_params(
-        cls,
         input_state: list[int],
         loop_lengths: list[int],
         thetas: list[float],
-    ):
+    ) -> "PhotonicCircuit":
         thetas_copy = thetas.copy()
         circuit = PhotonicCircuit(input_state=input_state)
         for length in loop_lengths:
@@ -228,6 +229,57 @@ class PhotonicCircuit(QuantumCircuit):
                     qumode1=qumode - length,
                     qumode2=qumode,
                 )
+        return circuit
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "registers": [
+                {"name": preg.name, "num_qumodes": preg.size} for preg in self.pregs
+            ],
+            "input_state": self.input_state,
+            "operations": [
+                {
+                    "name": op.operation.name,
+                    "label": op.operation.label,
+                    "duration": op.operation.duration,
+                    "unit": op.operation.unit,
+                    "qumodes": [self.qumodes.index(qm) for qm in op.qumodes],
+                    "params": list(op.params),
+                }
+                for op in self._data
+            ],
+        }
+
+    @staticmethod
+    def from_dict(circuit_dict: dict[str, Any]) -> "PhotonicCircuit":
+        registers = []
+
+        default_name = re.compile(rf"{PhotonicRegister.prefix}\d+")
+
+        for reg in circuit_dict["registers"]:
+            name, n_modes = reg["name"], reg["num_qumodes"]
+            # Match default names to avoid having two registers with the same name.
+            if default_name.match(name):
+                registers.append(PhotonicRegister(size=n_modes))
+            else:
+                registers.append(PhotonicRegister(size=n_modes, name=name))
+
+        input_state = circuit_dict["input_state"]
+
+        circuit = PhotonicCircuit(*registers, input_state=input_state)
+
+        for op in circuit_dict["operations"]:
+            match opname := op.get("name", "none"):
+                case "bs":
+                    circuit.bs(
+                        theta=op.get("parameters", [0])[0],
+                        qumode1=op.get("qumodes", [0, 1])[0],
+                        qumode2=op.get("qumodes", [0, 1])[1],
+                        label=op.get("label", None),
+                    )
+                case _:
+                    raise ValueError(f"Unsupported operation type: {opname}")
+
         return circuit
 
     def __str__(self):

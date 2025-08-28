@@ -1,3 +1,4 @@
+import json
 import time
 from collections.abc import Callable
 
@@ -13,6 +14,7 @@ from open_qbench.core import (
     HighLevelBenchmark,
 )
 from open_qbench.core.benchmark import BenchmarkError
+from open_qbench.photonics import PhotonicCircuit
 from open_qbench.sampler.benchmark_sampler import BenchmarkSampler
 
 
@@ -82,7 +84,9 @@ class ApplicationBenchmark(HighLevelBenchmark):
     def _dumps_circuit(circuit: QuantumCircuit) -> str:
         if circuit.__class__ is QuantumCircuit:
             return qasm3.dumps(circuit)
-        return "TODO"
+        elif isinstance(circuit, PhotonicCircuit):
+            return json.dumps(circuit.to_dict())
+        raise ValueError(f"Unsupported circuit type {type(circuit)}")
 
     def run(self) -> BenchmarkResult:
         """Run the Application Benchmark protocol.

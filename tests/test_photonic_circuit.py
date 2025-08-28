@@ -17,17 +17,77 @@ def _lists_match(l1: list, l2: list, exact_is: bool = False) -> bool:
     return all(comp(e1, e2) for e1, e2 in zip(l1, l2, strict=False))
 
 
-def create_bs_circuit(size: int, qm1: int, qm2: int):
+def makeistate(n):
+    return [(i + 1) % 2 for i in range(n)]
+
+
+def create_bs_circuit(size: int, qm1: int, qm2: int, istate: list[int] | None = None):
     pr = PhotonicRegister(size)
-    pc = PhotonicCircuit(pr)
+    pc = PhotonicCircuit(
+        pr, input_state=istate if istate is not None else makeistate(size)
+    )
 
     pc.bs(theta=1.5, qumode1=qm1, qumode2=qm2)
+    return pc
 
 
 def test_circuit_creation():
     create_bs_circuit(2, 0, 1)
     with pytest.raises(IndexError):
         create_bs_circuit(2, 0, 2)
+
+
+def test_circuit_export():
+    pc = create_bs_circuit(2, 0, 1)
+    assert pc.to_dict() == {
+        "registers": [{"name": pc.pregs[0].name, "num_qumodes": 2}],
+        "input_state": [1, 0],
+        "operations": [
+            {
+                "name": "bs",
+                "label": None,
+                "duration": None,
+                "unit": "dt",
+                "qumodes": [0, 1],
+                "params": [1.5],
+            }
+        ],
+    }
+
+    pc.bs(1.4, 1, 0, "test")
+
+    assert pc.to_dict() == {
+        "registers": [{"name": pc.pregs[0].name, "num_qumodes": 2}],
+        "input_state": [1, 0],
+        "operations": [
+            {
+                "name": "bs",
+                "label": None,
+                "duration": None,
+                "unit": "dt",
+                "qumodes": [0, 1],
+                "params": [1.5],
+            },
+            {
+                "name": "bs",
+                "label": "test",
+                "duration": None,
+                "unit": "dt",
+                "qumodes": [1, 0],
+                "params": [1.4],
+            },
+        ],
+    }
+
+
+def test_circuit_import():
+    pc = create_bs_circuit(2, 0, 1)
+    save_dict = pc.to_dict()
+    reconst = PhotonicCircuit.from_dict(save_dict)
+
+    assert len(pc.pregs) == len(reconst.pregs)
+    assert _lists_match(pc.input_state, reconst.input_state)
+    assert len(pc._data) == len(reconst._data)
 
 
 def test_depth():
