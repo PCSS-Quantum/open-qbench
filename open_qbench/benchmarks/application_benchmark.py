@@ -74,9 +74,9 @@ class ApplicationBenchmark(HighLevelBenchmark):
             if "measure" in trans_circuits.count_ops():
                 return trans_circuits.depth() - 1
             return trans_circuits.depth()
-        else:
-            return 0
-            # TODO: implement for photonics
+        elif isinstance(benchmark_input.program, QuantumCircuit):
+            return benchmark_input.program.depth()
+        return 0
 
     @staticmethod
     def _dumps_circuit(circuit: QuantumCircuit) -> str:

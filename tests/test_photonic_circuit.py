@@ -30,6 +30,23 @@ def test_circuit_creation():
         create_bs_circuit(2, 0, 2)
 
 
+def test_depth():
+    pr = PhotonicRegister(4)
+    pc = PhotonicCircuit(pr)
+
+    pc.bs(1, 0, 1)
+    pc.bs(1, 2, 3)
+
+    assert pc.depth() == 1
+    pc.bs(1, 1, 2)
+
+    assert pc.depth() == 2
+
+    pc.bs(1, 2, 3)
+
+    assert pc.depth() == 3
+
+
 def test_qumodes_binding():
     pr = PhotonicRegister(2)
     pc = PhotonicCircuit(pr)
