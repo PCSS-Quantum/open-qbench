@@ -214,14 +214,15 @@ class PhotonicCircuit(QuantumCircuit):
             representation.draw(structure, input_state, padding=padding)
             plt.show()  # type: ignore
 
-    @staticmethod
+    @classmethod
     def from_tbi_params(
+        cls,
         input_state: list[int],
         loop_lengths: list[int],
         thetas: list[float],
-    ) -> "PhotonicCircuit":
+    ):
         thetas_copy = thetas.copy()
-        circuit = PhotonicCircuit(input_state=input_state)
+        circuit = cls(input_state=input_state)
         for length in loop_lengths:
             for qumode in range(length, len(input_state)):
                 circuit.bs(
@@ -250,8 +251,8 @@ class PhotonicCircuit(QuantumCircuit):
             ],
         }
 
-    @staticmethod
-    def from_dict(circuit_dict: dict[str, Any]) -> "PhotonicCircuit":
+    @classmethod
+    def from_dict(cls, circuit_dict: dict[str, Any]):
         registers = []
 
         default_name = re.compile(rf"{PhotonicRegister.prefix}\d+")
@@ -266,7 +267,7 @@ class PhotonicCircuit(QuantumCircuit):
 
         input_state = circuit_dict["input_state"]
 
-        circuit = PhotonicCircuit(*registers, input_state=input_state)
+        circuit = cls(*registers, input_state=input_state)
 
         for op in circuit_dict["operations"]:
             match opname := op.get("name", "none"):
