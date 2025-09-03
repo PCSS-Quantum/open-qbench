@@ -38,12 +38,13 @@ class ApplicationBenchmark(HighLevelBenchmark):
             if not isinstance(backend_sampler, BenchmarkSampler)
             else backend_sampler
         )
+        self.backend_sampler.shots = backend_sampler.default_shots
         self.reference_state_sampler = (
             BenchmarkSampler(reference_state_sampler)
             if not isinstance(reference_state_sampler, BenchmarkSampler)
             else reference_state_sampler
         )
-
+        self.reference_state_sampler.shots = reference_state_sampler.default_shots
         if analysis is not None:
             self.analysis = analysis
         elif accuracy_measure is not None:
