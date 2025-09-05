@@ -41,7 +41,7 @@ class BenchmarkSampler:
             else:
                 return None
 
-        return str(self.sampler).rsplit(".", maxsplit=1)[-1].split("'")[0]
+        return str(self.sampler.__class__).rsplit(".", maxsplit=1)[-1].split("'")[0]
 
     def get_counts(
         self, sampler_input: QuantumCircuit | PhotonicCircuit | Problem
