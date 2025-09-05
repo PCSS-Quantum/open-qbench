@@ -2,7 +2,9 @@ from typing import Any
 
 import dimod
 from qiskit import QuantumCircuit
-from qiskit.primitives import BaseSamplerV2
+from qiskit.primitives import BackendSamplerV2, BaseSamplerV2
+from qiskit.providers import BackendV1, BackendV2
+from qiskit_ibm_runtime import Sampler, SamplerV2
 from qlauncher import QLauncher
 from qlauncher.base import Algorithm, Backend, Problem
 from qlauncher.base.adapter_structure import get_formatter
@@ -14,12 +16,32 @@ class BenchmarkSampler:
     def __init__(
         self,
         sampler: BaseSamplerV2 | dimod.Sampler | tuple[Algorithm, Backend],
-        shots=1024,
+        shots: int = 1024,
+        backend_name: str | None = None,
         **sampling_kwargs,
     ) -> None:
         self.sampler = sampler
         self.shots = shots
+        self._backend_name = backend_name
         self.kwargs = sampling_kwargs
+
+    @property
+    def backend_name(self) -> str | None:
+        if self._backend_name is not None:
+            return self._backend_name
+
+        if isinstance(self.sampler, BackendSamplerV2 | Sampler | SamplerV2):
+            print(type(self.sampler.backend))
+            if isinstance(self.sampler.backend, BackendV1):
+                return self.sampler.backend.name()
+            elif isinstance(self.sampler.backend, BackendV2):
+                return self.sampler.backend.name
+            elif callable(self.sampler.backend):
+                return self.sampler.backend().name
+            else:
+                return None
+
+        return str(self.sampler).rsplit(".", maxsplit=1)[-1].split("'")[0]
 
     def get_counts(
         self, sampler_input: QuantumCircuit | PhotonicCircuit | Problem

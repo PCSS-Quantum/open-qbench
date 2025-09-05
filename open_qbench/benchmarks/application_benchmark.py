@@ -54,7 +54,11 @@ class ApplicationBenchmark(HighLevelBenchmark):
             raise BenchmarkError(
                 "Analysis has to be defined either directly or by the accuracy_measure argument"
             )
-        self.result = BenchmarkResult(self.name, self.benchmark_input)
+        self.result = BenchmarkResult(
+            self.name,
+            self.benchmark_input,
+            backend_name=self.backend_sampler.backend_name,
+        )
 
     basis_gates = frozenset(
         ("rx", "ry", "rz", "cx")

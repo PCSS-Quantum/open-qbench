@@ -35,7 +35,9 @@ class OptimizationBenchmark(HybridBenchmark):
         self.sampler = sampler
         self.analysis = analysis
 
-        self.result = BenchmarkResult(self.name, self.benchmark_input)
+        self.result = BenchmarkResult(
+            self.name, self.benchmark_input, backend_name=self.sampler.backend_name
+        )
 
     def _verify_input(self, benchmark_input: BenchmarkInput) -> None:
         if not isinstance(benchmark_input.program, Problem):

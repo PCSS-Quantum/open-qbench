@@ -74,6 +74,7 @@ class BenchmarkResult:
     input: BenchmarkInput
     execution_data: dict = field(default_factory=dict)
     metrics: dict[str, int | float] = field(default_factory=dict)
+    backend_name: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         self_dict = asdict(self)

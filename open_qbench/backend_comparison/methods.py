@@ -61,7 +61,8 @@ class ElectreBackendComparison:
 
         if self.graph_path is not None:
             devices = [
-                str(res.name).split(".")[-1].split(" ")[0] for res in execution_results
+                res.backend_name if res.backend_name is not None else res.name
+                for res in execution_results
             ]
             draw_graph(rank_P, devices, self.graph_path)
 
