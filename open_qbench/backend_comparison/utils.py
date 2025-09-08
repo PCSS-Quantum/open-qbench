@@ -87,10 +87,12 @@ def combine_indifferent(partial_rank, labels):
 
 def draw_graph(matrix, labels, output_path: str):
     matrix, new_labels = combine_indifferent(matrix, labels)
+    max_lines = max([len(lab.splitlines()) for lab in new_labels])
     G = create_ranking(matrix)
     mapping = {i: new_labels[i] for i in range(len(new_labels))}
     G = nx.relabel_nodes(G, mapping)
     pos = nx.multipartite_layout(G, subset_key="subset", align="horizontal", scale=-1)
 
-    nx.draw(G, pos, with_labels=True, node_color="white")
+    nx.draw(G, pos, with_labels=True, node_color="white", node_size=(500 * max_lines))
+
     plt.savefig(output_path)
