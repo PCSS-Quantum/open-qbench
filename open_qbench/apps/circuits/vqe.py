@@ -16,8 +16,10 @@ from qiskit_nature.second_q.transformers import (
 )
 
 
-def uccsd_3q_56d() -> tuple[QuantumCircuit, tuple[float, ...]]:
-    """Returns a 3-qubit UCCSD circuit with normalized depth 56, as in the document.
+def uccsd_3q_56d(
+    bound=True,
+) -> QuantumCircuit | tuple[QuantumCircuit, tuple[float, ...]]:
+    """Returns a 3-qubit UCCSD circuit with normalized depth 56.
     Returned parameters are chosen arbitrarily, so that the final distribution is
     not uniform.
     """
@@ -45,5 +47,8 @@ def uccsd_3q_56d() -> tuple[QuantumCircuit, tuple[float, ...]]:
     )
     ansatz.name = "VQE_UCCSD_LiH_3q"
     params = (0.08670186, 0.41080424, 0.96417694, 0.17362798)
+
+    if bound:
+        return ansatz.assign_parameters(params)
 
     return ansatz, params

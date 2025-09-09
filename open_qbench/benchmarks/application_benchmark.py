@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 import dimod
 from qiskit import QuantumCircuit, qasm3, transpile
-from qiskit.primitives import BaseSamplerV2
+from qiskit.primitives import BaseSamplerV1, BaseSamplerV2
 
 from open_qbench.analysis.fidelity import FidelityAnalysis
 from open_qbench.core import (
@@ -23,7 +23,10 @@ class ApplicationBenchmark(HighLevelBenchmark):
 
     def __init__(
         self,
-        backend_sampler: BaseSamplerV2 | dimod.Sampler | BenchmarkSampler,
+        backend_sampler: BaseSamplerV1
+        | BaseSamplerV2
+        | dimod.Sampler
+        | BenchmarkSampler,
         reference_state_sampler: BaseSamplerV2 | dimod.Sampler | BenchmarkSampler,
         benchmark_input: BenchmarkInput,
         name: str = "Application Benchmark",
@@ -35,13 +38,19 @@ class ApplicationBenchmark(HighLevelBenchmark):
             analysis,
             name,
         )
+
         self.backend_sampler = (
-            BenchmarkSampler(backend_sampler)
+            BenchmarkSampler(
+                backend_sampler, self.benchmark_input.options.get("backend_shots", 1000)
+            )
             if not isinstance(backend_sampler, BenchmarkSampler)
             else backend_sampler
         )
         self.reference_state_sampler = (
-            BenchmarkSampler(reference_state_sampler)
+            BenchmarkSampler(
+                reference_state_sampler,
+                self.benchmark_input.options.get("simulator_shots", 1000),
+            )
             if not isinstance(reference_state_sampler, BenchmarkSampler)
             else reference_state_sampler
         )
@@ -101,7 +110,7 @@ class ApplicationBenchmark(HighLevelBenchmark):
             self.compiled_input, QuantumCircuit
         ):
             executed_circuit = self._dumps_circuit(self.compiled_input)
-            self.result.execution_data["width"] = self.benchmark_input.program.width
+            self.result.execution_data["width"] = self.benchmark_input.program.width()
             self.result.execution_data["normalized_depth"] = self._normalized_depth(
                 self.benchmark_input
             )

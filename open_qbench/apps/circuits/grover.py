@@ -4,14 +4,14 @@ from qiskit import QuantumCircuit
 
 
 def grover_nq(num_qubits: int, marked_state: int | str) -> QuantumCircuit:
-    """Resturns an n-qubit Grover circuit with one marked state"""
+    """Return an n-qubit Grover circuit with one marked state."""
     if isinstance(marked_state, int):
         marked_state = bin(marked_state)[2:]
     if len(marked_state) > num_qubits:
         raise ValueError(
             "Number of bits in the marked state cannot be larger than number of qubits"
         )
-    marking_circ = QuantumCircuit(num_qubits, num_qubits)
+    marking_circ = QuantumCircuit(num_qubits)
     for i, q in enumerate(reversed(marked_state)):
         if int(q) == 0:
             marking_circ.x(i)

@@ -12,6 +12,7 @@ def ghz_direct(num_qubits: int) -> QuantumCircuit:
         circuit.rx(math.pi / 2, i + 1)
     circuit.ry(math.pi / 2, 0)
     circuit.measure_all()
+    circuit.name = "GHZ_direct"
     return circuit
 
 
@@ -34,4 +35,5 @@ def ghz_decoherence_free(num_qubits: int) -> QuantumCircuit:
         if qubit % 2 == 1:
             circuit.x(qubit)
     circuit.barrier(list(range(num_qubits)))
+    circuit.name = "GHZ_decoherence_free"
     return circuit

@@ -34,7 +34,7 @@ class BenchmarkInput:
     * a workflow desribing a complete computational problem,
     * quantum circuit\\*,
     * photonic circuit\\*,
-    * QUBO matrix,
+    * QUBO matrix\\*,
     * pulse schedule.
 
     \\* - currently implemented
@@ -44,9 +44,13 @@ class BenchmarkInput:
         self,
         program: QuantumProgram,
         backend: Backend | None = None,
+        options: dict | None = None,
     ) -> None:
-        # self.program = program
         self.backend = backend
+        if options is not None:
+            self.options = options
+        else:
+            options = {}
 
         if isinstance(program, tuple):
             self.program = program[0]
@@ -56,7 +60,7 @@ class BenchmarkInput:
             self.params = None
 
     def __repr__(self):
-        return f"Program: {self.program.name}, Backend: {self.backend}"
+        return f"Program: {self.program.name}, Backend: {self.backend}, Options: {self.options}"
 
     @property
     def width(self):

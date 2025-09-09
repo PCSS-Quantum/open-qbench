@@ -4,7 +4,7 @@ from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.library import QFT
 
 
-def prepare_QFT(encoded_number: int):
+def prepare_QFT(encoded_number: int) -> QuantumCircuit:
     n_qubits = len(bin(encoded_number)) - 2
     q = QuantumRegister(n_qubits, "q")
 
