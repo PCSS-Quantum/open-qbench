@@ -99,5 +99,25 @@ print(ab.result)
 ## Contributing
 We welcome contributions from the community! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed guide.
 
+## Citation
+```bibtex
+@article{openqbench2026,
+  author={Wojciechowski, Konrad
+  and Kurowski, Krzysztof
+  and Slysz, Mateusz
+  and Pecyna, Tomasz},
+  title={{Open QBench}: A benchmarking framework for evaluating quantum computing platforms},
+  journal={Quantum Information Processing},
+  year={2026},
+  month={Mar},
+  day={09},
+  volume={25},
+  number={3},
+  pages={98},
+  issn={1573-1332},
+  doi={10.1007/s11128-026-05115-2},
+}
+```
+
 ## License
 [Apache License 2.0](https://github.com/PCSS-Quantum/open-qbench/blob/qbench_v2/LICENSE)
