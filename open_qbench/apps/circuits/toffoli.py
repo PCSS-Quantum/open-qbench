@@ -12,6 +12,7 @@ def toffoli_circuit(
         if int(q) == 1:
             circuit.x(i)
     circuit.mcx(list(range(num_qubits - 1)), num_qubits - 1)
+    circuit.measure_all()
 
     circuit.name = f"Toffoli_{num_qubits}q"
     return circuit

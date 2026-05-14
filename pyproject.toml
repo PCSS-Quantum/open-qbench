@@ -55,5 +55,11 @@ python_version = "3.12"
 exclude = ["docs/"]
 
 [[tool.mypy.overrides]]
-module = ["qiskit.*", "qiskit_aer.*", "qiskit-ibm-runtime.*", "ptseries.*"]
+module = [
+    "qiskit.*",
+    "qiskit_aer.*",
+    "qiskit-ibm-runtime.*",
+    "ptseries.*",
+    "qlauncher.*",
+]
 ignore_missing_imports = true

@@ -43,7 +43,9 @@ def test_application_benchmark():
     bench = ApplicationBenchmark(
         TestSampler({"0": 51, "1": 49}),
         TestSampler({"0": 50, "1": 50}),
-        BenchmarkInput(QuantumCircuit(1)),
+        BenchmarkInput(
+            QuantumCircuit(1), options={"backend_shots": 100, "simulator_shots": 100}
+        ),
         accuracy_measure=normalized_fidelity,
     )
 

@@ -60,7 +60,7 @@ class BenchmarkInput:
             self.params = None
 
     def __repr__(self):
-        return f"Program: {self.program.name}, Backend: {self.backend}, Options: {self.options}"
+        return f"Program: {self.program.name}, Backend: {type(self.backend)}, Options: {self.options}"
 
     @property
     def width(self):

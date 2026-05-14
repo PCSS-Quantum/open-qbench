@@ -19,19 +19,18 @@ from open_qbench.metrics.fidelities import normalized_fidelity
 
 
 def test_qsvm__generation():
-    qc, params = trained_qsvm_8q()
-    qc.measure_all()
+    qc = trained_qsvm_8q()
     assert qc.num_qubits == 8
-    assert len(params) == 8
-    Sampler().run([(qc, params)]).result()
+    Sampler().run([(qc)]).result()
 
 
 def test_toffoli_generation():
     qc = toffoli_circuit(5, "11111")
-    qc.measure_all()
-    res = Sampler().run([(qc)]).result()[0].data.meas.get_bitstrings()
+    data = Sampler().run([(qc)]).result()[0].data
+    register_name = next(iter(vars(data).keys()))
+    bitstrings = getattr(data, register_name).get_bitstrings()
     # assert res[0] == "01111"
-    assert all(s == "01111" for s in res)
+    assert all(s == "01111" for s in bitstrings)
 
 
 def test_ghz_generation():
@@ -41,28 +40,24 @@ def test_ghz_generation():
 
 def test_grover_generation():
     qc = grover_nq(4, 10)
-    qc.measure_all()
     res = Sampler().run([(qc)]).result()[0].data.meas.get_counts()
     c = Counter(res)
     assert c.most_common(1)[0][0] == bin(10)[2:]
 
 
 def test_qaoa_generation():
-    qc, params = jssp_7q_24d()
-    qc.measure_all()
-    Sampler().run([(qc, params)]).result()
+    qc = jssp_7q_24d()
+    Sampler().run([(qc)]).result()
 
 
 def test_vqe_generation():
-    qc, params = uccsd_3q_56d()
-    qc.measure_all()
-    Sampler().run([(qc, params)]).result()
+    qc = uccsd_3q_56d()
+    Sampler().run([(qc)]).result()
 
 
 def test_qft():
     num = 24
     qc = prepare_QFT(num)
-    qc.measure_all()
     res = Sampler().run([(qc)]).result()[0].data.meas.get_bitstrings()
     assert all(s == bin(num)[2:] for s in res)
 
@@ -77,7 +72,9 @@ def test_run_app_benchmark():
     s = RSampler(backend)
     ss = Sampler()
     qc = ghz_decoherence_free(5)
-    ben_input = BenchmarkInput(qc, s.backend())
+    ben_input = BenchmarkInput(
+        qc, s.backend(), {"backend_shots": 10, "simulator_shots": 10}
+    )
 
     app_ben = ApplicationBenchmark(
         s,
@@ -86,8 +83,6 @@ def test_run_app_benchmark():
         analysis=FidelityAnalysis(normalized_fidelity),
         name="GHZ",
     )
-    print(app_ben)
-
     app_ben.run()
 
 

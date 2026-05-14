@@ -17,6 +17,7 @@
 
 import csv
 from importlib.resources import files
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -80,7 +81,7 @@ class FeatureMap:
         parameters: npt.NDArray[np.float64] | ParameterVector | None = None,
         inverse: bool = False,
         name: str | None = None,
-    ):
+    ) -> QuantumCircuit:
         """Construct the feature map circuit.
 
         Args:
@@ -134,7 +135,7 @@ class FeatureMap:
             return circuit
 
 
-def prepare_qsvm_circuit(train_data):
+def prepare_qsvm_circuit(train_data) -> QuantumCircuit:
     d = train_data.shape[1]
     fm = FeatureMap(feature_dimension=d)
 
@@ -147,7 +148,7 @@ def sort_2_arrays(list1, list2):
     return list1[p], list2[p]
 
 
-def load_csv_data(path: str):
+def load_csv_data(path: str) -> np.ndarray[Any, np.dtype[np.int16]]:
     data = []
     with open(path, encoding="UTF-8") as csvfile:
         reader_variable = csv.reader(csvfile, delimiter=",")
@@ -177,11 +178,14 @@ def load_prepared_mnist(
     return x_train, y_train
 
 
-def trained_qsvm_8q() -> tuple[QuantumCircuit, tuple[float, ...]]:
+def trained_qsvm_8q(
+    bound=True,
+) -> QuantumCircuit | tuple[QuantumCircuit, tuple[float, ...]]:
     datafile = str(files("open_qbench.data").joinpath("mnist_train100.csv"))
     train_data_x, _ = load_prepared_mnist(datafile, 20, 4, seed=123)
     circuit = prepare_qsvm_circuit(train_data_x)
     circuit.name = "QSVM_MNIST_8q"
+    circuit.measure_all()
     parameters = (
         0.61069116,
         1.99988148,
@@ -192,4 +196,9 @@ def trained_qsvm_8q() -> tuple[QuantumCircuit, tuple[float, ...]]:
         2.43730072,
         0.21604097,
     )
+
+    if bound:
+        circuit.assign_parameters(parameters, inplace=True)
+        return circuit
+
     return circuit, parameters

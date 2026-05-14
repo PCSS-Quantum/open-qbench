@@ -33,6 +33,7 @@ class ApplicationBenchmark(HighLevelBenchmark):
         analysis: BaseAnalysis | None = None,
         accuracy_measure: Callable[[dict, dict], float] | None = None,
     ):
+        self.validate_shots_options(benchmark_input)
         super().__init__(
             benchmark_input,
             analysis,
@@ -77,7 +78,9 @@ class ApplicationBenchmark(HighLevelBenchmark):
             int: circuit depth
 
         """
-        if benchmark_input.program.__class__ is QuantumCircuit:
+        if isinstance(benchmark_input.program, QuantumCircuit) and not isinstance(
+            benchmark_input.program, PhotonicCircuit
+        ):
             trans_circuits = transpile(
                 benchmark_input.program,
                 basis_gates=list(ApplicationBenchmark.basis_gates),
@@ -129,9 +132,27 @@ class ApplicationBenchmark(HighLevelBenchmark):
 
         self.result.metrics["execution_time"] = execution_time
 
-        self.result = self.analysis.run(self.result)
+        if self.analysis is not None:
+            self.result = self.analysis.run(self.result)
 
         return self.result
 
     def measure_creation_time(self):
         pass
+
+    @staticmethod
+    def validate_shots_options(benchmark_input: BenchmarkInput) -> None:
+        if not hasattr(benchmark_input, "options") or benchmark_input.options is None:
+            raise AttributeError(
+                "'BenchmarkInput' object is missing required attribute 'options'"
+            )
+        required = {"backend_shots": int, "simulator_shots": int}
+        config = benchmark_input.options
+
+        for key, expected_type in required.items():
+            if key not in config:
+                raise KeyError(f"Missing required key: '{key}'")
+            if not isinstance(config[key], expected_type):
+                raise TypeError(
+                    f"'{key}' must be an int, got {type(config[key]).__name__}"
+                )

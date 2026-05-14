@@ -27,7 +27,6 @@ class HighLevelBenchmark(BaseBenchmark):
             # TODO: validate circuits for backend
             self.compiled_input = self.benchmark_input.program
         elif isinstance(self.benchmark_input.program, QuantumCircuit):
-            self.benchmark_input.program.measure_all()
             self.compiled_input = transpile(
                 self.benchmark_input.program, self.benchmark_input.backend
             )

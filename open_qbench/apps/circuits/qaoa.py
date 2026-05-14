@@ -3,7 +3,9 @@ from qiskit.circuit.library import QAOAAnsatz
 from qiskit.quantum_info import SparsePauliOp
 
 
-def jssp_7q_24d() -> tuple[QuantumCircuit, tuple[float, ...]]:
+def jssp_7q_24d(
+    bound=True,
+) -> QuantumCircuit | tuple[QuantumCircuit, tuple[float, ...]]:
     """Returns a 7-qubit QAOA circuit with normalized depth 24, as in the document.
     Returned parameters are chosen arbitrarily, so that the final distribution is
     not uniform.
@@ -30,5 +32,10 @@ def jssp_7q_24d() -> tuple[QuantumCircuit, tuple[float, ...]]:
     qc = QAOAAnsatz(hamiltonian, reps=1)
     params = (0.388917, 5.44861221)
     qc.name = "QAOA_JSSP_7q"
+    qc.measure_all()
+
+    if bound:
+        qc.assign_parameters(params, inplace=True)
+        return qc
 
     return qc, params
