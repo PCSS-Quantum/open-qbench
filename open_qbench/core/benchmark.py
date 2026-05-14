@@ -1,8 +1,10 @@
 import json
-import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from pathlib import Path
+from pprint import pprint
 from typing import Any
 
 from qiskit import QuantumCircuit
@@ -66,8 +68,8 @@ class BenchmarkInput:
             self.program = program
             self.params = None
 
-    def __repr__(self):
-        return f"Program: {self.program.name}, Backend: {type(self.backend)}, Options: {self.options}"
+    def __str__(self):
+        return f"Program: {self.program.name}, Backend: {type(self.backend).__module__}.{type(self.backend).__qualname__}, Options: {self.options}"
 
     @property
     def width(self):
@@ -85,6 +87,68 @@ class BenchmarkResult:
     input: BenchmarkInput
     execution_data: dict = field(default_factory=dict)
     metrics: dict[str, int | float] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=datetime.now)
+
+    def show(
+        self, *fields: str, verbose: bool = False, save_to: Path | str | None = None
+    ) -> None:
+        """
+        A convenience method for displaying, formatting and saving results to files."
+        """
+        all_output: dict = {
+            "name": self.name,
+            "input": str(self.input),
+            "execution_data": self.execution_data,
+            "metrics": self.metrics,
+            "timestamp": self.timestamp.isoformat(timespec="milliseconds"),
+        }
+
+        if save_to is not None:
+            if fields:
+                output = {
+                    **{k: v for k, v in all_output.items() if k != "execution_data"},
+                    "execution_data": {
+                        k: v
+                        for k, v in all_output["execution_data"].items()
+                        if k in fields
+                    },
+                }
+            else:
+                output = all_output
+            path = Path(save_to)
+            if path.suffix == "":
+                path.mkdir(parents=True, exist_ok=True)
+                timestamp_str = self.timestamp.strftime("%Y%m%d_%H%M%S")
+                path = path / f"{timestamp_str}-{self.name}.json"
+            path.write_text(json.dumps(output, indent=4))
+        else:
+            if verbose:
+                output = all_output
+            elif fields:
+                output = {
+                    **{k: v for k, v in all_output.items() if k != "execution_data"},
+                    "execution_data": {
+                        k: v
+                        for k, v in all_output["execution_data"].items()
+                        if k in fields
+                    },
+                }
+            else:
+                output = {k: v for k, v in all_output.items() if k != "execution_data"}
+            pprint(output, sort_dicts=False)
+
+    def __str__(self) -> str:
+        execution_data = {
+            k: v for k, v in self.execution_data.items() if k != "executed_circuit"
+        }
+        return (
+            f"BenchmarkResult\n"
+            f"  name:           {self.name}\n"
+            f"  input:          {self.input}\n"
+            f"  execution_data: {execution_data}\n"
+            f"  metrics:        {self.metrics}\n"
+            f"  timestamp:      {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}\n"
+        )
 
     def to_dict(self) -> dict[str, Any]:
         self_dict = asdict(self)
@@ -94,22 +158,6 @@ class BenchmarkResult:
             "params": self.input.params,
         }
         return self_dict
-
-    def save_to_file(self, save_dir: str = "./results"):
-        """
-        Save result to a json file in the provided directory.
-
-        Args:
-            save_dir (str, optional): Folder to save the result to. Defaults to "./results".
-        """
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-        with open(
-            os.path.join(save_dir, self.name + ".json"),
-            "w",
-            encoding="utf-8",
-        ) as file:
-            file.write(json.dumps(self.to_dict(), indent=4))
 
 
 class BaseAnalysis:

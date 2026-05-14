@@ -118,6 +118,7 @@ class ApplicationBenchmark(HighLevelBenchmark):
                 self.benchmark_input
             )
             self.result.execution_data["depth_transpiled"] = self.compiled_input.depth()
+            self.result.execution_data["operations"] = self.compiled_input.count_ops()
             self.result.execution_data["executed_circuit"] = executed_circuit
 
         self.result.execution_data["counts_ideal"] = (
