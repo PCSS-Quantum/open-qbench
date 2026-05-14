@@ -100,6 +100,9 @@ print(ab.result)
 We welcome contributions from the community! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed guide.
 
 ## Citation
+
+If you use this software in your research, please cite it as:
+
 ```bibtex
 @article{openqbench2026,
   author={Wojciechowski, Konrad
