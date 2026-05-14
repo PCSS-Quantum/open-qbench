@@ -1,7 +1,20 @@
 import time
 
 import dimod
-from qlauncher.base import Algorithm, Backend, Problem
+
+try:
+    from qlauncher.base import Algorithm, Backend, Problem
+except ImportError:
+
+    class Problem:  # type: ignore[no-redef]
+        pass
+
+    class Algorithm:
+        pass
+
+    class Backend:
+        pass
+
 
 from open_qbench.core.benchmark import BaseAnalysis, BenchmarkInput, BenchmarkResult
 from open_qbench.core.hybrid_benchmark import HybridBenchmark
@@ -61,5 +74,6 @@ class OptimizationBenchmark(HybridBenchmark):
         execution_time = time.time() - start
         self.result.metrics["execution_time"] = execution_time
 
-        self.result = self.analysis.run(self.result)
+        if self.analysis is not None:
+            self.result = self.analysis.run(self.result)
         return self.result

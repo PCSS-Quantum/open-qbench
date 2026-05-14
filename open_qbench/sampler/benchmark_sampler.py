@@ -4,9 +4,22 @@ from typing import Any
 import dimod
 from qiskit import QuantumCircuit
 from qiskit.primitives import BaseSamplerV1, BaseSamplerV2, BitArray  # , SamplerPubLike
-from qlauncher import QLauncher
-from qlauncher.base import Algorithm, Backend, Problem
-from qlauncher.base.adapter_structure import get_formatter
+
+try:
+    from qlauncher import QLauncher
+    from qlauncher.base import Algorithm, Backend, Problem
+    from qlauncher.base.adapter_structure import get_formatter
+except ImportError:
+
+    class Problem:  # type: ignore[no-redef]
+        pass
+
+    class Algorithm:
+        pass
+
+    class Backend:
+        pass
+
 
 from open_qbench.photonics import PhotonicCircuit
 

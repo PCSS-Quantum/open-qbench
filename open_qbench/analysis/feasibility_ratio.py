@@ -1,6 +1,12 @@
 from collections.abc import Callable
 
-from qlauncher.base import Problem
+try:
+    from qlauncher.base import Problem as Problem
+except ImportError:
+
+    class Problem:  # type: ignore[no-redef]
+        pass
+
 
 from open_qbench.core.benchmark import BaseAnalysis, BenchmarkError, BenchmarkResult
 

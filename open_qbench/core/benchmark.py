@@ -7,9 +7,16 @@ from typing import Any
 
 from qiskit import QuantumCircuit
 from qiskit.providers import Backend
-from qlauncher.base import Problem
 
 from open_qbench.photonics import PhotonicCircuit
+
+try:
+    from qlauncher.base import Problem as Problem
+except ImportError:
+
+    class Problem:  # type: ignore[no-redef]
+        pass
+
 
 type QuantumProgram = (
     QuantumCircuit

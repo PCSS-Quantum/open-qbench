@@ -3,17 +3,23 @@ from collections.abc import Sequence
 
 from qiskit_aer.noise import NoiseModel
 from qiskit_aer.primitives import SamplerV2 as AerSampler
-from qiskit_ibm_runtime import QiskitRuntimeService
-from qiskit_ibm_runtime import SamplerV2 as RuntimeSampler
-from qiskit_ibm_runtime.fake_provider.fake_backend import (
-    FakeBackendV2,
-)
+
+try:
+    from qiskit_ibm_runtime import QiskitRuntimeService
+    from qiskit_ibm_runtime import SamplerV2 as RuntimeSampler
+    from qiskit_ibm_runtime.fake_provider.fake_backend import (
+        FakeBackendV2,
+    )
+
+    HAS_IBM_RUNTIME = True
+except ImportError:
+    HHAS_IBM_RUNTIME = False
 
 from .metrics.fidelities import normalized_fidelity
 
 
 def get_fake_backend_sampler(
-    fake_backend: FakeBackendV2,
+    fake_backend: "FakeBackendV2",
     shots: int | None = None,
     seed: int | None = None,
 ) -> AerSampler:
@@ -28,6 +34,8 @@ def get_fake_backend_sampler(
     Returns:
         AerSampler: _description_
     """
+    if not HAS_IBM_RUNTIME:
+        raise ImportError("qiskit-ibm-runtime is required for this function")
     coupling_map = fake_backend.coupling_map
     noise_model = NoiseModel.from_backend(fake_backend)
 
@@ -49,7 +57,9 @@ def get_fake_backend_sampler(
     return backend_sampler
 
 
-def get_ibm_backend_sampler(name: str, shots):
+def get_ibm_backend_sampler(name: str, shots: int):
+    if not HAS_IBM_RUNTIME:
+        raise ImportError("qiskit-ibm-runtime is required for this function")
     service = QiskitRuntimeService(channel="ibm_quantum")
     backend = service.backend(name)
     # TODO: no transpilation options available for Sampler v2

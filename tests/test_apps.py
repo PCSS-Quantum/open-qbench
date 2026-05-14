@@ -10,9 +10,9 @@ from open_qbench.apps.circuits import (
     jssp_7q_24d,
     prepare_QFT,
     toffoli_circuit,
-    trained_qsvm_8q,
-    uccsd_3q_56d,
 )
+from open_qbench.apps.circuits.qsvm import trained_qsvm_8q
+from open_qbench.apps.circuits.vqe import uccsd_3q_56d
 from open_qbench.benchmarks import ApplicationBenchmark, OptimizationBenchmark
 from open_qbench.core import BenchmarkInput
 from open_qbench.metrics.fidelities import normalized_fidelity

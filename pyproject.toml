@@ -7,7 +7,6 @@ requires-python = "==3.12.*"
 dependencies = [
     "qiskit-aer~=0.17",
     "qiskit~=1.0",
-    "qlauncher[dwave]>=2.0.5",
     "dimod>=0.12.20",
 ]
 [project.optional-dependencies]
@@ -15,6 +14,12 @@ VQE = ["qiskit-nature[pyscf]>=0.7.2"]
 QSVM = ["scikit-image>=0.25.1"]
 IBM = ["qiskit-ibm-runtime>=0.36.1"]
 AQT = ["qiskit-aqt-provider>=1.10.0"]
+iqm = [
+    "iqm-client[qiskit]>=34.0.3",
+]
+dwave = [
+    "dwave-ocean-sdk>=8.4.0",
+]
 
 [dependency-groups]
 dev = [

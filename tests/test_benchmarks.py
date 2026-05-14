@@ -5,14 +5,19 @@ from typing import Any
 
 from dwave.samplers import TabuSampler
 from qiskit import QuantumCircuit
-from qlauncher.base import Problem
+
+try:
+    from qlauncher.base import Problem as Problem
+except ImportError:
+
+    class Problem:  # type: ignore[no-redef]
+        pass
+
 
 from open_qbench.analysis import FeasibilityRatioAnalysis
-from open_qbench.apps.optimization import easy_jssp
 from open_qbench.benchmarks import ApplicationBenchmark, OptimizationBenchmark
 from open_qbench.core.benchmark import BaseBenchmark, BenchmarkInput, BenchmarkResult
 from open_qbench.core.manager import BenchmarkManager
-from open_qbench.metrics.feasibilities import JSSPFeasibility
 from open_qbench.metrics.fidelities import normalized_fidelity
 from open_qbench.photonics.photonic_circuit import PhotonicCircuit
 from open_qbench.sampler.benchmark_sampler import BenchmarkSampler
@@ -57,6 +62,9 @@ def test_application_benchmark():
 
 
 def test_optimization_benchmark():
+    from open_qbench.apps.optimization import easy_jssp
+    from open_qbench.metrics.feasibilities import JSSPFeasibility
+
     bench = OptimizationBenchmark(
         TestSampler({"1111": 99, "0101": 1}),
         BenchmarkInput(easy_jssp()),
